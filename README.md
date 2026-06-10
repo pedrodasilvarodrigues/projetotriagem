@@ -28,6 +28,8 @@ RESEND_FROM_EMAIL=
 NEXT_PUBLIC_APP_URL=
 ```
 
+No deploy da Vercel, cadastre essas mesmas variaveis em Project Settings > Environment Variables. Nunca coloque valores reais em arquivos versionados no GitHub, principalmente `SUPABASE_SERVICE_ROLE_KEY`.
+
 3. Aplique as migrations no Supabase:
 
 ```bash

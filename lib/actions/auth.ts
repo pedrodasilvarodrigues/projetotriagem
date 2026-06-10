@@ -1,0 +1,378 @@
+"use server";
+
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { z } from "zod";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { createServerClient } from "@/lib/supabase/server";
+import { ageFromBirthDate, isValidBrazilianPhone, isValidCnpj, isValidCpf, onlyDigits } from "@/lib/validations/br";
+
+const minimumAge = Number(process.env.MINIMUM_PROFESSIONAL_AGE ?? 14);
+
+const emailPasswordSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6)
+});
+
+const passwordUpdateSchema = z
+  .object({
+    password: z.string().min(6),
+    confirmPassword: z.string().min(6)
+  })
+  .refine((data) => data.password === data.confirmPassword, "senhas-nao-conferem");
+
+const professionalRegistrationSchema = emailPasswordSchema
+  .extend({
+    fullName: z.string().min(3).regex(/^[\p{L}\s]+$/u),
+    cpf: z.string().refine(isValidCpf, "cpf-invalido"),
+    phone: z.string().refine(isValidBrazilianPhone, "telefone-invalido"),
+    birthDate: z.string().refine((value) => ageFromBirthDate(value) >= minimumAge, "idade-minima"),
+    cep: z.string().refine((value) => onlyDigits(value).length === 8, "cep-invalido"),
+    street: z.string().min(2),
+    addressNumber: z.string().min(1),
+    neighborhood: z.string().min(2),
+    city: z.string().min(2),
+    state: z.string().min(2).max(2),
+    terms: z.literal("on"),
+    privacy: z.literal("on")
+  });
+
+type ProfessionalRegistration = z.infer<typeof professionalRegistrationSchema>;
+
+const companyRegistrationSchema = emailPasswordSchema.extend({
+  legalName: z.string().min(3),
+  tradeName: z.string().min(2),
+  cnpj: z.string().refine(isValidCnpj, "cnpj-invalido"),
+  phone: z.string().refine(isValidBrazilianPhone, "telefone-invalido"),
+  corporateEmail: z.string().email(),
+  cep: z.string().refine((value) => onlyDigits(value).length === 8, "cep-invalido"),
+  street: z.string().min(2),
+  addressNumber: z.string().min(1),
+  neighborhood: z.string().min(2),
+  city: z.string().min(2),
+  state: z.string().min(2).max(2),
+  contactName: z.string().min(3).regex(/^[\p{L}\s]+$/u),
+  contactRole: z.string().min(2),
+  contactPhone: z.string().refine(isValidBrazilianPhone, "telefone-responsavel-invalido"),
+  terms: z.literal("on"),
+  privacy: z.literal("on")
+});
+
+type CompanyRegistration = z.infer<typeof companyRegistrationSchema>;
+
+async function getOrigin() {
+  const headerStore = await headers();
+  return headerStore.get("origin") ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+}
+
+async function getRequestMeta() {
+  const headerStore = await headers();
+  return {
+    ipAddress: headerStore.get("x-forwarded-for")?.split(",")[0] ?? null,
+    userAgent: headerStore.get("user-agent")
+  };
+}
+
+function canUseAdminClient() {
+  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+}
+
+async function saveProfessionalSignup(client: ReturnType<typeof createAdminClient>, userId: string, data: ProfessionalRegistration) {
+  const normalizedCpf = onlyDigits(data.cpf);
+  const normalizedPhone = onlyDigits(data.phone);
+  const { ipAddress, userAgent } = await getRequestMeta();
+
+  const { data: duplicatedCpf } = await client.from("professionals").select("id,user_id").eq("cpf", normalizedCpf).neq("user_id", userId).maybeSingle();
+  if (duplicatedCpf) redirect("/register?error=cpf-ja-cadastrado");
+
+  await client.from("profiles").upsert({
+    id: userId,
+    full_name: data.fullName,
+    email: data.email,
+    phone: normalizedPhone,
+    status: "pending"
+  });
+
+  await client.from("user_roles").upsert({ user_id: userId, role: "professional" });
+
+  const { error: professionalError } = await client.from("professionals").upsert(
+    {
+      user_id: userId,
+      full_name: data.fullName,
+      email: data.email,
+      cpf: normalizedCpf,
+      phone: normalizedPhone,
+      birth_date: data.birthDate,
+      desired_role: "A definir",
+      education_level: "medio",
+      cep: onlyDigits(data.cep),
+      street: data.street,
+      address_number: data.addressNumber,
+      neighborhood: data.neighborhood,
+      city: data.city,
+      state: data.state.toUpperCase(),
+      status: "pending"
+    },
+    { onConflict: "user_id" }
+  );
+
+  if (professionalError) redirect(`/register?error=${encodeURIComponent(professionalError.message)}`);
+
+  await client.from("consent_records").insert({
+    user_id: userId,
+    terms_version: "2026-06-03",
+    privacy_version: "2026-06-03",
+    ip_address: ipAddress,
+    user_agent: userAgent
+  });
+}
+
+async function saveCompanySignup(client: ReturnType<typeof createAdminClient>, userId: string, data: CompanyRegistration) {
+  const normalizedCnpj = onlyDigits(data.cnpj);
+  const normalizedPhone = onlyDigits(data.phone);
+  const normalizedContactPhone = onlyDigits(data.contactPhone);
+  const { ipAddress, userAgent } = await getRequestMeta();
+
+  const { data: duplicatedCnpj } = await client.from("companies").select("id,owner_id").eq("cnpj", normalizedCnpj).neq("owner_id", userId).maybeSingle();
+  if (duplicatedCnpj) redirect("/register?type=company&error=cnpj-ja-cadastrado");
+
+  await client.from("profiles").upsert({
+    id: userId,
+    full_name: data.contactName,
+    email: data.email,
+    phone: normalizedContactPhone,
+    status: "pending"
+  });
+
+  await client.from("user_roles").upsert({ user_id: userId, role: "company" });
+
+  const { data: company, error } = await client
+    .from("companies")
+    .upsert(
+      {
+        owner_id: userId,
+        legal_name: data.legalName,
+        trade_name: data.tradeName,
+        cnpj: normalizedCnpj,
+        phone: normalizedPhone,
+        corporate_email: data.corporateEmail,
+        cep: onlyDigits(data.cep),
+        street: data.street,
+        address_number: data.addressNumber,
+        neighborhood: data.neighborhood,
+        city: data.city,
+        state: data.state.toUpperCase(),
+        status: "pending"
+      },
+      { onConflict: "cnpj" }
+    )
+    .select("id")
+    .single();
+
+  if (error || !company?.id) {
+    redirect(`/register?type=company&error=${encodeURIComponent(error?.message ?? "empresa-nao-criada")}`);
+  }
+
+  await client.from("company_contacts").delete().eq("company_id", company.id);
+  await client.from("company_contacts").insert({
+    company_id: company.id,
+    name: data.contactName,
+    email: data.corporateEmail,
+    phone: normalizedContactPhone,
+    role_title: data.contactRole
+  });
+
+  await client.from("consent_records").insert({
+    user_id: userId,
+    terms_version: "2026-06-03",
+    privacy_version: "2026-06-03",
+    ip_address: ipAddress,
+    user_agent: userAgent
+  });
+}
+
+export async function signInWithGoogleAction(formData?: FormData) {
+  const supabase = await createServerClient();
+  const origin = await getOrigin();
+  const accountType = formData instanceof FormData ? String(formData.get("accountType") ?? "") : "";
+  const signupRole = accountType === "professional" || accountType === "company" ? accountType : "";
+  const callbackUrl = new URL(`${origin}/auth/callback`);
+  if (signupRole) callbackUrl.searchParams.set("signupRole", signupRole);
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: callbackUrl.toString()
+    }
+  });
+
+  if (error || !data.url) {
+    redirect(`/login?error=${encodeURIComponent(error?.message ?? "nao-foi-possivel-iniciar-google")}`);
+  }
+
+  redirect(data.url);
+}
+
+export async function signInWithEmailAction(formData: FormData) {
+  const supabase = await createServerClient();
+  const parsed = emailPasswordSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password")
+  });
+
+  if (!parsed.success) redirect("/login?error=credenciais-invalidas");
+
+  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  if (error) redirect("/login?error=credenciais-invalidas");
+
+  redirect("/auth/callback");
+}
+
+export async function registerProfessionalWithEmailAction(formData: FormData) {
+  const parsed = professionalRegistrationSchema.safeParse({
+    fullName: formData.get("fullName"),
+    cpf: formData.get("cpf"),
+    phone: formData.get("phone"),
+    email: formData.get("email"),
+    password: formData.get("password"),
+    birthDate: formData.get("birthDate"),
+    cep: formData.get("cep"),
+    street: formData.get("street"),
+    addressNumber: formData.get("addressNumber"),
+    neighborhood: formData.get("neighborhood"),
+    city: formData.get("city"),
+    state: formData.get("state"),
+    terms: formData.get("terms"),
+    privacy: formData.get("privacy")
+  });
+
+  if (!parsed.success) redirect("/register?error=dados-invalidos");
+  if (!canUseAdminClient()) redirect("/register?error=configuracao-supabase-incompleta");
+
+  const data = parsed.data;
+  const origin = await getOrigin();
+  const admin = createAdminClient();
+  const { data: duplicatedCpf } = await admin.from("professionals").select("id,user_id").eq("cpf", onlyDigits(data.cpf)).maybeSingle();
+  if (duplicatedCpf) redirect("/register?error=cpf-ja-cadastrado");
+
+  const supabase = await createServerClient();
+  const { data: signUpData, error } = await supabase.auth.signUp({
+    email: data.email,
+    password: data.password,
+    options: {
+      emailRedirectTo: `${origin}/auth/callback`,
+      data: {
+        full_name: data.fullName,
+        role: "professional"
+      }
+    }
+  });
+
+  if (error || !signUpData.user) {
+    redirect(`/register?error=${encodeURIComponent(error?.message ?? "nao-foi-possivel-criar-conta")}`);
+  }
+
+  await saveProfessionalSignup(admin, signUpData.user.id, data);
+
+  if (!signUpData.session) {
+    redirect("/login?message=confirme-email");
+  }
+
+  redirect("/professional");
+}
+
+export async function registerCompanyWithEmailAction(formData: FormData) {
+  const parsed = companyRegistrationSchema.safeParse({
+    legalName: formData.get("legalName"),
+    tradeName: formData.get("tradeName"),
+    cnpj: formData.get("cnpj"),
+    phone: formData.get("phone"),
+    corporateEmail: formData.get("corporateEmail"),
+    email: formData.get("email"),
+    password: formData.get("password"),
+    cep: formData.get("cep"),
+    street: formData.get("street"),
+    addressNumber: formData.get("addressNumber"),
+    neighborhood: formData.get("neighborhood"),
+    city: formData.get("city"),
+    state: formData.get("state"),
+    contactName: formData.get("contactName"),
+    contactRole: formData.get("contactRole"),
+    contactPhone: formData.get("contactPhone"),
+    terms: formData.get("terms"),
+    privacy: formData.get("privacy")
+  });
+
+  if (!parsed.success) redirect("/register?type=company&error=dados-invalidos");
+  if (!canUseAdminClient()) redirect("/register?type=company&error=configuracao-supabase-incompleta");
+
+  const data = parsed.data;
+  const origin = await getOrigin();
+  const admin = createAdminClient();
+  const { data: duplicatedCnpj } = await admin.from("companies").select("id,owner_id").eq("cnpj", onlyDigits(data.cnpj)).maybeSingle();
+  if (duplicatedCnpj) redirect("/register?type=company&error=cnpj-ja-cadastrado");
+
+  const supabase = await createServerClient();
+  const { data: signUpData, error } = await supabase.auth.signUp({
+    email: data.email,
+    password: data.password,
+    options: {
+      emailRedirectTo: `${origin}/auth/callback`,
+      data: {
+        full_name: data.contactName,
+        role: "company"
+      }
+    }
+  });
+
+  if (error || !signUpData.user) {
+    redirect(`/register?type=company&error=${encodeURIComponent(error?.message ?? "nao-foi-possivel-criar-conta")}`);
+  }
+
+  await saveCompanySignup(admin, signUpData.user.id, data);
+
+  if (!signUpData.session) {
+    redirect("/login?message=confirme-email");
+  }
+
+  redirect("/company");
+}
+
+export async function requestPasswordResetAction(formData: FormData) {
+  const parsed = z.object({ email: z.string().email() }).safeParse({ email: formData.get("email") });
+  if (!parsed.success) redirect("/forgot-password?error=email-invalido");
+
+  const supabase = await createServerClient();
+  const origin = await getOrigin();
+  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    redirectTo: `${origin}/auth/callback?next=/update-password`
+  });
+
+  if (error) redirect(`/forgot-password?error=${encodeURIComponent(error.message)}`);
+  redirect("/forgot-password?message=email-enviado");
+}
+
+export async function updatePasswordAction(formData: FormData) {
+  const parsed = passwordUpdateSchema.safeParse({
+    password: formData.get("password"),
+    confirmPassword: formData.get("confirmPassword")
+  });
+
+  if (!parsed.success) redirect("/update-password?error=senhas-invalidas");
+
+  const supabase = await createServerClient();
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) redirect("/login?error=sessao-expirada");
+
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
+  if (error) redirect(`/update-password?error=${encodeURIComponent(error.message)}`);
+
+  await supabase.auth.signOut({ scope: "local" });
+  redirect("/login?message=senha-atualizada");
+}
+
+export async function signOutAction() {
+  const supabase = await createServerClient();
+  await supabase.auth.signOut({ scope: "local" });
+  redirect("/login?message=saiu");
+}

@@ -9,8 +9,10 @@ const errorMessages: Record<string, string> = {
   "sessao-expirada": "Sua sessao expirou. Entre novamente para continuar.",
   "nao-foi-possivel-iniciar-google": "Nao foi possivel iniciar o login com Google.",
   "credenciais-invalidas": "Email ou senha invalidos.",
+  "email-nao-confirmado": "Seu email ainda nao foi confirmado.",
   "link-invalido": "Link invalido ou expirado. Solicite um novo acesso.",
-  "configuracao-supabase-incompleta": "Configuracao do Supabase pendente. Adicione as variaveis de ambiente na Vercel para ativar o login."
+  "configuracao-supabase-incompleta": "Configuracao do Supabase pendente. Adicione as variaveis de ambiente na Vercel para ativar o login.",
+  "erro-autenticacao": "Nao foi possivel entrar agora. Tente novamente em instantes."
 };
 
 const messageMap: Record<string, string> = {
@@ -139,12 +141,22 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
               {error ? (
                 <div className="mt-5 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
                   {errorMessages[error] ?? error}
+                  {error === "email-nao-confirmado" ? (
+                    <Link href="/confirm-email" className="mt-2 block font-semibold text-red-800 underline underline-offset-4">
+                      Reenviar email de confirmacao
+                    </Link>
+                  ) : null}
                 </div>
               ) : null}
 
               {message ? (
                 <div className="mt-5 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700" role="status">
                   {messageMap[message] ?? message}
+                  {message === "confirme-email" ? (
+                    <Link href="/confirm-email" className="mt-2 block font-semibold text-green-800 underline underline-offset-4">
+                      Reenviar email de confirmacao
+                    </Link>
+                  ) : null}
                 </div>
               ) : null}
 

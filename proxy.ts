@@ -9,7 +9,7 @@ function defaultRouteForRole(role?: string | null) {
 
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
-  const publicRoutes = ["/", "/login", "/register", "/forgot-password", "/update-password", "/acesso-negado"];
+  const publicRoutes = ["/", "/login", "/register", "/forgot-password", "/confirm-email", "/update-password", "/acesso-negado"];
 
   if (path === "/" && request.nextUrl.searchParams.has("code")) {
     const callbackUrl = new URL("/auth/callback", request.url);
@@ -17,7 +17,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(callbackUrl);
   }
 
-  if (publicRoutes.includes(path) || path.startsWith("/auth/callback")) {
+  if (publicRoutes.includes(path) || path.startsWith("/auth/callback") || path.startsWith("/auth/confirm")) {
     return NextResponse.next({ request });
   }
 

@@ -37,6 +37,22 @@ Se o Resend ainda nao estiver configurado, o app usa o email nativo do Supabase 
 https://projetotriagem.vercel.app/auth/callback?next=/update-password
 ```
 
+## Confirmacao de cadastro
+
+O login mostra um atalho para reenviar a confirmacao quando o Supabase retorna `email not confirmed`. A pagina publica e:
+
+```text
+https://projetotriagem.vercel.app/confirm-email
+```
+
+Ela usa `supabase.auth.resend({ type: "signup" })` e aponta o retorno para:
+
+```text
+https://projetotriagem.vercel.app/auth/callback
+```
+
+O Supabase limita reenvios de confirmacao e recuperacao por cerca de 60 segundos. Quando isso acontecer, o app exibe uma mensagem em portugues pedindo para aguardar, em vez de mostrar o erro tecnico em ingles.
+
 ## Supabase URL Configuration
 
 No Supabase Dashboard > Authentication > URL Configuration:
@@ -86,6 +102,18 @@ No template de recuperacao do Supabase, use um link com `token_hash` para manter
 <p>
   <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/update-password">
     Redefinir senha
+  </a>
+</p>
+```
+
+No template de confirmacao de cadastro, para projetos SSR/PKCE, use:
+
+```html
+<h2>Confirme seu email</h2>
+<p>Use o link abaixo para ativar sua conta no Portal de Triagem Profissional:</p>
+<p>
+  <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next={{ .RedirectTo }}">
+    Confirmar email
   </a>
 </p>
 ```

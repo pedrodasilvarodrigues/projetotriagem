@@ -16,6 +16,10 @@ const emailPasswordSchema = z.object({
   password: z.string().min(6)
 });
 
+const emailOnlySchema = z.object({
+  email: z.string().trim().toLowerCase().email()
+});
+
 const passwordUpdateSchema = z
   .object({
     password: z.string().min(6),
@@ -106,6 +110,28 @@ function canUseAdminClient() {
 
 function canSendBrandedAuthEmail() {
   return Boolean(process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL && canUseAdminClient());
+}
+
+function authErrorCode(error?: { message?: string | null; status?: number | null; code?: string | null } | null) {
+  const message = `${error?.code ?? ""} ${error?.message ?? ""}`.toLowerCase();
+
+  if (error?.status === 429 || message.includes("rate limit") || message.includes("security purposes") || message.includes("too many requests")) {
+    return "aguarde-um-minuto";
+  }
+
+  if (message.includes("email not confirmed") || message.includes("email_not_confirmed")) {
+    return "email-nao-confirmado";
+  }
+
+  if (message.includes("invalid login credentials")) {
+    return "credenciais-invalidas";
+  }
+
+  if (message.includes("already confirmed") || message.includes("already been confirmed")) {
+    return "email-ja-confirmado";
+  }
+
+  return "erro-autenticacao";
 }
 
 async function saveProfessionalSignup(client: ReturnType<typeof createAdminClient>, userId: string, data: ProfessionalRegistration) {
@@ -258,7 +284,7 @@ export async function signInWithEmailAction(formData: FormData) {
   if (!parsed.success) redirect("/login?error=credenciais-invalidas");
 
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
-  if (error) redirect("/login?error=credenciais-invalidas");
+  if (error) redirect(`/login?error=${authErrorCode(error)}`);
 
   redirect("/auth/callback");
 }
@@ -374,7 +400,7 @@ export async function registerCompanyWithEmailAction(formData: FormData) {
 }
 
 export async function requestPasswordResetAction(formData: FormData) {
-  const parsed = z.object({ email: z.string().email() }).safeParse({ email: formData.get("email") });
+  const parsed = emailOnlySchema.safeParse({ email: formData.get("email") });
   if (!parsed.success) redirect("/forgot-password?error=email-invalido");
 
   const supabase = await createServerClient();
@@ -418,8 +444,28 @@ export async function requestPasswordResetAction(formData: FormData) {
     redirectTo: `${origin}/auth/callback?next=/update-password`
   });
 
-  if (error) redirect(`/forgot-password?error=${encodeURIComponent(error.message)}`);
+  if (error) redirect(`/forgot-password?error=${authErrorCode(error)}`);
   redirect("/forgot-password?message=email-enviado");
+}
+
+export async function resendSignupConfirmationAction(formData: FormData) {
+  if (!hasSupabasePublicEnv()) redirect("/confirm-email?error=configuracao-supabase-incompleta");
+
+  const parsed = emailOnlySchema.safeParse({ email: formData.get("email") });
+  if (!parsed.success) redirect("/confirm-email?error=email-invalido");
+
+  const supabase = await createServerClient();
+  const origin = await getAuthRedirectOrigin();
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email: parsed.data.email,
+    options: {
+      emailRedirectTo: `${origin}/auth/callback`
+    }
+  });
+
+  if (error) redirect(`/confirm-email?error=${authErrorCode(error)}`);
+  redirect("/confirm-email?message=email-enviado");
 }
 
 export async function updatePasswordAction(formData: FormData) {

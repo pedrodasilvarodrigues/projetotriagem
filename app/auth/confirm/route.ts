@@ -5,7 +5,15 @@ import { createServerClient } from "@/lib/supabase/server";
 const allowedTypes = new Set(["signup", "invite", "magiclink", "recovery", "email_change", "email"]);
 
 function safePath(value: string | null) {
-  return value && value.startsWith("/") && !value.startsWith("//") ? value : null;
+  if (!value) return null;
+  if (value.startsWith("/") && !value.startsWith("//")) return value;
+
+  try {
+    const url = new URL(value);
+    return `${url.pathname}${url.search}`;
+  } catch {
+    return null;
+  }
 }
 
 export async function GET(request: NextRequest) {
@@ -25,7 +33,7 @@ export async function GET(request: NextRequest) {
   });
 
   if (error) {
-    return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(error.message)}`, request.url));
+    return NextResponse.redirect(new URL("/login?error=link-invalido", request.url));
   }
 
   return NextResponse.redirect(new URL(next, request.url));

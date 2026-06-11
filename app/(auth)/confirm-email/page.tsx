@@ -1,19 +1,20 @@
 import Link from "next/link";
-import { ArrowLeft, BriefcaseBusiness, Mail } from "lucide-react";
-import { requestPasswordResetAction } from "@/lib/actions/auth";
+import { ArrowLeft, BriefcaseBusiness, Mail, ShieldCheck } from "lucide-react";
+import { resendSignupConfirmationAction } from "@/lib/actions/auth";
 
 const messageMap: Record<string, string> = {
-  "email-enviado": "Enviamos as instrucoes para o email informado."
+  "email-enviado": "Se esse email estiver cadastrado e ainda nao confirmado, enviaremos um novo link de confirmacao."
 };
 
 const errorMap: Record<string, string> = {
   "email-invalido": "Informe um email valido.",
-  "aguarde-um-minuto": "Aguarde cerca de 1 minuto antes de solicitar outro email. Essa protecao vem do Supabase para evitar abuso.",
+  "aguarde-um-minuto": "Aguarde cerca de 1 minuto antes de solicitar outro email. Essa protecao evita envios repetidos.",
+  "email-ja-confirmado": "Esse email ja foi confirmado. Volte para o login e entre normalmente.",
   "configuracao-supabase-incompleta": "Configuracao do Supabase pendente. Verifique as variaveis de ambiente.",
-  "erro-autenticacao": "Nao foi possivel enviar o email agora. Tente novamente em instantes."
+  "erro-autenticacao": "Nao foi possivel reenviar a confirmacao agora. Tente novamente em instantes."
 };
 
-export default async function ForgotPasswordPage({ searchParams }: { searchParams: Promise<{ error?: string; message?: string }> }) {
+export default async function ConfirmEmailPage({ searchParams }: { searchParams: Promise<{ error?: string; message?: string }> }) {
   const params = await searchParams;
   const error = params.error ? decodeURIComponent(params.error) : null;
   const message = params.message ? decodeURIComponent(params.message) : null;
@@ -22,11 +23,11 @@ export default async function ForgotPasswordPage({ searchParams }: { searchParam
     <main id="conteudo" className="grid min-h-screen bg-slate-50 text-slate-950 lg:grid-cols-[minmax(0,1fr)_520px]">
       <section className="relative hidden overflow-hidden lg:block">
         <img
-          src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1500&q=85"
-          alt="Pessoa acessando plataforma profissional em notebook"
+          src="https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1500&q=85"
+          alt="Profissionais trabalhando em uma plataforma digital"
           className="h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-slate-950/35" />
+        <div className="absolute inset-0 bg-slate-950/40" />
       </section>
 
       <section className="flex items-center justify-center px-6 py-10">
@@ -39,8 +40,17 @@ export default async function ForgotPasswordPage({ searchParams }: { searchParam
           </Link>
 
           <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-            <h1 className="text-3xl font-semibold tracking-normal">Recuperar senha</h1>
-            <p className="mt-3 text-sm leading-6 text-slate-600">Informe seu email para receber o link de redefinicao de senha.</p>
+            <div className="mb-5 flex items-start gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-700">
+                <ShieldCheck aria-hidden="true" size={21} />
+              </span>
+              <div>
+                <h1 className="text-3xl font-semibold tracking-normal">Confirmar email</h1>
+                <p className="mt-3 text-sm leading-6 text-slate-600">
+                  Informe o email cadastrado para receber outro link de confirmacao.
+                </p>
+              </div>
+            </div>
 
             {error ? (
               <div className="mt-5 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
@@ -54,7 +64,7 @@ export default async function ForgotPasswordPage({ searchParams }: { searchParam
               </div>
             ) : null}
 
-            <form action={requestPasswordResetAction} className="mt-6 space-y-4">
+            <form action={resendSignupConfirmationAction} className="mt-6 space-y-4">
               <label className="block text-sm font-medium text-slate-800">
                 Email
                 <span className="mt-1 flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2.5 focus-within:border-blue-700">
@@ -63,7 +73,7 @@ export default async function ForgotPasswordPage({ searchParams }: { searchParam
                 </span>
               </label>
               <button className="w-full rounded-md bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-800" type="submit">
-                Enviar link de recuperacao
+                Reenviar email de confirmacao
               </button>
             </form>
 

@@ -156,16 +156,35 @@ function signupErrorCode(error?: { message?: string | null; status?: number | nu
 async function findAuthUserByEmail(client: ReturnType<typeof createAdminClient>, email: string) {
   const normalizedEmail = email.trim().toLowerCase();
 
-  for (let page = 1; page <= 10; page += 1) {
-    const { data, error } = await client.auth.admin.listUsers({ page, perPage: 1000 });
-    if (error) return null;
+  try {
+    for (let page = 1; page <= 10; page += 1) {
+      const { data, error } = await client.auth.admin.listUsers({ page, perPage: 1000 });
+      if (error) return null;
 
-    const user = data.users.find((item) => item.email?.toLowerCase() === normalizedEmail);
-    if (user) return user;
-    if (data.users.length < 1000) return null;
+      const user = data.users.find((item) => item.email?.toLowerCase() === normalizedEmail);
+      if (user) return user;
+      if (data.users.length < 1000) return null;
+    }
+  } catch {
+    return null;
   }
 
   return null;
+}
+
+async function confirmAuthEmailByAddress(email: string) {
+  if (!canUseAdminClient()) return false;
+
+  try {
+    const admin = createAdminClient();
+    const authUser = await findAuthUserByEmail(admin, email);
+    if (!authUser?.id) return false;
+
+    const { error } = await admin.auth.admin.updateUserById(authUser.id, { email_confirm: true });
+    return !error;
+  } catch {
+    return false;
+  }
 }
 
 async function saveProfessionalSignup(client: ReturnType<typeof createAdminClient>, userId: string, data: ProfessionalRegistration) {
@@ -322,14 +341,9 @@ export async function signInWithEmailAction(formData: FormData) {
   if (error) {
     const code = authErrorCode(error);
 
-    if (code === "email-nao-confirmado" && canUseAdminClient()) {
-      const admin = createAdminClient();
-      const authUser = await findAuthUserByEmail(admin, parsed.data.email);
-      if (authUser?.id) {
-        await admin.auth.admin.updateUserById(authUser.id, { email_confirm: true });
-        const { error: retryError } = await supabase.auth.signInWithPassword(parsed.data);
-        if (!retryError) redirect("/auth/callback");
-      }
+    if (code === "email-nao-confirmado" && (await confirmAuthEmailByAddress(parsed.data.email))) {
+      const { error: retryError } = await supabase.auth.signInWithPassword(parsed.data);
+      if (!retryError) redirect("/auth/callback");
     }
 
     redirect(`/login?error=${code}`);
@@ -477,15 +491,23 @@ export async function requestPasswordResetAction(formData: FormData) {
     redirectTo: `${origin}/auth/callback?next=/update-password`
   });
 
-  if (error) redirect(`/forgot-password?error=${authErrorCode(error)}`);
+  if (error) {
+    const code = authErrorCode(error);
+    if (code === "aguarde-um-minuto") redirect("/forgot-password?message=email-recente");
+    redirect(`/forgot-password?error=${code}`);
+  }
   redirect("/forgot-password?message=email-enviado");
 }
 
 export async function resendSignupConfirmationAction(formData: FormData) {
-  if (!hasSupabasePublicEnv()) redirect("/confirm-email?error=configuracao-supabase-incompleta");
-
   const parsed = emailOnlySchema.safeParse({ email: formData.get("email") });
   if (!parsed.success) redirect("/confirm-email?error=email-invalido");
+
+  if (await confirmAuthEmailByAddress(parsed.data.email)) {
+    redirect("/login?message=email-confirmado");
+  }
+
+  if (!hasSupabasePublicEnv()) redirect("/confirm-email?error=configuracao-supabase-incompleta");
 
   const supabase = await createServerClient();
   const origin = await getAuthRedirectOrigin();

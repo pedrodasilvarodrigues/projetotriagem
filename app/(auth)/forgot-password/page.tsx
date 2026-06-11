@@ -3,7 +3,8 @@ import { ArrowLeft, BriefcaseBusiness, Mail } from "lucide-react";
 import { requestPasswordResetAction } from "@/lib/actions/auth";
 
 const messageMap: Record<string, string> = {
-  "email-enviado": "Enviamos as instrucoes para o email informado."
+  "email-enviado": "Enviamos as instrucoes para o email informado.",
+  "email-recente": "Ja existe uma solicitacao recente para esse email. Confira sua caixa de entrada e tente novamente em cerca de 1 minuto se precisar de outro link."
 };
 
 const errorMap: Record<string, string> = {

@@ -45,9 +45,9 @@ export default async function ConfirmEmailPage({ searchParams }: { searchParams:
                 <ShieldCheck aria-hidden="true" size={21} />
               </span>
               <div>
-                <h1 className="text-3xl font-semibold tracking-normal">Confirmar email</h1>
+                <h1 className="text-3xl font-semibold tracking-normal">Liberar acesso</h1>
                 <p className="mt-3 text-sm leading-6 text-slate-600">
-                  Informe o email cadastrado para receber outro link de confirmacao.
+                  Informe o email cadastrado para confirmar o acesso. Quando possivel, a liberacao acontece automaticamente.
                 </p>
               </div>
             </div>
@@ -73,7 +73,7 @@ export default async function ConfirmEmailPage({ searchParams }: { searchParams:
                 </span>
               </label>
               <button className="w-full rounded-md bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-800" type="submit">
-                Reenviar email de confirmacao
+                Confirmar acesso
               </button>
             </form>
 

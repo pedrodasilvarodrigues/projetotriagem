@@ -18,6 +18,7 @@ const errorMessages: Record<string, string> = {
 
 const messageMap: Record<string, string> = {
   "cadastro-criado": "Cadastro criado. Entre com seu email e senha para acessar.",
+  "email-confirmado": "Email confirmado. Entre com seu email e senha para acessar.",
   "confirme-email": "Cadastro criado. Confirme seu email e entre para continuar.",
   "senha-atualizada": "Senha atualizada com sucesso. Entre novamente.",
   saiu: "Voce saiu da sua conta."
@@ -149,7 +150,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
                   {errorMessages[error] ?? error}
                   {error === "email-nao-confirmado" ? (
                     <Link href="/confirm-email" className="mt-2 block font-semibold text-red-800 underline underline-offset-4">
-                      Reenviar email de confirmacao
+                      Liberar acesso agora
                     </Link>
                   ) : null}
                 </div>
@@ -160,7 +161,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
                   {messageMap[message] ?? message}
                   {message === "confirme-email" ? (
                     <Link href="/confirm-email" className="mt-2 block font-semibold text-green-800 underline underline-offset-4">
-                      Reenviar email de confirmacao
+                      Liberar acesso agora
                     </Link>
                   ) : null}
                 </div>

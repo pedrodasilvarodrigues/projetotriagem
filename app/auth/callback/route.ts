@@ -9,7 +9,13 @@ export async function GET(request: NextRequest) {
   const signupRoleParam = requestUrl.searchParams.get("signupRole");
   const signupRole = signupRoleParam === "professional" || signupRoleParam === "company" ? signupRoleParam : null;
   const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : null;
-  const supabase = await createServerClient();
+  let supabase: Awaited<ReturnType<typeof createServerClient>>;
+
+  try {
+    supabase = await createServerClient();
+  } catch {
+    return NextResponse.redirect(new URL("/login?error=configuracao-supabase-incompleta", request.url));
+  }
 
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
@@ -27,9 +33,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL(safeNext, request.url));
   }
 
-  const entryPath = await resolveAuthenticatedEntryPath(supabase, data.user.id, data.user.user_metadata, signupRole);
+  const entryPath = await resolveAuthenticatedEntryPath(supabase, data.user.id, data.user.user_metadata, signupRole).catch(() => null);
   if (!entryPath) {
-    await supabase.auth.signOut({ scope: "local" });
+    await supabase.auth.signOut({ scope: "local" }).catch(() => null);
     return NextResponse.redirect(new URL("/login?error=conta-nao-cadastrada", request.url));
   }
 

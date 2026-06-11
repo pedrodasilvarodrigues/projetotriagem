@@ -24,6 +24,9 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Login com Google sem perfil cadastrado encerra a sessao local e volta ao login com mensagem clara, sem prender o usuario no cadastro.
 - Onboarding possui acao visivel de sair da conta e rota dedicada `/auth/sign-out`.
 - Cadastro empresarial aceita email corporativo opcional, usando o email de acesso como fallback quando necessario.
+- Callback de autenticacao e confirmacao automatica de emails antigos estao protegidos contra erro 500, redirecionando para mensagens controladas no login.
+- Pagina `/confirm-email` tenta liberar o acesso diretamente via Supabase Admin API antes de usar reenvio de email do Supabase.
+- Recuperacao de senha trata limite de 1 minuto do Supabase como solicitacao recente, sem exibir erro vermelho de falha.
 - Suporte a email proprio de reset via Resend quando as variaveis seguras estiverem configuradas.
 - Guia AUTH_SETUP.md com configuracao de Supabase SMTP, URLs de redirect e Google OAuth/branding.
 - Fallback no proxy para redirecionar `/?code=...` para `/auth/callback` quando o Supabase retornar o codigo na raiz do dominio correto.
@@ -39,10 +42,11 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 # Proximos Passos
 - Melhorar a pre-visualizacao do CV antes do download.
 - Validar fluxos completos com contas reais de profissional, empresa e admin.
-- Validar recuperacao de senha apos o limite de 60 segundos do Supabase expirar.
+- Validar recebimento real de recuperacao de senha com SMTP/Resend configurado em producao.
 - Evoluir os filtros de vagas para salvar pesquisas e alertas por email quando SMTP estiver pronto.
 
 # Observacoes
 - As chaves sensiveis do Supabase devem continuar fora do GitHub e ser configuradas em ambiente local/Vercel.
 - A confirmacao por email nao e mais exigida para novos cadastros por email/senha; recuperacao de senha ainda depende de Supabase Auth ou Resend configurado.
+- O limite de reenvio de recuperacao do Supabase continua existindo na API externa; a interface agora comunica como pedido recente e nao como quebra.
 - O deploy em producao ocorre pelo reposititorio GitHub conectado; esta tarefa nao altera configuracoes da Vercel.

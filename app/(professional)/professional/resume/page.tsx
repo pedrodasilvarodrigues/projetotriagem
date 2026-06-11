@@ -95,7 +95,7 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
   return (
     <AppShell eyebrow="Profissional" title="Curriculo">
       <div className="space-y-5">
-        <div className="border border-slate-200 bg-white shadow-sm">
+        <div className="sticky top-[142px] z-30 border border-slate-200 bg-white/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/90">
           <div className="flex flex-col gap-4 border-b border-slate-200 p-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-xs font-bold uppercase text-[#174a86]">Subgrupos do curriculo</p>
@@ -120,7 +120,7 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
           {params.error ? <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">Verifique os dados informados. Codigo: {params.error}</p> : null}
           {params.message ? <p className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">Atualizacao salva.</p> : null}
 
-          <section id="dados-pessoais" className="border border-slate-200 bg-white p-5 shadow-sm">
+          <section id="dados-pessoais" className="scroll-mt-72 border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold uppercase">Dados pessoais</h2>
             <form action={updateResumePersonalAction} className="mt-5 grid gap-4 md:grid-cols-2">
               <label className="text-sm font-semibold">Nome<input name="firstName" required defaultValue={nameParts.firstName} className="field-input mt-2" /></label>
@@ -140,7 +140,7 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             </form>
           </section>
 
-          <section id="confidencialidade" className="border border-slate-200 bg-white p-5 shadow-sm">
+          <section id="confidencialidade" className="scroll-mt-72 border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center gap-2">
               <ShieldCheck aria-hidden="true" size={18} className="text-blue-700" />
               <h2 className="text-lg font-semibold">Seguranca e Confidencialidade</h2>
@@ -156,7 +156,7 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             </form>
           </section>
 
-          <section id="objetivo" className="border border-slate-200 bg-white p-5 shadow-sm">
+          <section id="objetivo" className="scroll-mt-72 border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center gap-2">
               <Sparkles aria-hidden="true" size={18} className="text-blue-700" />
               <h2 className="text-lg font-semibold">Objetivo profissional</h2>
@@ -175,7 +175,7 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             </form>
           </section>
 
-          <section id="formacao" className="border border-slate-200 bg-white p-5 shadow-sm">
+          <section id="formacao" className="scroll-mt-72 border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center gap-2">
               <GraduationCap aria-hidden="true" size={18} className="text-blue-700" />
               <h2 className="text-lg font-semibold">Historico academico</h2>
@@ -200,7 +200,7 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             </form>
           </section>
 
-          <section id="experiencias" className="border border-slate-200 bg-white p-5 shadow-sm">
+          <section id="experiencias" className="scroll-mt-72 border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center gap-2">
               <BriefcaseBusiness aria-hidden="true" size={18} className="text-blue-700" />
               <h2 className="text-lg font-semibold">Experiencia profissional</h2>
@@ -226,7 +226,7 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             </form>
           </section>
 
-          <section id="cursos" className="border border-slate-200 bg-white p-5 shadow-sm">
+          <section id="cursos" className="scroll-mt-72 border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">Cursos e qualificacoes</h2>
             <div className="mt-5 grid gap-3 md:grid-cols-2">
               {((courses ?? []) as CourseRow[]).map((course) => (
@@ -247,7 +247,7 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             </form>
           </section>
 
-          <section id="idiomas" className="border border-slate-200 bg-white p-5 shadow-sm">
+          <section id="idiomas" className="scroll-mt-72 border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center gap-2">
               <Languages aria-hidden="true" size={18} className="text-blue-700" />
               <h2 className="text-lg font-semibold">Idiomas</h2>
@@ -268,7 +268,7 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             </form>
           </section>
 
-          <section id="habilidades" className="border border-slate-200 bg-white p-5 shadow-sm">
+          <section id="habilidades" className="scroll-mt-72 border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">Habilidades e competencias</h2>
             <div className="mt-5 flex flex-wrap gap-2">
               {((skills ?? []) as SkillRow[]).map((skill) => (
@@ -284,13 +284,13 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             </form>
           </section>
 
-          <section id="documento" className="border border-slate-200 bg-white p-5 shadow-sm">
+          <section id="documento" className="scroll-mt-72 border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2 text-blue-700">
                 <FileText aria-hidden="true" size={18} />
                 <h2 className="font-semibold text-slate-950">Documento anexado</h2>
               </div>
-              <ResumeDownloadCustomizer documentUrl={documentUrl?.signedUrl ?? null} hasDocument={Boolean(activeVersion && documentUrl?.signedUrl)} showSalaryExpectation={prefs.show_salary_expectation} />
+              <ResumeDownloadCustomizer exportUrl="/professional/resume/export" hasDocument={Boolean(activeVersion && documentUrl?.signedUrl)} showSalaryExpectation={prefs.show_salary_expectation} />
             </div>
             {activeVersion ? (
               <div className="mt-4 space-y-3 text-sm">

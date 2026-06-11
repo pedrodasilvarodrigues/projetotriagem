@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { Check, Download, X } from "lucide-react";
 
 type ResumeDownloadCustomizerProps = {
-  documentUrl?: string | null;
+  exportUrl: string;
   hasDocument: boolean;
   showSalaryExpectation: boolean;
 };
@@ -60,7 +60,7 @@ function TemplatePreview({ templateId, color }: { templateId: string; color: str
   );
 }
 
-export function ResumeDownloadCustomizer({ documentUrl, hasDocument, showSalaryExpectation }: ResumeDownloadCustomizerProps) {
+export function ResumeDownloadCustomizer({ exportUrl, hasDocument, showSalaryExpectation }: ResumeDownloadCustomizerProps) {
   const [open, setOpen] = useState(false);
   const [template, setTemplate] = useState(templates[0].id);
   const [color, setColor] = useState(colors[0].id);
@@ -70,12 +70,11 @@ export function ResumeDownloadCustomizer({ documentUrl, hasDocument, showSalaryE
   const selectedTemplate = templates.find((item) => item.id === template) ?? templates[0];
 
   function handleDownload() {
-    if (documentUrl) {
-      window.open(documentUrl, "_blank", "noopener,noreferrer");
-      return;
-    }
-
-    window.print();
+    const url = new URL(exportUrl, window.location.origin);
+    url.searchParams.set("template", selectedTemplate.id);
+    url.searchParams.set("color", selectedColor.id);
+    url.searchParams.set("salary", salary ? "1" : "0");
+    window.location.assign(url.toString());
   }
 
   return (
@@ -154,7 +153,7 @@ export function ResumeDownloadCustomizer({ documentUrl, hasDocument, showSalaryE
               <p className="text-sm font-bold text-slate-950">Resumo da exportacao</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 Modelo {selectedTemplate.title.toLowerCase()}, cor {selectedColor.label.toLowerCase()} e pretensao salarial {salary ? "visivel" : "oculta"}.
-                {hasDocument ? " O arquivo anexado sera aberto para baixar." : " Sem arquivo anexado, a pagina sera preparada para impressao."}
+                {hasDocument ? " O PDF sera recriado com os dados do seu perfil e as escolhas acima." : " O PDF sera gerado com os dados preenchidos no curriculo."}
               </p>
             </div>
 
@@ -162,7 +161,7 @@ export function ResumeDownloadCustomizer({ documentUrl, hasDocument, showSalaryE
               <button type="button" onClick={() => setOpen(false)} className="rounded-md border border-slate-300 px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50">Cancelar</button>
               <button type="button" onClick={handleDownload} className="inline-flex items-center justify-center gap-2 rounded-md bg-[#174a86] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#103765]">
                 <Download aria-hidden="true" size={18} />
-                {hasDocument ? "Baixar arquivo" : "Imprimir curriculo"}
+                Baixar PDF personalizado
               </button>
             </div>
           </section>

@@ -11,14 +11,17 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Area de curriculo com dados pessoais, objetivo, historico academico, experiencias, cursos, idiomas, habilidades e documento anexado.
 - Navegacao superior por subgrupos na area de curriculo.
 - Painel de personalizacao para baixar CV com 3 modelos, 7 cores e opcao de pretensao salarial.
+- Menu principal recolhivel para liberar espaco na tela.
+- Subgrupos do curriculo fixos durante a rolagem, com ajuste de ancoras para abrir cada bloco completo.
+- Exportacao de curriculo em PDF respeitando modelo, cor e pretensao salarial selecionados.
+- Configuracoes profissionais com grupos clicaveis e opcao de idioma local.
 
 # Pendente
 - Persistir as escolhas de modelo/cor do CV no banco, caso a personalizacao precise ser reutilizada em downloads futuros.
-- Gerar PDF final com layout escolhido, em vez de apenas abrir o arquivo anexado ou imprimir a pagina.
+- Persistir idioma preferido no banco quando houver uma coluna dedicada para isso.
 - Revisar textos e acentuacao da interface em todo o projeto.
 
 # Proximos Passos
-- Conectar a personalizacao do curriculo a um gerador de PDF.
 - Melhorar a pre-visualizacao do CV antes do download.
 - Validar fluxos completos com contas reais de profissional, empresa e admin.
 

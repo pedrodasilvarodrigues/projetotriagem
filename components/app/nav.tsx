@@ -1,11 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Bell,
   BriefcaseBusiness,
   Building2,
+  ChevronDown,
+  ChevronUp,
   ClipboardCheck,
   FileText,
   History,
@@ -68,6 +71,7 @@ const navItems = {
 export function AppNav({ role }: { role: AppRole }) {
   const nav = navItems[role];
   const pathname = usePathname();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
     <header className="sticky top-0 z-40 border-b-4 border-[#d6a238] bg-[#18212f] text-white shadow-[0_10px_30px_rgba(15,23,42,0.18)]">
@@ -82,6 +86,18 @@ export function AppNav({ role }: { role: AppRole }) {
               <span className="block text-xs text-slate-300">{nav.subtitle}</span>
             </span>
           </Link>
+          <button
+            type="button"
+            aria-expanded={!isCollapsed}
+            onClick={() => setIsCollapsed((current) => !current)}
+            className="inline-flex min-h-10 items-center gap-2 border border-white/15 bg-white/8 px-3 py-2 text-sm font-semibold text-slate-100 transition hover:border-[#d6a238] hover:text-white"
+          >
+            {isCollapsed ? <ChevronDown aria-hidden="true" size={16} /> : <ChevronUp aria-hidden="true" size={16} />}
+            <span>{isCollapsed ? "Mostrar menu" : "Recolher menu"}</span>
+          </button>
+        </div>
+
+        <div className={`${isCollapsed ? "hidden" : "mt-4"}`}>
           <nav aria-label={`Menu ${nav.title}`} className="flex max-w-full gap-1 overflow-x-auto border border-white/15 bg-white/8 p-1">
             {nav.items.map((item) => {
               const isActive = pathname === item.href || (item.href !== nav.items[0].href && pathname.startsWith(`${item.href}/`));

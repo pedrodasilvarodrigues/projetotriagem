@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Bell, LockKeyhole, Mail, ShieldCheck, UserRoundCog } from "lucide-react";
+import { LockKeyhole, Mail, UserRoundCog } from "lucide-react";
 import { AppShell } from "@/components/app/shell";
+import { SettingsPreferences } from "@/components/professional/settings-preferences";
 import { signOutAction } from "@/lib/actions/auth";
 import { updateUserSettingsAction } from "@/lib/actions/workspace";
 import { createServerClient } from "@/lib/supabase/server";
@@ -59,48 +60,16 @@ export default async function ProfessionalSettingsPage({ searchParams }: { searc
           {params.error ? <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">Nao foi possivel salvar as configuracoes.</p> : null}
           {params.message ? <p className="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-700">Configuracoes atualizadas.</p> : null}
 
-          <div className="grid gap-5 md:grid-cols-2">
-            <section className="border border-slate-200 bg-slate-50 p-4">
-              <div className="flex items-center gap-2 text-blue-700">
-                <Bell aria-hidden="true" size={18} />
-                <h2 className="font-semibold text-slate-950">Notificacoes</h2>
-              </div>
-              <label className="mt-4 flex items-start gap-3 text-sm font-medium">
-                <input name="emailNotifications" type="checkbox" defaultChecked={prefs.email_notifications} className="mt-1 size-4" />
-                <span><strong className="block">Emails da plataforma</strong><span className="text-slate-600">Receber avisos importantes sobre processos, triagens e mensagens.</span></span>
-              </label>
-              <label className="mt-4 flex items-start gap-3 text-sm font-medium">
-                <input name="opportunityAlerts" type="checkbox" defaultChecked={prefs.opportunity_alerts} className="mt-1 size-4" />
-                <span><strong className="block">Alertas de vagas</strong><span className="text-slate-600">Receber oportunidades de acordo com cidades, perfil e currículo.</span></span>
-              </label>
-            </section>
+          <div className="grid gap-5">
+            <SettingsPreferences prefs={prefs} />
 
             <section className="border border-slate-200 bg-slate-50 p-4">
-              <div className="flex items-center gap-2 text-blue-700">
-                <ShieldCheck aria-hidden="true" size={18} />
-                <h2 className="font-semibold text-slate-950">Privacidade do perfil</h2>
-              </div>
-              <label className="mt-4 flex items-start gap-3 text-sm font-medium">
-                <input name="profileVisible" type="checkbox" defaultChecked={prefs.profile_visible} className="mt-1 size-4" />
-                <span><strong className="block">Perfil visivel para triagem</strong><span className="text-slate-600">Permitir que recrutadores internos encontrem seu currículo.</span></span>
-              </label>
-              <label className="mt-4 flex items-start gap-3 text-sm font-medium">
-                <input name="allowRecruiterContact" type="checkbox" defaultChecked={prefs.allow_recruiter_contact} className="mt-1 size-4" />
-                <span><strong className="block">Contato por recrutadores</strong><span className="text-slate-600">Permitir contato em processos compatíveis.</span></span>
-              </label>
-              <label className="mt-4 flex items-start gap-3 text-sm font-medium">
-                <input name="showSalaryExpectation" type="checkbox" defaultChecked={prefs.show_salary_expectation} className="mt-1 size-4" />
-                <span><strong className="block">Mostrar pretensao salarial</strong><span className="text-slate-600">Exibir essa informacao quando ela existir no perfil.</span></span>
-              </label>
-            </section>
-
-            <section className="border border-slate-200 bg-slate-50 p-4 md:col-span-2">
               <div className="flex items-center gap-2 text-blue-700">
                 <Mail aria-hidden="true" size={18} />
                 <h2 className="font-semibold text-slate-950">Resumo das preferencias</h2>
               </div>
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                Essas configuracoes controlam como a plataforma envia avisos, recomenda vagas e exibe seu perfil dentro do processo de triagem.
+                Essas configuracoes controlam como a plataforma envia avisos, recomenda vagas, exibe seu perfil e prepara sua experiencia de idioma.
               </p>
             </section>
           </div>

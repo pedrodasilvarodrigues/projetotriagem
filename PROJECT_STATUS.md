@@ -15,10 +15,14 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Subgrupos do curriculo fixos durante a rolagem, com ajuste de ancoras para abrir cada bloco completo.
 - Exportacao de curriculo em PDF respeitando modelo, cor e pretensao salarial selecionados.
 - Configuracoes profissionais com grupos clicaveis e opcao de idioma local.
+- Recuperacao de senha apontando para o dominio oficial da Vercel, com rota /auth/confirm para links por token hash.
+- Suporte a email proprio de reset via Resend quando as variaveis seguras estiverem configuradas.
+- Guia AUTH_SETUP.md com configuracao de Supabase SMTP, URLs de redirect e Google OAuth/branding.
 
 # Pendente
 - Persistir as escolhas de modelo/cor do CV no banco, caso a personalizacao precise ser reutilizada em downloads futuros.
 - Persistir idioma preferido no banco quando houver uma coluna dedicada para isso.
+- Configurar SMTP personalizado e credenciais Google OAuth no painel Supabase/Google usando AUTH_SETUP.md.
 - Revisar textos e acentuacao da interface em todo o projeto.
 
 # Proximos Passos

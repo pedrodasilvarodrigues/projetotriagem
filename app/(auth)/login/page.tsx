@@ -9,6 +9,7 @@ const errorMessages: Record<string, string> = {
   "sessao-expirada": "Sua sessao expirou. Entre novamente para continuar.",
   "nao-foi-possivel-iniciar-google": "Nao foi possivel iniciar o login com Google.",
   "credenciais-invalidas": "Email ou senha invalidos.",
+  "link-invalido": "Link invalido ou expirado. Solicite um novo acesso.",
   "configuracao-supabase-incompleta": "Configuracao do Supabase pendente. Adicione as variaveis de ambiente na Vercel para ativar o login."
 };
 

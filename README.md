@@ -25,7 +25,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 RESEND_API_KEY=
 RESEND_FROM_EMAIL=
-NEXT_PUBLIC_APP_URL=
+NEXT_PUBLIC_APP_URL=https://projetotriagem.vercel.app
 ```
 
 No deploy da Vercel, cadastre essas mesmas variaveis em Project Settings > Environment Variables. Nunca coloque valores reais em arquivos versionados no GitHub, principalmente `SUPABASE_SERVICE_ROLE_KEY`.
@@ -50,18 +50,13 @@ npm run dev
 
 ## Autenticacao
 
-O projeto aceita email/senha e Google OAuth pelo Supabase.
+O projeto aceita email/senha e Google OAuth pelo Supabase. As configuracoes de dominio oficial, SMTP do email do site e Google OAuth estao em [`AUTH_SETUP.md`](./AUTH_SETUP.md).
 
 Para Google, habilite o provider em Authentication > Providers e cadastre a URL de callback:
 
 ```text
-http://localhost:3000/auth/callback
-```
-
-Em producao, cadastre tambem:
-
-```text
-https://seudominio.com/auth/callback
+https://projetotriagem.vercel.app/auth/callback
+https://projetotriagem.vercel.app/auth/confirm
 ```
 
 O usuario novo passa por:

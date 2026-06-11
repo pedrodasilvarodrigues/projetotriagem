@@ -4,10 +4,12 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendTransactionalEmail } from "@/lib/resend/send-email";
 import { createServerClient, hasSupabasePublicEnv } from "@/lib/supabase/server";
 import { ageFromBirthDate, isValidBrazilianPhone, isValidCnpj, isValidCpf, onlyDigits } from "@/lib/validations/br";
 
 const minimumAge = Number(process.env.MINIMUM_PROFESSIONAL_AGE ?? 14);
+const productionAppUrl = "https://projetotriagem.vercel.app";
 
 const emailPasswordSchema = z.object({
   email: z.string().email(),
@@ -60,9 +62,34 @@ const companyRegistrationSchema = emailPasswordSchema.extend({
 
 type CompanyRegistration = z.infer<typeof companyRegistrationSchema>;
 
-async function getOrigin() {
+function normalizeOrigin(value?: string | null) {
+  if (!value) return null;
+  const withProtocol = value.startsWith("http://") || value.startsWith("https://") ? value : `https://${value}`;
+
+  try {
+    const url = new URL(withProtocol);
+    return url.origin;
+  } catch {
+    return null;
+  }
+}
+
+function isLocalOrigin(value: string) {
+  const hostname = new URL(value).hostname;
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+}
+
+async function getAuthRedirectOrigin() {
   const headerStore = await headers();
-  return headerStore.get("origin") ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const candidates = [
+    normalizeOrigin(process.env.NEXT_PUBLIC_APP_URL),
+    normalizeOrigin(process.env.VERCEL_PROJECT_PRODUCTION_URL),
+    normalizeOrigin(process.env.VERCEL_URL),
+    normalizeOrigin(headerStore.get("origin")),
+    productionAppUrl
+  ].filter((value): value is string => Boolean(value));
+
+  return candidates.find((value) => !isLocalOrigin(value)) ?? productionAppUrl;
 }
 
 async function getRequestMeta() {
@@ -75,6 +102,10 @@ async function getRequestMeta() {
 
 function canUseAdminClient() {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+}
+
+function canSendBrandedAuthEmail() {
+  return Boolean(process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL && canUseAdminClient());
 }
 
 async function saveProfessionalSignup(client: ReturnType<typeof createAdminClient>, userId: string, data: ProfessionalRegistration) {
@@ -195,7 +226,7 @@ export async function signInWithGoogleAction(formData?: FormData) {
   if (!hasSupabasePublicEnv()) redirect("/login?error=configuracao-supabase-incompleta");
 
   const supabase = await createServerClient();
-  const origin = await getOrigin();
+  const origin = await getAuthRedirectOrigin();
   const accountType = formData instanceof FormData ? String(formData.get("accountType") ?? "") : "";
   const signupRole = accountType === "professional" || accountType === "company" ? accountType : "";
   const callbackUrl = new URL(`${origin}/auth/callback`);
@@ -254,7 +285,7 @@ export async function registerProfessionalWithEmailAction(formData: FormData) {
   if (!canUseAdminClient()) redirect("/register?error=configuracao-supabase-incompleta");
 
   const data = parsed.data;
-  const origin = await getOrigin();
+  const origin = await getAuthRedirectOrigin();
   const admin = createAdminClient();
   const { data: duplicatedCpf } = await admin.from("professionals").select("id,user_id").eq("cpf", onlyDigits(data.cpf)).maybeSingle();
   if (duplicatedCpf) redirect("/register?error=cpf-ja-cadastrado");
@@ -311,7 +342,7 @@ export async function registerCompanyWithEmailAction(formData: FormData) {
   if (!canUseAdminClient()) redirect("/register?type=company&error=configuracao-supabase-incompleta");
 
   const data = parsed.data;
-  const origin = await getOrigin();
+  const origin = await getAuthRedirectOrigin();
   const admin = createAdminClient();
   const { data: duplicatedCnpj } = await admin.from("companies").select("id,owner_id").eq("cnpj", onlyDigits(data.cnpj)).maybeSingle();
   if (duplicatedCnpj) redirect("/register?type=company&error=cnpj-ja-cadastrado");
@@ -347,7 +378,42 @@ export async function requestPasswordResetAction(formData: FormData) {
   if (!parsed.success) redirect("/forgot-password?error=email-invalido");
 
   const supabase = await createServerClient();
-  const origin = await getOrigin();
+  const origin = await getAuthRedirectOrigin();
+  let brandedEmailSent = false;
+
+  if (canSendBrandedAuthEmail()) {
+    try {
+      const admin = createAdminClient();
+      const { data, error } = await admin.auth.admin.generateLink({
+        type: "recovery",
+        email: parsed.data.email,
+        options: {
+          redirectTo: `${origin}/auth/callback?next=/update-password`
+        }
+      });
+
+      const tokenHash = data.properties?.hashed_token;
+      if (!error && tokenHash) {
+        const resetUrl = new URL("/auth/confirm", origin);
+        resetUrl.searchParams.set("token_hash", tokenHash);
+        resetUrl.searchParams.set("type", "recovery");
+        resetUrl.searchParams.set("next", "/update-password");
+
+        const { error: emailError } = await sendTransactionalEmail({
+          to: parsed.data.email,
+          template: "password_reset",
+          variables: { url: resetUrl.toString() }
+        });
+
+        brandedEmailSent = !emailError;
+      }
+    } catch {
+      // If the branded sender is not ready, keep the recovery flow working through Supabase Auth.
+    }
+  }
+
+  if (brandedEmailSent) redirect("/forgot-password?message=email-enviado");
+
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
     redirectTo: `${origin}/auth/callback?next=/update-password`
   });

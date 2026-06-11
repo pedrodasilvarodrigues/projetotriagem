@@ -9,11 +9,16 @@ import { ageFromBirthDate, isValidBrazilianPhone, isValidCnpj, isValidCpf, onlyD
 
 const minimumAge = Number(process.env.MINIMUM_PROFESSIONAL_AGE ?? 14);
 
+const optionalEmailSchema = z.preprocess((value) => {
+  const text = typeof value === "string" ? value.trim().toLowerCase() : "";
+  return text.length > 0 ? text : undefined;
+}, z.string().email().optional());
+
 const professionalSchema = z.object({
   fullName: z.string().min(3).regex(/^[\p{L}\s]+$/u),
   cpf: z.string().refine(isValidCpf, "cpf-invalido"),
   phone: z.string().refine(isValidBrazilianPhone, "telefone-invalido"),
-  email: z.string().email(),
+  email: z.string().trim().toLowerCase().email(),
   birthDate: z.string().refine((value) => ageFromBirthDate(value) >= minimumAge, "idade-minima"),
   cep: z.string().refine((value) => onlyDigits(value).length === 8, "cep-invalido"),
   street: z.string().min(2),
@@ -30,7 +35,7 @@ const companySchema = z.object({
   tradeName: z.string().min(2),
   cnpj: z.string().refine(isValidCnpj, "cnpj-invalido"),
   phone: z.string().refine(isValidBrazilianPhone, "telefone-invalido"),
-  corporateEmail: z.string().email(),
+  corporateEmail: optionalEmailSchema,
   cep: z.string().refine((value) => onlyDigits(value).length === 8, "cep-invalido"),
   street: z.string().min(2),
   addressNumber: z.string().min(1),
@@ -268,6 +273,9 @@ export async function saveCompanyAction(formData: FormData) {
 
   const data = parsed.data;
   const normalizedCnpj = onlyDigits(data.cnpj);
+  const corporateEmail = data.corporateEmail ?? user.email;
+  if (!corporateEmail) redirect("/onboarding/company?error=email-invalido");
+
   const { data: duplicatedCnpj } = await supabase.from("companies").select("id,owner_id").eq("cnpj", normalizedCnpj).neq("owner_id", user.id).maybeSingle();
   if (duplicatedCnpj) redirect("/onboarding/company?error=cnpj-ja-cadastrado");
 
@@ -278,7 +286,7 @@ export async function saveCompanyAction(formData: FormData) {
     trade_name: data.tradeName,
     cnpj: normalizedCnpj,
     phone: onlyDigits(data.phone),
-    corporate_email: data.corporateEmail,
+    corporate_email: corporateEmail,
     cep: onlyDigits(data.cep),
     street: data.street,
     address_number: data.addressNumber,
@@ -293,7 +301,7 @@ export async function saveCompanyAction(formData: FormData) {
   await supabase.from("company_contacts").insert({
     company_id: company.id,
     name: data.contactName,
-    email: data.corporateEmail,
+    email: corporateEmail,
     phone: onlyDigits(data.contactPhone),
     role_title: data.contactRole
   });

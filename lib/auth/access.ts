@@ -15,6 +15,8 @@ export async function getCurrentRole() {
   if (roleRecord?.role) return roleRecord.role as AppRole;
 
   const entryPath = await resolveAuthenticatedEntryPath(supabase, data.user.id, data.user.user_metadata);
+  if (!entryPath) redirect("/login?error=conta-nao-cadastrada");
+
   if (entryPath === "/admin") return "admin";
   if (entryPath === "/company") return "company";
   return "professional";

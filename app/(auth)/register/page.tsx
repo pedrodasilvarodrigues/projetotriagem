@@ -22,7 +22,10 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
   const supabase = await createServerClient();
   const { data: userData } = await supabase.auth.getUser();
   if (userData.user) {
-    redirect(await resolveAuthenticatedEntryPath(supabase, userData.user.id, userData.user.user_metadata));
+    const entryPath = await resolveAuthenticatedEntryPath(supabase, userData.user.id, userData.user.user_metadata);
+    if (entryPath) redirect(entryPath);
+
+    await supabase.auth.signOut({ scope: "local" });
   }
 
   const params = await searchParams;

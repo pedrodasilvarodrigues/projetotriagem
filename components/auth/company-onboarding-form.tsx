@@ -85,7 +85,7 @@ export function CompanyOnboardingForm({ email, error }: { email: string; error?:
           <label className="block text-sm font-medium">Razao Social<input name="legalName" required value={legalName} onChange={(event) => setLegalName(event.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
           <label className="block text-sm font-medium">Nome Fantasia<input name="tradeName" required value={tradeName} onChange={(event) => setTradeName(event.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
           <label className="block text-sm font-medium">Telefone<input name="phone" required value={phone} onChange={(event) => setPhone(maskPhone(event.target.value))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
-          <label className="block text-sm font-medium">Email Corporativo<input name="corporateEmail" required type="email" value={corporateEmail} onChange={(event) => setCorporateEmail(event.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
+          <label className="block text-sm font-medium">Email Corporativo (opcional)<input name="corporateEmail" type="email" value={corporateEmail} onChange={(event) => setCorporateEmail(event.target.value)} placeholder="Usaremos o email da conta se ficar vazio" className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
           <label className="block text-sm font-medium">CEP<input name="cep" required value={cep} onChange={(event) => setCep(maskCep(event.target.value))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
           <label className="block text-sm font-medium lg:col-span-2">Endereco<input name="street" required value={street} onChange={(event) => setStreet(event.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
           <label className="block text-sm font-medium">Numero<input name="addressNumber" required value={number} onChange={(event) => setNumber(event.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
@@ -99,7 +99,7 @@ export function CompanyOnboardingForm({ email, error }: { email: string; error?:
       <section className="mt-8">
         <h2 className="text-lg font-semibold">Responsavel</h2>
         <div className="mt-5 grid gap-4 md:grid-cols-3">
-          <label className="block text-sm font-medium">Nome<input name="contactName" required pattern="^[A-Za-zÀ-ÿ\\s]+$" className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
+          <label className="block text-sm font-medium">Nome<input name="contactName" required autoComplete="name" className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
           <label className="block text-sm font-medium">Cargo<input name="contactRole" required className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
           <label className="block text-sm font-medium">Telefone<input name="contactPhone" required value={contactPhone} onChange={(event) => setContactPhone(maskPhone(event.target.value))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
         </div>

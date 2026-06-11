@@ -29,6 +29,15 @@ function maskCep(value: string) {
   return digits(value).slice(0, 8).replace(/(\d{5})(\d{1,3})$/, "$1-$2");
 }
 
+const errorMessages: Record<string, string> = {
+  "dados-invalidos": "Revise os campos obrigatorios e confira CPF, telefone, CEP e data de nascimento.",
+  "email-ja-cadastrado": "Esse email ja possui cadastro. Volte para login ou use outro email.",
+  "cpf-ja-cadastrado": "Esse CPF ja possui cadastro no portal.",
+  "senha-invalida": "A senha precisa ter pelo menos 6 caracteres.",
+  "configuracao-supabase-incompleta": "Configuracao do Supabase pendente. Adicione as variaveis de ambiente seguras na Vercel.",
+  "nao-foi-possivel-criar-conta": "Nao foi possivel criar a conta agora. Tente novamente em instantes."
+};
+
 export function ProfessionalRegisterForm({ error }: { error?: string }) {
   const [cpf, setCpf] = useState("");
   const [phone, setPhone] = useState("");
@@ -66,7 +75,7 @@ export function ProfessionalRegisterForm({ error }: { error?: string }) {
     <form action={registerProfessionalWithEmailAction} onSubmit={() => setSubmitting(true)} className="space-y-5">
       {error ? (
         <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
-          Verifique os dados informados. Codigo: {error}
+          {errorMessages[error] ?? `Verifique os dados informados. Codigo: ${error}`}
         </div>
       ) : null}
 
@@ -91,7 +100,7 @@ export function ProfessionalRegisterForm({ error }: { error?: string }) {
         <legend className="mb-1 text-sm font-semibold text-slate-950 md:col-span-2">Dados profissionais</legend>
         <label className="block text-sm font-medium text-slate-800">
           Nome Completo
-          <input name="fullName" required pattern="^[A-Za-zÀ-ÿ\s]+$" autoComplete="name" className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-950 transition focus:border-blue-700" />
+          <input name="fullName" required autoComplete="name" className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-950 transition focus:border-blue-700" />
         </label>
         <label className="block text-sm font-medium text-slate-800">
           CPF

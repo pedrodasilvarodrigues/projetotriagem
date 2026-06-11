@@ -34,6 +34,15 @@ function maskCep(value: string) {
   return digits(value).slice(0, 8).replace(/(\d{5})(\d{1,3})$/, "$1-$2");
 }
 
+const errorMessages: Record<string, string> = {
+  "dados-invalidos": "Revise os campos obrigatorios. O email corporativo pode ficar em branco se a empresa nao tiver um email proprio.",
+  "email-ja-cadastrado": "Esse email ja possui cadastro. Volte para login ou use outro email.",
+  "cnpj-ja-cadastrado": "Esse CNPJ ja possui cadastro no portal.",
+  "senha-invalida": "A senha precisa ter pelo menos 6 caracteres.",
+  "configuracao-supabase-incompleta": "Configuracao do Supabase pendente. Adicione as variaveis de ambiente seguras na Vercel.",
+  "nao-foi-possivel-criar-conta": "Nao foi possivel criar a conta agora. Tente novamente em instantes."
+};
+
 export function CompanyRegisterForm({ error }: { error?: string }) {
   const [cnpj, setCnpj] = useState("");
   const [legalName, setLegalName] = useState("");
@@ -82,7 +91,7 @@ export function CompanyRegisterForm({ error }: { error?: string }) {
     <form action={registerCompanyWithEmailAction} onSubmit={() => setSubmitting(true)} className="space-y-5">
       {error ? (
         <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
-          Verifique os dados informados. Codigo: {error}
+          {errorMessages[error] ?? `Verifique os dados informados. Codigo: ${error}`}
         </div>
       ) : null}
 
@@ -109,7 +118,7 @@ export function CompanyRegisterForm({ error }: { error?: string }) {
         <label className="block text-sm font-medium text-slate-800">Razao Social<input name="legalName" required value={legalName} onChange={(event) => setLegalName(event.target.value)} className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-950 transition focus:border-blue-700" /></label>
         <label className="block text-sm font-medium text-slate-800">Nome Fantasia<input name="tradeName" required value={tradeName} onChange={(event) => setTradeName(event.target.value)} className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-950 transition focus:border-blue-700" /></label>
         <label className="block text-sm font-medium text-slate-800">Telefone<input name="phone" required value={phone} onChange={(event) => setPhone(maskPhone(event.target.value))} className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-950 transition focus:border-blue-700" /></label>
-        <label className="block text-sm font-medium text-slate-800">Email Corporativo<input name="corporateEmail" required type="email" value={corporateEmail} onChange={(event) => setCorporateEmail(event.target.value)} className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-950 transition focus:border-blue-700" /></label>
+        <label className="block text-sm font-medium text-slate-800">Email Corporativo (opcional)<input name="corporateEmail" type="email" value={corporateEmail} onChange={(event) => setCorporateEmail(event.target.value)} placeholder="Usaremos o email de acesso se ficar vazio" className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-950 transition focus:border-blue-700" /></label>
         <label className="block text-sm font-medium text-slate-800">CEP<input name="cep" required value={cep} onChange={(event) => setCep(maskCep(event.target.value))} className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-950 transition focus:border-blue-700" /></label>
         <label className="block text-sm font-medium text-slate-800 lg:col-span-2">Endereco<input name="street" required value={street} onChange={(event) => setStreet(event.target.value)} className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-950 transition focus:border-blue-700" /></label>
         <label className="block text-sm font-medium text-slate-800">Numero<input name="addressNumber" required value={number} onChange={(event) => setNumber(event.target.value)} className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-950 transition focus:border-blue-700" /></label>
@@ -122,7 +131,7 @@ export function CompanyRegisterForm({ error }: { error?: string }) {
 
       <fieldset className="grid gap-4 md:grid-cols-3">
         <legend className="mb-1 text-sm font-semibold text-slate-950 md:col-span-3">Responsavel</legend>
-        <label className="block text-sm font-medium text-slate-800">Nome<input name="contactName" required pattern="^[A-Za-zÃ€-Ã¿\\s]+$" className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-950 transition focus:border-blue-700" /></label>
+        <label className="block text-sm font-medium text-slate-800">Nome<input name="contactName" required autoComplete="name" className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-950 transition focus:border-blue-700" /></label>
         <label className="block text-sm font-medium text-slate-800">Cargo<input name="contactRole" required className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-950 transition focus:border-blue-700" /></label>
         <label className="block text-sm font-medium text-slate-800">Telefone<input name="contactPhone" required value={contactPhone} onChange={(event) => setContactPhone(maskPhone(event.target.value))} className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-950 transition focus:border-blue-700" /></label>
       </fieldset>

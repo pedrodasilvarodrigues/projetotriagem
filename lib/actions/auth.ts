@@ -12,13 +12,18 @@ const minimumAge = Number(process.env.MINIMUM_PROFESSIONAL_AGE ?? 14);
 const productionAppUrl = "https://projetotriagem.vercel.app";
 
 const emailPasswordSchema = z.object({
-  email: z.string().email(),
+  email: z.string().trim().toLowerCase().email(),
   password: z.string().min(6)
 });
 
 const emailOnlySchema = z.object({
   email: z.string().trim().toLowerCase().email()
 });
+
+const optionalEmailSchema = z.preprocess((value) => {
+  const text = typeof value === "string" ? value.trim().toLowerCase() : "";
+  return text.length > 0 ? text : undefined;
+}, z.string().email().optional());
 
 const passwordUpdateSchema = z
   .object({
@@ -50,7 +55,7 @@ const companyRegistrationSchema = emailPasswordSchema.extend({
   tradeName: z.string().min(2),
   cnpj: z.string().refine(isValidCnpj, "cnpj-invalido"),
   phone: z.string().refine(isValidBrazilianPhone, "telefone-invalido"),
-  corporateEmail: z.string().email(),
+  corporateEmail: optionalEmailSchema,
   cep: z.string().refine((value) => onlyDigits(value).length === 8, "cep-invalido"),
   street: z.string().min(2),
   addressNumber: z.string().min(1),
@@ -134,6 +139,35 @@ function authErrorCode(error?: { message?: string | null; status?: number | null
   return "erro-autenticacao";
 }
 
+function signupErrorCode(error?: { message?: string | null; status?: number | null; code?: string | null } | null) {
+  const message = `${error?.code ?? ""} ${error?.message ?? ""}`.toLowerCase();
+
+  if (message.includes("already") || message.includes("registered") || message.includes("exists") || message.includes("user_already_exists")) {
+    return "email-ja-cadastrado";
+  }
+
+  if (message.includes("password")) {
+    return "senha-invalida";
+  }
+
+  return "nao-foi-possivel-criar-conta";
+}
+
+async function findAuthUserByEmail(client: ReturnType<typeof createAdminClient>, email: string) {
+  const normalizedEmail = email.trim().toLowerCase();
+
+  for (let page = 1; page <= 10; page += 1) {
+    const { data, error } = await client.auth.admin.listUsers({ page, perPage: 1000 });
+    if (error) return null;
+
+    const user = data.users.find((item) => item.email?.toLowerCase() === normalizedEmail);
+    if (user) return user;
+    if (data.users.length < 1000) return null;
+  }
+
+  return null;
+}
+
 async function saveProfessionalSignup(client: ReturnType<typeof createAdminClient>, userId: string, data: ProfessionalRegistration) {
   const normalizedCpf = onlyDigits(data.cpf);
   const normalizedPhone = onlyDigits(data.phone);
@@ -188,6 +222,7 @@ async function saveCompanySignup(client: ReturnType<typeof createAdminClient>, u
   const normalizedCnpj = onlyDigits(data.cnpj);
   const normalizedPhone = onlyDigits(data.phone);
   const normalizedContactPhone = onlyDigits(data.contactPhone);
+  const corporateEmail = data.corporateEmail ?? data.email;
   const { ipAddress, userAgent } = await getRequestMeta();
 
   const { data: duplicatedCnpj } = await client.from("companies").select("id,owner_id").eq("cnpj", normalizedCnpj).neq("owner_id", userId).maybeSingle();
@@ -212,7 +247,7 @@ async function saveCompanySignup(client: ReturnType<typeof createAdminClient>, u
         trade_name: data.tradeName,
         cnpj: normalizedCnpj,
         phone: normalizedPhone,
-        corporate_email: data.corporateEmail,
+        corporate_email: corporateEmail,
         cep: onlyDigits(data.cep),
         street: data.street,
         address_number: data.addressNumber,
@@ -234,7 +269,7 @@ async function saveCompanySignup(client: ReturnType<typeof createAdminClient>, u
   await client.from("company_contacts").insert({
     company_id: company.id,
     name: data.contactName,
-    email: data.corporateEmail,
+    email: corporateEmail,
     phone: normalizedContactPhone,
     role_title: data.contactRole
   });
@@ -284,7 +319,21 @@ export async function signInWithEmailAction(formData: FormData) {
   if (!parsed.success) redirect("/login?error=credenciais-invalidas");
 
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
-  if (error) redirect(`/login?error=${authErrorCode(error)}`);
+  if (error) {
+    const code = authErrorCode(error);
+
+    if (code === "email-nao-confirmado" && canUseAdminClient()) {
+      const admin = createAdminClient();
+      const authUser = await findAuthUserByEmail(admin, parsed.data.email);
+      if (authUser?.id) {
+        await admin.auth.admin.updateUserById(authUser.id, { email_confirm: true });
+        const { error: retryError } = await supabase.auth.signInWithPassword(parsed.data);
+        if (!retryError) redirect("/auth/callback");
+      }
+    }
+
+    redirect(`/login?error=${code}`);
+  }
 
   redirect("/auth/callback");
 }
@@ -311,35 +360,27 @@ export async function registerProfessionalWithEmailAction(formData: FormData) {
   if (!canUseAdminClient()) redirect("/register?error=configuracao-supabase-incompleta");
 
   const data = parsed.data;
-  const origin = await getAuthRedirectOrigin();
   const admin = createAdminClient();
   const { data: duplicatedCpf } = await admin.from("professionals").select("id,user_id").eq("cpf", onlyDigits(data.cpf)).maybeSingle();
   if (duplicatedCpf) redirect("/register?error=cpf-ja-cadastrado");
 
-  const supabase = await createServerClient();
-  const { data: signUpData, error } = await supabase.auth.signUp({
+  const { data: createdUser, error } = await admin.auth.admin.createUser({
     email: data.email,
     password: data.password,
-    options: {
-      emailRedirectTo: `${origin}/auth/callback`,
-      data: {
-        full_name: data.fullName,
-        role: "professional"
-      }
+    email_confirm: true,
+    user_metadata: {
+      full_name: data.fullName,
+      role: "professional"
     }
   });
 
-  if (error || !signUpData.user) {
-    redirect(`/register?error=${encodeURIComponent(error?.message ?? "nao-foi-possivel-criar-conta")}`);
+  if (error || !createdUser.user) {
+    redirect(`/register?error=${signupErrorCode(error)}`);
   }
 
-  await saveProfessionalSignup(admin, signUpData.user.id, data);
+  await saveProfessionalSignup(admin, createdUser.user.id, data);
 
-  if (!signUpData.session) {
-    redirect("/login?message=confirme-email");
-  }
-
-  redirect("/professional");
+  redirect("/login?message=cadastro-criado");
 }
 
 export async function registerCompanyWithEmailAction(formData: FormData) {
@@ -368,35 +409,27 @@ export async function registerCompanyWithEmailAction(formData: FormData) {
   if (!canUseAdminClient()) redirect("/register?type=company&error=configuracao-supabase-incompleta");
 
   const data = parsed.data;
-  const origin = await getAuthRedirectOrigin();
   const admin = createAdminClient();
   const { data: duplicatedCnpj } = await admin.from("companies").select("id,owner_id").eq("cnpj", onlyDigits(data.cnpj)).maybeSingle();
   if (duplicatedCnpj) redirect("/register?type=company&error=cnpj-ja-cadastrado");
 
-  const supabase = await createServerClient();
-  const { data: signUpData, error } = await supabase.auth.signUp({
+  const { data: createdUser, error } = await admin.auth.admin.createUser({
     email: data.email,
     password: data.password,
-    options: {
-      emailRedirectTo: `${origin}/auth/callback`,
-      data: {
-        full_name: data.contactName,
-        role: "company"
-      }
+    email_confirm: true,
+    user_metadata: {
+      full_name: data.contactName,
+      role: "company"
     }
   });
 
-  if (error || !signUpData.user) {
-    redirect(`/register?type=company&error=${encodeURIComponent(error?.message ?? "nao-foi-possivel-criar-conta")}`);
+  if (error || !createdUser.user) {
+    redirect(`/register?type=company&error=${signupErrorCode(error)}`);
   }
 
-  await saveCompanySignup(admin, signUpData.user.id, data);
+  await saveCompanySignup(admin, createdUser.user.id, data);
 
-  if (!signUpData.session) {
-    redirect("/login?message=confirme-email");
-  }
-
-  redirect("/company");
+  redirect("/login?message=cadastro-criado");
 }
 
 export async function requestPasswordResetAction(formData: FormData) {

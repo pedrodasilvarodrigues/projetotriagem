@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BriefcaseBusiness, ShieldCheck } from "lucide-react";
+import { BriefcaseBusiness, LogOut, ShieldCheck } from "lucide-react";
 import { TermsModal } from "@/components/auth/terms-modal";
 
 export function OnboardingLayout({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
@@ -13,9 +13,15 @@ export function OnboardingLayout({ title, description, children }: { title: stri
             </span>
             <span>Portal de Triagem</span>
           </Link>
-          <div className="hidden items-center gap-2 text-sm text-slate-600 sm:flex">
-            <ShieldCheck aria-hidden="true" size={17} />
-            Cadastro protegido por LGPD
+          <div className="flex items-center gap-3">
+            <div className="hidden items-center gap-2 text-sm text-slate-600 sm:flex">
+              <ShieldCheck aria-hidden="true" size={17} />
+              Cadastro protegido por LGPD
+            </div>
+            <Link href="/auth/sign-out" className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:text-blue-700">
+              <LogOut aria-hidden="true" size={16} />
+              Sair
+            </Link>
           </div>
         </div>
       </header>

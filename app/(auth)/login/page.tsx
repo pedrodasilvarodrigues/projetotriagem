@@ -10,12 +10,14 @@ const errorMessages: Record<string, string> = {
   "nao-foi-possivel-iniciar-google": "Nao foi possivel iniciar o login com Google.",
   "credenciais-invalidas": "Email ou senha invalidos.",
   "email-nao-confirmado": "Seu email ainda nao foi confirmado.",
+  "conta-nao-cadastrada": "Essa conta ainda nao possui cadastro no portal. Crie uma conta escolhendo Profissional ou Empresa.",
   "link-invalido": "Link invalido ou expirado. Solicite um novo acesso.",
   "configuracao-supabase-incompleta": "Configuracao do Supabase pendente. Adicione as variaveis de ambiente na Vercel para ativar o login.",
   "erro-autenticacao": "Nao foi possivel entrar agora. Tente novamente em instantes."
 };
 
 const messageMap: Record<string, string> = {
+  "cadastro-criado": "Cadastro criado. Entre com seu email e senha para acessar.",
   "confirme-email": "Cadastro criado. Confirme seu email e entre para continuar.",
   "senha-atualizada": "Senha atualizada com sucesso. Entre novamente.",
   saiu: "Voce saiu da sua conta."
@@ -45,7 +47,11 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     const supabase = await createServerClient();
     const { data: userData } = await supabase.auth.getUser();
     if (userData.user) {
-      redirect(await resolveAuthenticatedEntryPath(supabase, userData.user.id, userData.user.user_metadata));
+      const entryPath = await resolveAuthenticatedEntryPath(supabase, userData.user.id, userData.user.user_metadata);
+      if (entryPath) redirect(entryPath);
+
+      await supabase.auth.signOut({ scope: "local" });
+      redirect("/login?error=conta-nao-cadastrada");
     }
   }
 

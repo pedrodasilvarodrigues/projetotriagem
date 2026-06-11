@@ -12,7 +12,10 @@ export async function GET(request: NextRequest) {
   const supabase = await createServerClient();
 
   if (code) {
-    await supabase.auth.exchangeCodeForSession(code);
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) {
+      return NextResponse.redirect(new URL("/login?error=link-invalido", request.url));
+    }
   }
 
   const { data } = await supabase.auth.getUser();
@@ -25,5 +28,10 @@ export async function GET(request: NextRequest) {
   }
 
   const entryPath = await resolveAuthenticatedEntryPath(supabase, data.user.id, data.user.user_metadata, signupRole);
+  if (!entryPath) {
+    await supabase.auth.signOut({ scope: "local" });
+    return NextResponse.redirect(new URL("/login?error=conta-nao-cadastrada", request.url));
+  }
+
   return NextResponse.redirect(new URL(entryPath, request.url));
 }

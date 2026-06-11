@@ -1,5 +1,6 @@
 import { BriefcaseBusiness, FileText, GraduationCap, Languages, Plus, ShieldCheck, Sparkles, Upload } from "lucide-react";
 import { AppShell } from "@/components/app/shell";
+import { ResumeDownloadCustomizer } from "@/components/professional/resume-download-customizer";
 import {
   addProfessionalCourseAction,
   addProfessionalEducationAction,
@@ -35,7 +36,7 @@ const sections = [
   ["dados-pessoais", "Dados pessoais"],
   ["confidencialidade", "Seguranca"],
   ["objetivo", "Objetivo"],
-  ["formacao", "Formacao"],
+  ["formacao", "Historico academico"],
   ["experiencias", "Experiencias"],
   ["cursos", "Cursos"],
   ["idiomas", "Idiomas"],
@@ -93,22 +94,27 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
 
   return (
     <AppShell eyebrow="Profissional" title="Curriculo">
-      <div className="grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
-        <aside className="h-fit border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-24">
-          <p className="text-xs font-bold uppercase text-blue-700">Subgrupos</p>
-          <nav className="mt-3 grid gap-1">
+      <div className="space-y-5">
+        <div className="border border-slate-200 bg-white shadow-sm">
+          <div className="flex flex-col gap-4 border-b border-slate-200 p-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase text-[#174a86]">Subgrupos do curriculo</p>
+              <p className="mt-1 text-sm text-slate-600">Navegue pelas informacoes que compoem seu perfil profissional.</p>
+            </div>
+            <div className="grid gap-2 text-sm text-slate-600 sm:grid-cols-3 lg:min-w-[360px]">
+              <p className="flex justify-between gap-3 rounded-md bg-slate-50 px-3 py-2"><span>Documento</span><strong>{activeVersion ? "ok" : "pendente"}</strong></p>
+              <p className="flex justify-between gap-3 rounded-md bg-slate-50 px-3 py-2"><span>Experiencias</span><strong>{(experiences ?? []).length}</strong></p>
+              <p className="flex justify-between gap-3 rounded-md bg-slate-50 px-3 py-2"><span>Cursos</span><strong>{(courses ?? []).length}</strong></p>
+            </div>
+          </div>
+          <nav className="flex gap-2 overflow-x-auto px-4 py-3" aria-label="Subgrupos do curriculo">
             {sections.map(([href, label]) => (
-              <a key={href} href={`#${href}`} className="border border-transparent px-3 py-2 text-sm font-semibold text-slate-700 hover:border-slate-200 hover:bg-slate-50">
+              <a key={href} href={`#${href}`} className="shrink-0 rounded-md border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-bold text-slate-700 transition hover:border-[#174a86] hover:bg-[#eef5ff] hover:text-[#174a86]">
                 {label}
               </a>
             ))}
           </nav>
-          <div className="mt-5 border-t border-slate-200 pt-4 text-sm text-slate-600">
-            <p className="flex justify-between"><span>Documento</span><strong>{activeVersion ? "ok" : "pendente"}</strong></p>
-            <p className="mt-2 flex justify-between"><span>Experiencias</span><strong>{(experiences ?? []).length}</strong></p>
-            <p className="mt-2 flex justify-between"><span>Cursos</span><strong>{(courses ?? []).length}</strong></p>
-          </div>
-        </aside>
+        </div>
 
         <div className="space-y-5">
           {params.error ? <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">Verifique os dados informados. Codigo: {params.error}</p> : null}
@@ -157,7 +163,7 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             </div>
             <form action={updateResumeProfileAction} className="mt-5 grid gap-4 md:grid-cols-2">
               <label className="text-sm font-semibold">Cargo desejado<input name="desiredRole" required defaultValue={professional?.desired_role ?? ""} className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">Escolaridade principal
+              <label className="text-sm font-semibold">Grau de instrucao atual
                 <select name="educationLevel" defaultValue={professional?.education_level ?? "medio"} className="field-input mt-2">
                   {educationOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                 </select>
@@ -172,8 +178,9 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
           <section id="formacao" className="border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center gap-2">
               <GraduationCap aria-hidden="true" size={18} className="text-blue-700" />
-              <h2 className="text-lg font-semibold">Formacao academica</h2>
+              <h2 className="text-lg font-semibold">Historico academico</h2>
             </div>
+            <p className="mt-2 text-sm leading-6 text-slate-600">Adicione instituicoes, cursos tecnicos, graduacoes e pos-graduacoes. O grau de instrucao atual fica separado no objetivo profissional.</p>
             <div className="mt-5 grid gap-3 md:grid-cols-2">
               {((educations ?? []) as EducationRow[]).map((education) => (
                 <article key={education.id} className="border border-slate-200 bg-slate-50 p-4">
@@ -185,11 +192,11 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
               {(educations ?? []).length === 0 ? <p className="text-sm text-slate-500">Nenhuma formacao adicionada.</p> : null}
             </div>
             <form action={addProfessionalEducationAction} className="mt-6 grid gap-4 border-t border-slate-200 pt-5 md:grid-cols-2">
-              <label className="text-sm font-semibold">Nivel<select name="level" className="field-input mt-2">{educationOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+              <label className="text-sm font-semibold">Tipo de formacao<select name="level" className="field-input mt-2">{educationOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
               <label className="text-sm font-semibold">Instituicao<input name="institution" required className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">Curso<input name="courseName" required className="field-input mt-2" /></label>
+              <label className="text-sm font-semibold">Nome do curso ou area<input name="courseName" required className="field-input mt-2" /></label>
               <label className="text-sm font-semibold">Conclusao<input name="completedAt" type="date" className="field-input mt-2" /></label>
-              <div className="md:col-span-2"><button className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white" type="submit"><Plus aria-hidden="true" size={16} />Adicionar formacao</button></div>
+              <div className="md:col-span-2"><button className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white" type="submit"><Plus aria-hidden="true" size={16} />Adicionar historico academico</button></div>
             </form>
           </section>
 
@@ -278,9 +285,12 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
           </section>
 
           <section id="documento" className="border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center gap-2 text-blue-700">
-              <FileText aria-hidden="true" size={18} />
-              <h2 className="font-semibold text-slate-950">Documento anexado</h2>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2 text-blue-700">
+                <FileText aria-hidden="true" size={18} />
+                <h2 className="font-semibold text-slate-950">Documento anexado</h2>
+              </div>
+              <ResumeDownloadCustomizer documentUrl={documentUrl?.signedUrl ?? null} hasDocument={Boolean(activeVersion && documentUrl?.signedUrl)} showSalaryExpectation={prefs.show_salary_expectation} />
             </div>
             {activeVersion ? (
               <div className="mt-4 space-y-3 text-sm">

@@ -1,4 +1,5 @@
-import { BriefcaseBusiness, FileText, GraduationCap, Languages, Plus, ShieldCheck, Sparkles, Upload } from "lucide-react";
+import Link from "next/link";
+import { BriefcaseBusiness, CheckCircle2, FileText, GraduationCap, Languages, Plus, ShieldCheck, Sparkles, Target, Upload } from "lucide-react";
 import { AppShell } from "@/components/app/shell";
 import { ResumeDownloadCustomizer } from "@/components/professional/resume-download-customizer";
 import {
@@ -91,6 +92,18 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
     allow_recruiter_contact: settings?.allow_recruiter_contact ?? true,
     show_salary_expectation: settings?.show_salary_expectation ?? false
   };
+  const resumeChecklist = [
+    { label: "Dados pessoais", done: Boolean(professional?.full_name && professional?.email && professional?.phone && professional?.city && professional?.state), href: "#dados-pessoais" },
+    { label: "Objetivo e resumo", done: Boolean(professional?.desired_role && professional?.summary), href: "#objetivo" },
+    { label: "Historico academico", done: (educations ?? []).length > 0, href: "#formacao" },
+    { label: "Experiencias", done: (experiences ?? []).length > 0, href: "#experiencias" },
+    { label: "Cursos", done: (courses ?? []).length > 0, href: "#cursos" },
+    { label: "Idiomas", done: (languages ?? []).length > 0, href: "#idiomas" },
+    { label: "Habilidades", done: (skills ?? []).length > 0, href: "#habilidades" },
+    { label: "Documento anexado", done: Boolean(activeVersion), href: "#documento" }
+  ];
+  const resumeCompletion = Math.round((resumeChecklist.filter((item) => item.done).length / resumeChecklist.length) * 100);
+  const nextResumeActions = resumeChecklist.filter((item) => !item.done).slice(0, 3);
 
   return (
     <AppShell eyebrow="Profissional" title="Curriculo">
@@ -119,6 +132,52 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
         <div className="space-y-5">
           {params.error ? <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">Verifique os dados informados. Codigo: {params.error}</p> : null}
           {params.message ? <p className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">Atualizacao salva.</p> : null}
+
+          <section className="grid gap-4 border border-slate-200 bg-white p-5 shadow-sm lg:grid-cols-[280px_minmax(0,1fr)]">
+            <div className="border border-blue-100 bg-blue-50 p-4">
+              <p className="inline-flex items-center gap-2 text-xs font-bold uppercase text-blue-700">
+                <Target aria-hidden="true" size={15} />
+                Qualidade do curriculo
+              </p>
+              <div className="mt-3 flex items-end gap-2">
+                <strong className="text-4xl leading-none text-slate-950">{resumeCompletion}%</strong>
+                <span className="text-sm font-semibold text-slate-600">completo</span>
+              </div>
+              <div className="mt-4 h-2 bg-white">
+                <span className="block h-full bg-blue-700" style={{ width: `${resumeCompletion}%` }} />
+              </div>
+              <p className="mt-3 text-sm leading-6 text-slate-600">Quanto mais completo, melhor a leitura para triagem e compatibilidade.</p>
+            </div>
+            <div>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold">Revise os pontos principais</h2>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">Use os atalhos abaixo para deixar o perfil pronto para empresas e recrutadores internos.</p>
+                </div>
+                <ResumeDownloadCustomizer exportUrl="/professional/resume/export" hasDocument={Boolean(activeVersion && documentUrl?.signedUrl)} showSalaryExpectation={prefs.show_salary_expectation} />
+              </div>
+              <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                {resumeChecklist.map((item) => (
+                  <a key={item.label} href={item.href} className={`flex items-center gap-2 border px-3 py-2 text-sm font-semibold ${item.done ? "border-green-200 bg-green-50 text-green-800" : "border-slate-200 bg-slate-50 text-slate-600"}`}>
+                    <CheckCircle2 aria-hidden="true" size={16} />
+                    {item.label}
+                  </a>
+                ))}
+              </div>
+              {nextResumeActions.length > 0 ? (
+                <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                  <strong className="block">Proximos ajustes recomendados</strong>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {nextResumeActions.map((item) => (
+                      <Link key={item.label} href={item.href} className="rounded-md bg-white px-3 py-1.5 font-semibold text-amber-900">
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </section>
 
           <section id="dados-pessoais" className="scroll-mt-72 border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold uppercase">Dados pessoais</h2>

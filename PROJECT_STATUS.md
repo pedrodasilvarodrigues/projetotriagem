@@ -8,7 +8,10 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Ambientes separados para profissional, empresa e administrador.
 - Login, cadastro, onboarding e protecao de acesso por perfil.
 - Area profissional com perfil, minha area, processos, curriculo, notificacoes e configuracoes.
+- Minha Area profissional com busca de vagas por cargo/local/modelo, recomendacoes priorizadas por perfil e indicador de forca do curriculo.
+- Vitrine publica de vagas com busca, filtros, areas com oportunidades e cards detalhados de vaga/empresa.
 - Area de curriculo com dados pessoais, objetivo, historico academico, experiencias, cursos, idiomas, habilidades e documento anexado.
+- Area de curriculo com painel de qualidade, checklist de preenchimento e proximos ajustes recomendados.
 - Navegacao superior por subgrupos na area de curriculo.
 - Painel de personalizacao para baixar CV com 3 modelos, 7 cores e opcao de pretensao salarial.
 - Menu principal recolhivel para liberar espaco na tela.
@@ -33,6 +36,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Melhorar a pre-visualizacao do CV antes do download.
 - Validar fluxos completos com contas reais de profissional, empresa e admin.
 - Validar envio de confirmacao e recuperacao apos o limite de 60 segundos do Supabase expirar.
+- Evoluir os filtros de vagas para salvar pesquisas e alertas por email quando SMTP estiver pronto.
 
 # Observacoes
 - As chaves sensiveis do Supabase devem continuar fora do GitHub e ser configuradas em ambiente local/Vercel.

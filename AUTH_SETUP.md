@@ -53,6 +53,14 @@ http://localhost:3000/auth/callback
 
 O localhost pode ficar apenas para desenvolvimento. Em producao, o fluxo usa o dominio da Vercel.
 
+Se o navegador abrir algo como:
+
+```text
+http://localhost:3000/?code=...
+```
+
+entao o `Site URL` do Supabase ainda esta como `http://localhost:3000` ou a URL da Vercel nao esta na lista de redirects permitidos. Troque o `Site URL` para `https://projetotriagem.vercel.app` e salve. O codigo tambem tem um fallback: se algum provedor cair em `/?code=...` dentro do dominio correto, ele redireciona automaticamente para `/auth/callback`.
+
 ## Email oficial do site
 
 Para o email deixar de aparecer como `Supabase Auth <noreply@mail.app.supabase.io>`, configure SMTP personalizado em Supabase Dashboard > Authentication > SMTP Settings.
@@ -84,7 +92,9 @@ No template de recuperacao do Supabase, use um link com `token_hash` para manter
 
 ## Google OAuth
 
-Para o Google mostrar o nome do portal em vez de `znmlgfllkwtcyvrpmwbt.supabase.co`, configure credenciais proprias no Google Auth Platform e depois cole o Client ID/Secret no Supabase.
+Para o Google mostrar o nome do portal em vez de `znmlgfllkwtcyvrpmwbt.supabase.co`, nao basta alterar codigo do site. Essa tela pertence ao Google e mostra o dominio que recebe o OAuth. Com Supabase Auth, esse dominio normalmente e o projeto Supabase.
+
+Para melhorar isso, configure credenciais proprias no Google Auth Platform e depois cole o Client ID/Secret no Supabase.
 
 No Google Auth Platform:
 
@@ -108,3 +118,17 @@ Client Secret: valor do Google
 ```
 
 Opcional, mas recomendado: configurar um dominio customizado para o Supabase Auth, como `auth.seudominio.com`, para o Google tambem deixar de exibir o subdominio `.supabase.co`.
+
+O texto do print:
+
+```text
+Prosseguir para znmlgfllkwtcyvrpmwbt.supabase.co
+```
+
+so deixa de mostrar o subdominio tecnico quando o Supabase Auth usa um dominio customizado, por exemplo:
+
+```text
+auth.seudominio.com
+```
+
+Sem dominio customizado, o Google continua mostrando o dominio Supabase porque o callback OAuth autorizado e `https://znmlgfllkwtcyvrpmwbt.supabase.co/auth/v1/callback`.

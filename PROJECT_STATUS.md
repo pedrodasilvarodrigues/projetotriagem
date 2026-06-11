@@ -18,11 +18,13 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Recuperacao de senha apontando para o dominio oficial da Vercel, com rota /auth/confirm para links por token hash.
 - Suporte a email proprio de reset via Resend quando as variaveis seguras estiverem configuradas.
 - Guia AUTH_SETUP.md com configuracao de Supabase SMTP, URLs de redirect e Google OAuth/branding.
+- Fallback no proxy para redirecionar `/?code=...` para `/auth/callback` quando o Supabase retornar o codigo na raiz do dominio correto.
 
 # Pendente
 - Persistir as escolhas de modelo/cor do CV no banco, caso a personalizacao precise ser reutilizada em downloads futuros.
 - Persistir idioma preferido no banco quando houver uma coluna dedicada para isso.
 - Configurar SMTP personalizado e credenciais Google OAuth no painel Supabase/Google usando AUTH_SETUP.md.
+- Trocar o Site URL do Supabase para `https://projetotriagem.vercel.app` e configurar dominio customizado de Auth se quiser remover `.supabase.co` da tela do Google.
 - Revisar textos e acentuacao da interface em todo o projeto.
 
 # Proximos Passos

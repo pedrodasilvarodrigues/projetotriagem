@@ -11,6 +11,12 @@ export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const publicRoutes = ["/", "/login", "/register", "/forgot-password", "/update-password", "/acesso-negado"];
 
+  if (path === "/" && request.nextUrl.searchParams.has("code")) {
+    const callbackUrl = new URL("/auth/callback", request.url);
+    request.nextUrl.searchParams.forEach((value, key) => callbackUrl.searchParams.set(key, value));
+    return NextResponse.redirect(callbackUrl);
+  }
+
   if (publicRoutes.includes(path) || path.startsWith("/auth/callback")) {
     return NextResponse.next({ request });
   }

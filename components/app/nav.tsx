@@ -47,7 +47,7 @@ const navItems = {
       { href: "/company/profile", label: "Perfil da Empresa", icon: UserRoundCog },
       { href: "/company/demands/new", label: "Criar Demanda", icon: BriefcaseBusiness },
       { href: "/company/demands", label: "Demandas Ativas", icon: ClipboardCheck },
-      { href: "/company/candidates", label: "Candidatos Encaminhados", icon: UserRoundSearch },
+      { href: "/company/candidates", label: "Analise de Candidatos", icon: UserRoundSearch },
       { href: "/company/history", label: "Historico", icon: History },
       { href: "/company/notifications", label: "Notificacoes", icon: Bell },
       { href: "/company/settings", label: "Configuracoes", icon: Settings }

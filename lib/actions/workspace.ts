@@ -5,9 +5,10 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth/access";
 import { createServerClient } from "@/lib/supabase/server";
-import { ageFromBirthDate, isValidBrazilianPhone, isValidCpf, onlyDigits } from "@/lib/validations/br";
+import { ageFromBirthDate, isValidBrazilianPhone, isValidCnpj, isValidCpf, onlyDigits } from "@/lib/validations/br";
 
 const demandSchema = z.object({
+  name: z.string().min(3),
   title: z.string().min(3),
   description: z.string().min(10),
   openings: z.coerce.number().int().min(1),
@@ -121,6 +122,11 @@ function fallbackCompanyName(email?: string | null, fullName?: string | null) {
 
 function placeholderCnpj(userId: string) {
   return `PENDENTE-${userId.replace(/-/g, "").slice(0, 20)}`;
+}
+
+function encodeRouteMessage(route: string, key: "error" | "message", value: string) {
+  const separator = route.includes("?") ? "&" : "?";
+  return `${route}${separator}${key}=${encodeURIComponent(value)}`;
 }
 
 async function getProfessionalContext() {
@@ -458,6 +464,7 @@ export async function updateCompanyProfileAction(formData: FormData) {
   const { data } = await supabase.auth.getUser();
   if (!data.user) redirect("/login");
 
+  const cnpj = String(formData.get("cnpj") ?? "");
   const tradeName = String(formData.get("tradeName") ?? "").trim();
   const legalName = String(formData.get("legalName") ?? "").trim();
   const corporateEmail = String(formData.get("corporateEmail") ?? "").trim();
@@ -466,14 +473,35 @@ export async function updateCompanyProfileAction(formData: FormData) {
   const state = String(formData.get("state") ?? "").trim().toUpperCase().slice(0, 2);
   const segment = String(formData.get("segment") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
+  const contactName = String(formData.get("contactName") ?? "").trim();
+  const contactRole = String(formData.get("contactRole") ?? "").trim();
+  const contactPhone = String(formData.get("contactPhone") ?? "");
 
-  if (tradeName.length < 2 || legalName.length < 3 || !corporateEmail.includes("@") || !isValidBrazilianPhone(phone) || city.length < 2 || state.length !== 2 || segment.length < 2) {
+  if (
+    !isValidCnpj(cnpj) ||
+    tradeName.length < 2 ||
+    legalName.length < 3 ||
+    !corporateEmail.includes("@") ||
+    !isValidBrazilianPhone(phone) ||
+    city.length < 2 ||
+    state.length !== 2 ||
+    segment.length < 2 ||
+    contactName.length < 3 ||
+    contactRole.length < 2 ||
+    !isValidBrazilianPhone(contactPhone)
+  ) {
     redirect("/company/profile?error=dados-invalidos");
   }
+
+  const normalizedCnpj = onlyDigits(cnpj);
+  const { data: company } = await supabase.from("companies").select("id").eq("owner_id", data.user.id).maybeSingle();
+  const { data: duplicatedCnpj } = await supabase.from("companies").select("id,owner_id").eq("cnpj", normalizedCnpj).neq("owner_id", data.user.id).maybeSingle();
+  if (duplicatedCnpj) redirect("/company/profile?error=cnpj-ja-cadastrado");
 
   await supabase
     .from("companies")
     .update({
+      cnpj: normalizedCnpj,
       trade_name: tradeName,
       legal_name: legalName,
       corporate_email: corporateEmail,
@@ -485,13 +513,26 @@ export async function updateCompanyProfileAction(formData: FormData) {
     })
     .eq("owner_id", data.user.id);
 
+  if (company?.id) {
+    await supabase.from("company_contacts").delete().eq("company_id", company.id);
+    await supabase.from("company_contacts").insert({
+      company_id: company.id,
+      name: contactName,
+      email: corporateEmail,
+      phone: onlyDigits(contactPhone),
+      role_title: contactRole
+    });
+  }
+
   revalidatePath("/company/profile");
+  revalidatePath("/company");
   redirect("/company/profile?message=empresa-atualizada");
 }
 
 export async function createDemandAction(formData: FormData) {
   await requireRole("company");
   const parsed = demandSchema.safeParse({
+    name: formData.get("name"),
     title: formData.get("title"),
     description: formData.get("description"),
     openings: formData.get("openings"),
@@ -544,6 +585,7 @@ export async function createDemandAction(formData: FormData) {
 
   const { error } = await supabase.from("demands").insert({
     company_id: company.id,
+    name: data.name,
     title: data.title,
     description: data.description,
     openings: data.openings,
@@ -560,7 +602,103 @@ export async function createDemandAction(formData: FormData) {
 
   if (error) redirect(`/company/demands/new?error=${encodeURIComponent(error.message)}`);
   revalidatePath("/company/demands");
+  revalidatePath("/company");
   redirect("/company/demands?message=demanda-criada");
+}
+
+export async function updateDemandAction(formData: FormData) {
+  await requireRole("company");
+
+  const demandId = String(formData.get("demandId") ?? "").trim();
+  if (!demandId) redirect("/company/demands?error=demanda-invalida");
+
+  const parsed = demandSchema.safeParse({
+    name: formData.get("name"),
+    title: formData.get("title"),
+    description: formData.get("description"),
+    openings: formData.get("openings"),
+    educationMinimum: formData.get("educationMinimum"),
+    city: formData.get("city"),
+    state: formData.get("state"),
+    modality: formData.get("modality"),
+    contractType: formData.get("contractType"),
+    technicalSkills: formData.get("technicalSkills"),
+    requiredCourses: formData.get("requiredCourses"),
+    minimumExperienceMonths: formData.get("minimumExperienceMonths")
+  });
+
+  if (!parsed.success) redirect(encodeRouteMessage(`/company/demands/${demandId}`, "error", "dados-invalidos"));
+
+  const status = String(formData.get("status") ?? "").trim();
+  if (!["draft", "active", "screening", "closed", "cancelled"].includes(status)) {
+    redirect(encodeRouteMessage(`/company/demands/${demandId}`, "error", "status-invalido"));
+  }
+
+  const supabase = await createServerClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) redirect("/login");
+
+  const { data: company } = await supabase.from("companies").select("id").eq("owner_id", userData.user.id).maybeSingle();
+  if (!company?.id) redirect("/company/profile?error=complete-empresa");
+
+  const { data: demand } = await supabase.from("demands").select("id").eq("id", demandId).eq("company_id", company.id).maybeSingle();
+  if (!demand?.id) redirect("/company/demands?error=demanda-nao-encontrada");
+
+  const data = parsed.data;
+  const { error } = await supabase
+    .from("demands")
+    .update({
+      name: data.name,
+      title: data.title,
+      description: data.description,
+      openings: data.openings,
+      education_minimum: data.educationMinimum,
+      city: data.city,
+      state: data.state.toUpperCase(),
+      modality: data.modality,
+      contract_type: data.contractType,
+      technical_skills: splitList(data.technicalSkills),
+      required_courses: splitList(data.requiredCourses),
+      minimum_experience_months: data.minimumExperienceMonths ?? 0,
+      status
+    })
+    .eq("id", demand.id);
+
+  if (error) redirect(encodeRouteMessage(`/company/demands/${demandId}`, "error", error.message));
+
+  revalidatePath("/company");
+  revalidatePath("/company/demands");
+  revalidatePath(`/company/demands/${demand.id}`);
+  redirect(encodeRouteMessage(`/company/demands/${demand.id}`, "message", "demanda-atualizada"));
+}
+
+export async function deleteDemandAction(formData: FormData) {
+  await requireRole("company");
+
+  const demandId = String(formData.get("demandId") ?? "").trim();
+  if (!demandId) redirect("/company/demands?error=demanda-invalida");
+
+  const supabase = await createServerClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) redirect("/login");
+
+  const { data: company } = await supabase.from("companies").select("id").eq("owner_id", userData.user.id).maybeSingle();
+  if (!company?.id) redirect("/company/profile?error=complete-empresa");
+
+  const { error } = await supabase
+    .from("demands")
+    .update({
+      status: "cancelled",
+      deleted_at: new Date().toISOString()
+    })
+    .eq("id", demandId)
+    .eq("company_id", company.id);
+
+  if (error) redirect(`/company/demands?error=${encodeURIComponent(error.message)}`);
+
+  revalidatePath("/company");
+  revalidatePath("/company/demands");
+  redirect("/company/demands?message=demanda-excluida");
 }
 
 export async function markNotificationsReadAction() {

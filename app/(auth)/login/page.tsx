@@ -13,6 +13,7 @@ const errorMessages: Record<string, string> = {
   "conta-nao-cadastrada": "Essa conta ainda nao possui cadastro no portal. Crie uma conta escolhendo Profissional ou Empresa.",
   "link-invalido": "Link invalido ou expirado. Solicite um novo acesso.",
   "configuracao-supabase-incompleta": "Configuracao do Supabase pendente. Adicione as variaveis de ambiente na Vercel para ativar o login.",
+  "erro-servidor-login": "Nao foi possivel concluir o login agora. A equipe tecnica ja tem logs para investigar.",
   "erro-autenticacao": "Nao foi possivel entrar agora. Tente novamente em instantes."
 };
 
@@ -23,6 +24,8 @@ const messageMap: Record<string, string> = {
   "senha-atualizada": "Senha atualizada com sucesso. Entre novamente.",
   saiu: "Voce saiu da sua conta."
 };
+
+export const dynamic = "force-dynamic";
 
 const highlights = [
   { label: "Perfis acompanhados", value: "+1500" },
@@ -45,15 +48,20 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const isSupabaseConfigured = hasSupabasePublicEnv();
 
   if (isSupabaseConfigured) {
-    const supabase = await createServerClient();
-    const { data: userData } = await supabase.auth.getUser();
-    if (userData.user) {
-      const entryPath = await resolveAuthenticatedEntryPath(supabase, userData.user.id, userData.user.user_metadata);
-      if (entryPath) redirect(entryPath);
+    let authenticatedRedirect: string | null = null;
 
-      await supabase.auth.signOut({ scope: "local" });
-      redirect("/login?error=conta-nao-cadastrada");
+    try {
+      const supabase = await createServerClient();
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData.user) {
+        const entryPath = await resolveAuthenticatedEntryPath(supabase, userData.user.id, userData.user.user_metadata).catch(() => null);
+        authenticatedRedirect = entryPath ?? "/auth/sign-out?reason=sem-perfil";
+      }
+    } catch (error) {
+      console.error("[auth] Falha ao recuperar sessao na pagina de login", { error: error instanceof Error ? error.message : String(error) });
     }
+
+    if (authenticatedRedirect) redirect(authenticatedRedirect);
   }
 
   const params = await searchParams;

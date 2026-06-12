@@ -40,6 +40,10 @@ export async function resolveAuthenticatedEntryPath(
     return defaultRouteForRole("professional");
   }
 
+  if (savedRole === "company" || savedRole === "professional") {
+    return onboardingRouteForRole(savedRole);
+  }
+
   if (preferredRole) {
     return persistRole(supabase, userId, preferredRole, onboardingRouteForRole(preferredRole));
   }

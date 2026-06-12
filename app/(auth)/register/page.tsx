@@ -7,6 +7,8 @@ import { signInWithGoogleAction } from "@/lib/actions/auth";
 import { resolveAuthenticatedEntryPath } from "@/lib/auth/entry";
 import { createServerClient } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
 function GoogleIcon() {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5">
@@ -19,14 +21,20 @@ function GoogleIcon() {
 }
 
 export default async function RegisterPage({ searchParams }: { searchParams: Promise<{ error?: string; type?: string }> }) {
-  const supabase = await createServerClient();
-  const { data: userData } = await supabase.auth.getUser();
-  if (userData.user) {
-    const entryPath = await resolveAuthenticatedEntryPath(supabase, userData.user.id, userData.user.user_metadata);
-    if (entryPath) redirect(entryPath);
+  let authenticatedRedirect: string | null = null;
 
-    await supabase.auth.signOut({ scope: "local" });
+  try {
+    const supabase = await createServerClient();
+    const { data: userData } = await supabase.auth.getUser();
+    if (userData.user) {
+      const entryPath = await resolveAuthenticatedEntryPath(supabase, userData.user.id, userData.user.user_metadata).catch(() => null);
+      authenticatedRedirect = entryPath ?? "/auth/sign-out?reason=sem-perfil";
+    }
+  } catch (error) {
+    console.error("[auth] Falha ao recuperar sessao na pagina de cadastro", { error: error instanceof Error ? error.message : String(error) });
   }
+
+  if (authenticatedRedirect) redirect(authenticatedRedirect);
 
   const params = await searchParams;
   const error = params.error ? decodeURIComponent(params.error) : undefined;

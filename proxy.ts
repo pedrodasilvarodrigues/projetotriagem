@@ -11,13 +11,21 @@ export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const publicRoutes = ["/", "/login", "/register", "/forgot-password", "/confirm-email", "/update-password", "/acesso-negado"];
 
+  if (path === "/profissional" || path.startsWith("/profissional/")) {
+    return NextResponse.redirect(new URL(path.replace("/profissional", "/professional"), request.url));
+  }
+
+  if (path === "/empresa" || path.startsWith("/empresa/")) {
+    return NextResponse.redirect(new URL(path.replace("/empresa", "/company"), request.url));
+  }
+
   if (path === "/" && request.nextUrl.searchParams.has("code")) {
     const callbackUrl = new URL("/auth/callback", request.url);
     request.nextUrl.searchParams.forEach((value, key) => callbackUrl.searchParams.set(key, value));
     return NextResponse.redirect(callbackUrl);
   }
 
-  if (publicRoutes.includes(path) || path.startsWith("/auth/callback") || path.startsWith("/auth/confirm")) {
+  if (publicRoutes.includes(path) || path.startsWith("/auth/callback") || path.startsWith("/auth/confirm") || path.startsWith("/auth/sign-out")) {
     return NextResponse.next({ request });
   }
 
@@ -26,8 +34,25 @@ export async function proxy(request: NextRequest) {
   }
 
   let response = NextResponse.next({ request });
+  const protectedArea = path.startsWith("/admin") || path.startsWith("/company") || path.startsWith("/professional") || path.startsWith("/onboarding");
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error("[auth] Proxy sem variaveis publicas do Supabase", { path });
+    if (protectedArea) return NextResponse.redirect(new URL("/login?error=configuracao-supabase-incompleta", request.url));
+    return response;
+  }
+
+  try {
+    new URL(supabaseUrl);
+  } catch {
+    console.error("[auth] Proxy com URL do Supabase invalida", { path });
+    if (protectedArea) return NextResponse.redirect(new URL("/login?error=configuracao-supabase-incompleta", request.url));
+    return response;
+  }
+
+  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
         return request.cookies.getAll();
@@ -40,8 +65,10 @@ export async function proxy(request: NextRequest) {
     }
   });
 
-  const { data } = await supabase.auth.getUser();
-  const protectedArea = path.startsWith("/admin") || path.startsWith("/company") || path.startsWith("/professional") || path.startsWith("/onboarding");
+  const { data, error: userError } = await supabase.auth.getUser();
+  if (userError) {
+    console.error("[auth] Proxy falhou ao recuperar usuario", { path, error: userError.message });
+  }
 
   if (protectedArea && !data.user) {
     return NextResponse.redirect(new URL("/login", request.url));
@@ -52,8 +79,17 @@ export async function proxy(request: NextRequest) {
   }
 
   if (data.user && protectedArea) {
-    const { data: roleRecord } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id).single();
+    const { data: roleRecord, error: roleError } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id).maybeSingle();
+    if (roleError) {
+      console.error("[auth] Proxy falhou ao buscar role", { path, userId: data.user.id, error: roleError.message });
+    }
+
     const role = roleRecord?.role;
+
+    if (!role && !path.startsWith("/onboarding")) {
+      console.log("[auth] Proxy redirecionando usuario sem role para onboarding", { path, userId: data.user.id });
+      return NextResponse.redirect(new URL("/onboarding", request.url));
+    }
 
     if (path.startsWith("/professional") && role === "professional") {
       const { data: professional } = await supabase

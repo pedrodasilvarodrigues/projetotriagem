@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
 import { sendTransactionalEmail } from "@/lib/resend/send-email";
 import { createServerClient, hasSupabasePublicEnv } from "@/lib/supabase/server";
 import { ageFromBirthDate, isValidBrazilianPhone, isValidCnpj, isValidCpf, onlyDigits } from "@/lib/validations/br";
@@ -110,7 +110,7 @@ async function getRequestMeta() {
 }
 
 function canUseAdminClient() {
-  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  return hasSupabaseAdminEnv();
 }
 
 function canSendBrandedAuthEmail() {
@@ -119,6 +119,10 @@ function canSendBrandedAuthEmail() {
 
 function authErrorCode(error?: { message?: string | null; status?: number | null; code?: string | null } | null) {
   const message = `${error?.code ?? ""} ${error?.message ?? ""}`.toLowerCase();
+
+  if (message.includes("invalid api key") || message.includes("api key")) {
+    return "configuracao-supabase-incompleta";
+  }
 
   if (error?.status === 429 || message.includes("rate limit") || message.includes("security purposes") || message.includes("too many requests")) {
     return "aguarde-um-minuto";
@@ -142,6 +146,10 @@ function authErrorCode(error?: { message?: string | null; status?: number | null
 function signupErrorCode(error?: { message?: string | null; status?: number | null; code?: string | null } | null) {
   const message = `${error?.code ?? ""} ${error?.message ?? ""}`.toLowerCase();
 
+  if (message.includes("invalid api key") || message.includes("api key")) {
+    return "configuracao-supabase-incompleta";
+  }
+
   if (message.includes("already") || message.includes("registered") || message.includes("exists") || message.includes("user_already_exists")) {
     return "email-ja-cadastrado";
   }
@@ -151,6 +159,15 @@ function signupErrorCode(error?: { message?: string | null; status?: number | nu
   }
 
   return "nao-foi-possivel-criar-conta";
+}
+
+function logAuth(event: string, details?: Record<string, unknown>) {
+  console.log(`[auth] ${event}`, details ?? {});
+}
+
+function logAuthError(event: string, error: unknown, details?: Record<string, unknown>) {
+  const message = error instanceof Error ? error.message : String(error);
+  console.error(`[auth] ${event}`, { ...details, error: message });
 }
 
 async function findAuthUserByEmail(client: ReturnType<typeof createAdminClient>, email: string) {
@@ -327,9 +344,6 @@ export async function signInWithGoogleAction(formData?: FormData) {
 }
 
 export async function signInWithEmailAction(formData: FormData) {
-  if (!hasSupabasePublicEnv()) redirect("/login?error=configuracao-supabase-incompleta");
-
-  const supabase = await createServerClient();
   const parsed = emailPasswordSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password")
@@ -337,19 +351,47 @@ export async function signInWithEmailAction(formData: FormData) {
 
   if (!parsed.success) redirect("/login?error=credenciais-invalidas");
 
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
-  if (error) {
-    const code = authErrorCode(error);
+  let target = "/auth/callback";
 
-    if (code === "email-nao-confirmado" && (await confirmAuthEmailByAddress(parsed.data.email))) {
-      const { error: retryError } = await supabase.auth.signInWithPassword(parsed.data);
-      if (!retryError) redirect("/auth/callback");
+  try {
+    if (!hasSupabasePublicEnv()) {
+      target = "/login?error=configuracao-supabase-incompleta";
+    } else {
+      logAuth("Login iniciado", { email: parsed.data.email });
+      const supabase = await createServerClient();
+      const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
+
+      if (error) {
+        const code = authErrorCode(error);
+        logAuthError("Falha no signInWithPassword", error, { email: parsed.data.email, code });
+
+        if (code === "email-nao-confirmado" && (await confirmAuthEmailByAddress(parsed.data.email))) {
+          const { data: retryData, error: retryError } = await supabase.auth.signInWithPassword(parsed.data);
+          if (!retryError && retryData.user) {
+            logAuth("Usuario autenticado apos confirmacao automatica", { userId: retryData.user.id });
+            target = "/auth/callback";
+          } else {
+            if (retryError) logAuthError("Falha no retry de login", retryError, { email: parsed.data.email });
+            target = `/login?error=${authErrorCode(retryError)}`;
+          }
+        } else {
+          target = `/login?error=${code}`;
+        }
+      } else if (data.user) {
+        logAuth("Usuario autenticado", { userId: data.user.id });
+        target = "/auth/callback";
+      } else {
+        logAuthError("Login sem usuario na resposta", "missing-user", { email: parsed.data.email });
+        target = "/login?error=erro-autenticacao";
+      }
     }
-
-    redirect(`/login?error=${code}`);
+  } catch (error) {
+    logAuthError("Excecao inesperada no login", error, { email: parsed.data.email });
+    target = "/login?error=erro-servidor-login";
   }
 
-  redirect("/auth/callback");
+  logAuth("Redirecionando apos login", { route: target });
+  redirect(target);
 }
 
 export async function registerProfessionalWithEmailAction(formData: FormData) {

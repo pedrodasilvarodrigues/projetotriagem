@@ -55,7 +55,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       const { data: userData } = await supabase.auth.getUser();
       if (userData.user) {
         const entryPath = await resolveAuthenticatedEntryPath(supabase, userData.user.id, userData.user.user_metadata).catch(() => null);
-        authenticatedRedirect = entryPath ?? "/auth/sign-out?reason=sem-perfil";
+        authenticatedRedirect = entryPath ?? "/onboarding";
       }
     } catch (error) {
       console.error("[auth] Falha ao recuperar sessao na pagina de login", { error: error instanceof Error ? error.message : String(error) });

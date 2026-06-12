@@ -4,6 +4,8 @@ type SupabaseLike = {
   from: (table: string) => any;
 };
 
+type AppRole = "admin" | "company" | "professional";
+
 function onboardingRouteForRole(role: "company" | "professional") {
   return role === "company" ? "/onboarding/company" : "/onboarding/professional";
 }
@@ -13,10 +15,21 @@ async function persistRole(supabase: SupabaseLike, userId: string, role: "compan
   return nextPath;
 }
 
+function metadataRole(userMetadata?: Record<string, unknown>, preferredRole?: "company" | "professional" | null): AppRole | null {
+  if (preferredRole) return preferredRole;
+
+  const rawRole = userMetadata?.role;
+  if (rawRole === "admin" || rawRole === "company" || rawRole === "professional") {
+    return rawRole;
+  }
+
+  return null;
+}
+
 export async function resolveAuthenticatedEntryPath(
   supabase: SupabaseLike,
   userId: string,
-  _userMetadata?: Record<string, unknown>,
+  userMetadata?: Record<string, unknown>,
   preferredRole?: "company" | "professional" | null
 ) {
   const [{ data: roleRecord }, { data: company }, { data: professional }] = await Promise.all([
@@ -41,12 +54,17 @@ export async function resolveAuthenticatedEntryPath(
   }
 
   if (savedRole === "company" || savedRole === "professional") {
-    return onboardingRouteForRole(savedRole);
+    return defaultRouteForRole(savedRole);
   }
 
-  if (preferredRole) {
-    return persistRole(supabase, userId, preferredRole, onboardingRouteForRole(preferredRole));
+  const inferredRole = metadataRole(userMetadata, preferredRole);
+  if (inferredRole === "admin") {
+    return defaultRouteForRole("admin");
   }
 
-  return null;
+  if (inferredRole === "company" || inferredRole === "professional") {
+    return persistRole(supabase, userId, inferredRole, defaultRouteForRole(inferredRole));
+  }
+
+  return "/onboarding";
 }

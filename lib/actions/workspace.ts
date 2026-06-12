@@ -109,6 +109,20 @@ function parsePreferredCity(value: FormDataEntryValue) {
   return { city, state: state.toUpperCase() };
 }
 
+function fallbackCompanyName(email?: string | null, fullName?: string | null) {
+  const normalizedName = (fullName ?? "").trim();
+  if (normalizedName.length >= 3) return normalizedName;
+
+  const localPart = (email ?? "").split("@")[0]?.trim();
+  if (localPart && localPart.length >= 3) return localPart;
+
+  return "Empresa em configuracao";
+}
+
+function placeholderCnpj(userId: string) {
+  return `PENDENTE-${userId.replace(/-/g, "").slice(0, 20)}`;
+}
+
 async function getProfessionalContext() {
   await requireRole("professional");
   const supabase = await createServerClient();
@@ -497,10 +511,37 @@ export async function createDemandAction(formData: FormData) {
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) redirect("/login");
 
-  const { data: company } = await supabase.from("companies").select("id").eq("owner_id", userData.user.id).maybeSingle();
-  if (!company?.id) redirect("/onboarding/company");
-
   const data = parsed.data;
+  let { data: company } = await supabase.from("companies").select("id").eq("owner_id", userData.user.id).maybeSingle();
+
+  if (!company?.id) {
+    const { data: profile } = await supabase.from("profiles").select("full_name,email,phone").eq("id", userData.user.id).maybeSingle();
+    const companyName = fallbackCompanyName(userData.user.email, profile?.full_name);
+    const fallbackEmail = profile?.email?.trim() || userData.user.email || `empresa-${userData.user.id.slice(0, 8)}@pendente.local`;
+
+    const { data: createdCompany, error: companyError } = await supabase
+      .from("companies")
+      .insert({
+        owner_id: userData.user.id,
+        legal_name: companyName,
+        trade_name: companyName,
+        cnpj: placeholderCnpj(userData.user.id),
+        city: data.city,
+        state: data.state.toUpperCase(),
+        phone: profile?.phone ?? null,
+        corporate_email: fallbackEmail,
+        status: "pending"
+      })
+      .select("id")
+      .single();
+
+    if (companyError || !createdCompany?.id) {
+      redirect(`/company/demands/new?error=${encodeURIComponent(companyError?.message ?? "empresa-nao-configurada")}`);
+    }
+
+    company = createdCompany;
+  }
+
   const { error } = await supabase.from("demands").insert({
     company_id: company.id,
     title: data.title,

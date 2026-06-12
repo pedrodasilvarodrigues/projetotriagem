@@ -91,56 +91,8 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/onboarding", request.url));
     }
 
-    if (path.startsWith("/professional") && role === "professional") {
-      const { data: professional } = await supabase
-        .from("professionals")
-        .select("id,cpf,phone,cep,street,address_number,neighborhood,city,state")
-        .eq("user_id", data.user.id)
-        .maybeSingle();
-      const { data: resume } = professional?.id
-        ? await supabase.from("resumes").select("id").eq("professional_id", professional.id).maybeSingle()
-        : { data: null };
-      const { data: consent } = await supabase.from("consent_records").select("id").eq("user_id", data.user.id).limit(1).maybeSingle();
-      const complete = Boolean(
-        professional?.cpf &&
-        professional.phone &&
-        professional.cep &&
-        professional.street &&
-        professional.address_number &&
-        professional.neighborhood &&
-        professional.city &&
-        professional.state &&
-        resume?.id &&
-        consent?.id
-      );
-      if (!complete) return NextResponse.redirect(new URL(professional?.id ? "/onboarding/professional/resume" : "/onboarding/professional", request.url));
-    }
-
-    if (path.startsWith("/company") && role === "company") {
-      const { data: company } = await supabase
-        .from("companies")
-        .select("id,cnpj,phone,corporate_email,cep,street,address_number,neighborhood,city,state")
-        .eq("owner_id", data.user.id)
-        .maybeSingle();
-      const { data: contact } = company?.id
-        ? await supabase.from("company_contacts").select("id").eq("company_id", company.id).limit(1).maybeSingle()
-        : { data: null };
-      const { data: consent } = await supabase.from("consent_records").select("id").eq("user_id", data.user.id).limit(1).maybeSingle();
-      const complete = Boolean(
-        company?.cnpj &&
-        company.phone &&
-        company.corporate_email &&
-        company.cep &&
-        company.street &&
-        company.address_number &&
-        company.neighborhood &&
-        company.city &&
-        company.state &&
-        contact?.id &&
-        consent?.id
-      );
-      if (!complete) return NextResponse.redirect(new URL("/onboarding/company", request.url));
-    }
+    // Do not force already authenticated users back into onboarding.
+    // Missing profile details can be completed from inside the protected area.
 
     if (path.endsWith("/dashboard")) {
       return NextResponse.redirect(new URL(defaultRouteForRole(role), request.url));

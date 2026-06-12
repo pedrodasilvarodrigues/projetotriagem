@@ -76,6 +76,7 @@ const userSettingsSchema = z.object({
   profileVisible: z.boolean(),
   allowRecruiterContact: z.boolean(),
   showSalaryExpectation: z.boolean(),
+  preferredLanguage: z.enum(["pt-BR", "en-US", "es-ES"]).default("pt-BR"),
   redirectTo: z.string().optional()
 });
 
@@ -377,6 +378,7 @@ export async function updateUserSettingsAction(formData: FormData) {
     profileVisible: formData.get("profileVisible") === "on",
     allowRecruiterContact: formData.get("allowRecruiterContact") === "on",
     showSalaryExpectation: formData.get("showSalaryExpectation") === "on",
+    preferredLanguage: formData.get("preferredLanguage") ?? "pt-BR",
     redirectTo: formData.get("redirectTo")
   });
 
@@ -392,12 +394,18 @@ export async function updateUserSettingsAction(formData: FormData) {
     opportunity_alerts: parsed.data.opportunityAlerts,
     profile_visible: parsed.data.profileVisible,
     allow_recruiter_contact: parsed.data.allowRecruiterContact,
-    show_salary_expectation: parsed.data.showSalaryExpectation
+    show_salary_expectation: parsed.data.showSalaryExpectation,
+    preferred_language: parsed.data.preferredLanguage
   });
 
-  const redirectTo = parsed.data.redirectTo && parsed.data.redirectTo.startsWith("/professional/") ? parsed.data.redirectTo : "/professional/settings";
+  const redirectTo =
+    parsed.data.redirectTo && (parsed.data.redirectTo.startsWith("/professional/") || parsed.data.redirectTo.startsWith("/company/"))
+      ? parsed.data.redirectTo
+      : "/professional/settings";
   revalidatePath("/professional/settings");
   revalidatePath("/professional/resume");
+  revalidatePath("/company/settings");
+  revalidatePath("/company");
   redirect(`${redirectTo}?message=configuracoes-atualizadas`);
 }
 
@@ -469,6 +477,10 @@ export async function updateCompanyProfileAction(formData: FormData) {
   const legalName = String(formData.get("legalName") ?? "").trim();
   const corporateEmail = String(formData.get("corporateEmail") ?? "").trim();
   const phone = String(formData.get("phone") ?? "");
+  const cep = String(formData.get("cep") ?? "");
+  const street = String(formData.get("street") ?? "").trim();
+  const addressNumber = String(formData.get("addressNumber") ?? "").trim();
+  const neighborhood = String(formData.get("neighborhood") ?? "").trim();
   const city = String(formData.get("city") ?? "").trim();
   const state = String(formData.get("state") ?? "").trim().toUpperCase().slice(0, 2);
   const segment = String(formData.get("segment") ?? "").trim();
@@ -483,6 +495,10 @@ export async function updateCompanyProfileAction(formData: FormData) {
     legalName.length < 3 ||
     !corporateEmail.includes("@") ||
     !isValidBrazilianPhone(phone) ||
+    onlyDigits(cep).length !== 8 ||
+    street.length < 2 ||
+    addressNumber.length < 1 ||
+    neighborhood.length < 2 ||
     city.length < 2 ||
     state.length !== 2 ||
     segment.length < 2 ||
@@ -506,6 +522,10 @@ export async function updateCompanyProfileAction(formData: FormData) {
       legal_name: legalName,
       corporate_email: corporateEmail,
       phone: onlyDigits(phone),
+      cep: onlyDigits(cep),
+      street,
+      address_number: addressNumber,
+      neighborhood,
       city,
       state,
       segment,

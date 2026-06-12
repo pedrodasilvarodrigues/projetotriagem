@@ -25,7 +25,6 @@ export default async function CompanyDemandsPage({ searchParams }: { searchParam
             {params.error ? <p className="mb-2 rounded-md bg-red-50 p-2 text-sm text-red-700">Nao foi possivel concluir a acao: {params.error}</p> : null}
             <p className="text-sm text-slate-600">Demandas privadas visiveis apenas para sua empresa e recrutadores da plataforma.</p>
           </div>
-          <Link href="/company/demands/new" className="rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Nova demanda</Link>
         </div>
         <div className="overflow-x-auto">
           <table className="data-table">

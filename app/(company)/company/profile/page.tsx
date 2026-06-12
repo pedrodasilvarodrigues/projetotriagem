@@ -7,7 +7,7 @@ export default async function CompanyProfilePage({ searchParams }: { searchParam
   const params = await searchParams;
   const supabase = await createServerClient();
   const { data: userData } = await supabase.auth.getUser();
-  const { data: company } = await supabase.from("companies").select("id,legal_name,trade_name,cnpj,corporate_email,phone,city,state,status,segment,description").eq("owner_id", userData.user?.id).maybeSingle();
+  const { data: company } = await supabase.from("companies").select("id,legal_name,trade_name,cnpj,corporate_email,phone,cep,street,address_number,neighborhood,city,state,status,segment,description").eq("owner_id", userData.user?.id).maybeSingle();
   const { data: contact } = company?.id
     ? await supabase.from("company_contacts").select("name,role_title,phone").eq("company_id", company.id).order("created_at", { ascending: true }).limit(1).maybeSingle()
     : { data: null };

@@ -10,7 +10,28 @@ type SettingsPreferencesProps = {
     profile_visible: boolean;
     allow_recruiter_contact: boolean;
     show_salary_expectation: boolean;
+    preferred_language?: string;
   };
+  labels?: Partial<{
+    notificationsTitle: string;
+    notificationsDescription: string;
+    emailPlatformTitle: string;
+    emailPlatformDescription: string;
+    alertsTitle: string;
+    alertsDescription: string;
+    privacyTitle: string;
+    privacyDescription: string;
+    profileVisibleTitle: string;
+    profileVisibleDescription: string;
+    recruiterContactTitle: string;
+    recruiterContactDescription: string;
+    salaryTitle: string;
+    salaryDescription: string;
+    languageTitle: string;
+    languageDescription: string;
+    primaryLanguageLabel: string;
+    languageHelp: string;
+  }>;
 };
 
 type PanelId = "notifications" | "privacy" | "language";
@@ -37,17 +58,39 @@ function ToggleOption({ name, title, description, defaultChecked }: { name: stri
   );
 }
 
-export function SettingsPreferences({ prefs }: SettingsPreferencesProps) {
+const defaultLabels = {
+  notificationsTitle: "Notificacoes",
+  notificationsDescription: "Emails da plataforma e alertas de vagas.",
+  emailPlatformTitle: "Emails da plataforma",
+  emailPlatformDescription: "Receber avisos importantes sobre processos, triagens e mensagens.",
+  alertsTitle: "Alertas de vagas",
+  alertsDescription: "Receber oportunidades de acordo com cidades, perfil e curriculo.",
+  privacyTitle: "Privacidade do perfil",
+  privacyDescription: "Visibilidade do curriculo e contato por recrutadores.",
+  profileVisibleTitle: "Perfil visivel para triagem",
+  profileVisibleDescription: "Permitir que recrutadores internos encontrem seu curriculo.",
+  recruiterContactTitle: "Contato por recrutadores",
+  recruiterContactDescription: "Permitir contato em processos compativeis.",
+  salaryTitle: "Mostrar pretensao salarial",
+  salaryDescription: "Exibir essa informacao quando ela existir no perfil.",
+  languageTitle: "Idioma",
+  languageDescription: "Preferencia de idioma da sua experiencia.",
+  primaryLanguageLabel: "Idioma principal",
+  languageHelp: "A selecao fica salva no seu perfil e prepara a plataforma para exibir sua experiencia no idioma escolhido."
+};
+
+export function SettingsPreferences({ prefs, labels }: SettingsPreferencesProps) {
+  const copy = { ...defaultLabels, ...(labels ?? {}) };
   const [openPanel, setOpenPanel] = useState<PanelId | null>(null);
-  const [language, setLanguage] = useState("pt-BR");
+  const [language, setLanguage] = useState(prefs.preferred_language ?? "pt-BR");
 
   useEffect(() => {
-    const savedLanguage = window.localStorage.getItem("triagem-preferred-language");
+    const savedLanguage = prefs.preferred_language || window.localStorage.getItem("triagem-preferred-language");
     if (savedLanguage && languages.some((item) => item.value === savedLanguage)) {
       setLanguage(savedLanguage);
       document.documentElement.lang = savedLanguage;
     }
-  }, []);
+  }, [prefs.preferred_language]);
 
   function updateLanguage(value: string) {
     setLanguage(value);
@@ -79,32 +122,32 @@ export function SettingsPreferences({ prefs }: SettingsPreferencesProps) {
   return (
     <div className="grid gap-4">
       <section>
-        <PanelButton id="notifications" title="Notificacoes" description="Emails da plataforma e alertas de vagas." icon={Bell} />
+        <PanelButton id="notifications" title={copy.notificationsTitle} description={copy.notificationsDescription} icon={Bell} />
         <div className={`${openPanel === "notifications" ? "grid" : "hidden"} gap-3 border-x border-b border-slate-200 bg-slate-50 p-4 md:grid-cols-2`}>
-          <ToggleOption name="emailNotifications" title="Emails da plataforma" description="Receber avisos importantes sobre processos, triagens e mensagens." defaultChecked={prefs.email_notifications} />
-          <ToggleOption name="opportunityAlerts" title="Alertas de vagas" description="Receber oportunidades de acordo com cidades, perfil e curriculo." defaultChecked={prefs.opportunity_alerts} />
+          <ToggleOption name="emailNotifications" title={copy.emailPlatformTitle} description={copy.emailPlatformDescription} defaultChecked={prefs.email_notifications} />
+          <ToggleOption name="opportunityAlerts" title={copy.alertsTitle} description={copy.alertsDescription} defaultChecked={prefs.opportunity_alerts} />
         </div>
       </section>
 
       <section>
-        <PanelButton id="privacy" title="Privacidade do perfil" description="Visibilidade do curriculo e contato por recrutadores." icon={ShieldCheck} />
+        <PanelButton id="privacy" title={copy.privacyTitle} description={copy.privacyDescription} icon={ShieldCheck} />
         <div className={`${openPanel === "privacy" ? "grid" : "hidden"} gap-3 border-x border-b border-slate-200 bg-slate-50 p-4 md:grid-cols-2`}>
-          <ToggleOption name="profileVisible" title="Perfil visivel para triagem" description="Permitir que recrutadores internos encontrem seu curriculo." defaultChecked={prefs.profile_visible} />
-          <ToggleOption name="allowRecruiterContact" title="Contato por recrutadores" description="Permitir contato em processos compativeis." defaultChecked={prefs.allow_recruiter_contact} />
-          <ToggleOption name="showSalaryExpectation" title="Mostrar pretensao salarial" description="Exibir essa informacao quando ela existir no perfil." defaultChecked={prefs.show_salary_expectation} />
+          <ToggleOption name="profileVisible" title={copy.profileVisibleTitle} description={copy.profileVisibleDescription} defaultChecked={prefs.profile_visible} />
+          <ToggleOption name="allowRecruiterContact" title={copy.recruiterContactTitle} description={copy.recruiterContactDescription} defaultChecked={prefs.allow_recruiter_contact} />
+          <ToggleOption name="showSalaryExpectation" title={copy.salaryTitle} description={copy.salaryDescription} defaultChecked={prefs.show_salary_expectation} />
         </div>
       </section>
 
       <section>
-        <PanelButton id="language" title="Idioma" description="Preferencia de idioma da sua experiencia." icon={Languages} />
+        <PanelButton id="language" title={copy.languageTitle} description={copy.languageDescription} icon={Languages} />
         <div className={`${openPanel === "language" ? "block" : "hidden"} border-x border-b border-slate-200 bg-slate-50 p-4`}>
           <label className="text-sm font-semibold text-slate-950">
-            Idioma principal
+            {copy.primaryLanguageLabel}
             <select name="preferredLanguage" value={language} onChange={(event) => updateLanguage(event.target.value)} className="field-input mt-2">
               {languages.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
             </select>
           </label>
-          <p className="mt-3 text-sm leading-6 text-slate-600">A selecao fica salva neste navegador e prepara a plataforma para futuras traducoes.</p>
+          <p className="mt-3 text-sm leading-6 text-slate-600">{copy.languageHelp}</p>
         </div>
       </section>
     </div>

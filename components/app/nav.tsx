@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import type { AppRole } from "@/lib/auth/access";
 import { signOutAction } from "@/lib/actions/auth";
+import { type AppLanguage, translateUi } from "@/lib/i18n/ui";
 
 const navItems = {
   admin: {
@@ -68,10 +69,31 @@ const navItems = {
   }
 } satisfies Record<AppRole, { title: string; subtitle: string; items: Array<{ href: string; label: string; icon: LucideIcon }> }>;
 
-export function AppNav({ role }: { role: AppRole }) {
+export function AppNav({ role, preferredLanguage }: { role: AppRole; preferredLanguage: AppLanguage }) {
   const nav = navItems[role];
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const translated = useMemo(() => ({
+    title: translateUi(nav.title, preferredLanguage),
+    subtitle:
+      preferredLanguage === "en-US"
+        ? role === "company"
+          ? "Demands, candidates and history"
+          : role === "professional"
+            ? "Profile, screening and referrals"
+            : "Screening, talent pool and referrals"
+        : preferredLanguage === "es-ES"
+          ? role === "company"
+            ? "Demandas, candidatos e historial"
+            : role === "professional"
+              ? "Perfil, seleccion y derivaciones"
+              : "Seleccion, banco de talentos y derivaciones"
+          : nav.subtitle
+  }), [nav.subtitle, nav.title, preferredLanguage, role]);
+
+  useEffect(() => {
+    document.documentElement.lang = preferredLanguage;
+  }, [preferredLanguage]);
 
   return (
     <header className="sticky top-0 z-40 border-b-4 border-[#d6a238] bg-[#18212f] text-white shadow-[0_10px_30px_rgba(15,23,42,0.18)]">
@@ -82,8 +104,8 @@ export function AppNav({ role }: { role: AppRole }) {
               <BriefcaseBusiness aria-hidden="true" size={20} />
             </span>
             <span>
-              <span className="block text-sm font-semibold uppercase tracking-normal">Triagem Profissional</span>
-              <span className="block text-xs text-slate-300">{nav.subtitle}</span>
+              <span className="block text-sm font-semibold uppercase tracking-normal">{preferredLanguage === "en-US" ? "Professional Screening" : preferredLanguage === "es-ES" ? "Triagem Profesional" : "Triagem Profissional"}</span>
+              <span className="block text-xs text-slate-300">{translated.subtitle}</span>
             </span>
           </Link>
           <button
@@ -93,12 +115,12 @@ export function AppNav({ role }: { role: AppRole }) {
             className="inline-flex min-h-10 items-center gap-2 border border-white/15 bg-white/8 px-3 py-2 text-sm font-semibold text-slate-100 transition hover:border-[#d6a238] hover:text-white"
           >
             {isCollapsed ? <ChevronDown aria-hidden="true" size={16} /> : <ChevronUp aria-hidden="true" size={16} />}
-            <span>{isCollapsed ? "Mostrar menu" : "Recolher menu"}</span>
+            <span>{preferredLanguage === "en-US" ? (isCollapsed ? "Show menu" : "Collapse menu") : preferredLanguage === "es-ES" ? (isCollapsed ? "Mostrar menu" : "Ocultar menu") : (isCollapsed ? "Mostrar menu" : "Recolher menu")}</span>
           </button>
         </div>
 
         <div className={`${isCollapsed ? "hidden" : "mt-4"}`}>
-          <nav aria-label={`Menu ${nav.title}`} className="flex max-w-full gap-1 overflow-x-auto border border-white/15 bg-white/8 p-1">
+          <nav aria-label={`Menu ${translated.title}`} className="flex max-w-full gap-1 overflow-x-auto border border-white/15 bg-white/8 p-1">
             {nav.items.map((item) => {
               const isActive = pathname === item.href || (item.href !== nav.items[0].href && pathname.startsWith(`${item.href}/`));
 
@@ -115,14 +137,14 @@ export function AppNav({ role }: { role: AppRole }) {
                   ].join(" ")}
                 >
                   <item.icon aria-hidden="true" size={16} />
-                  <span>{item.label}</span>
+                  <span>{translateUi(item.label, preferredLanguage)}</span>
                 </Link>
               );
             })}
             <form action={signOutAction}>
               <button className="inline-flex min-h-10 shrink-0 items-center gap-2 border border-transparent px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-red-300/60 hover:bg-red-500/15 hover:text-white" type="submit">
                 <LogOut aria-hidden="true" size={16} />
-                <span>Sair</span>
+                <span>{preferredLanguage === "en-US" ? "Sign out" : preferredLanguage === "es-ES" ? "Salir" : "Sair"}</span>
               </button>
             </form>
           </nav>

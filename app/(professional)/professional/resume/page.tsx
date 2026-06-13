@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BriefcaseBusiness, CheckCircle2, FileText, GraduationCap, Languages, Plus, ShieldCheck, Sparkles, Target, Upload } from "lucide-react";
 import { AppShell } from "@/components/app/shell";
 import { ResumeDownloadCustomizer } from "@/components/professional/resume-download-customizer";
+import { ResumeSectionNav } from "@/components/professional/resume-section-nav";
 import {
   addProfessionalCourseAction,
   addProfessionalEducationAction,
@@ -33,7 +34,7 @@ const educationOptions = [
   ["doutorado", "Doutorado"]
 ];
 
-const sections = [
+const sections: Array<[string, string]> = [
   ["dados-pessoais", "Dados pessoais"],
   ["confidencialidade", "Seguranca"],
   ["objetivo", "Objetivo"],
@@ -108,26 +109,7 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
   return (
     <AppShell eyebrow="Profissional" title="Curriculo">
       <div className="space-y-5">
-        <div className="sticky top-[142px] z-30 border border-slate-200 bg-white/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/90">
-          <div className="flex flex-col gap-4 border-b border-slate-200 p-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="text-xs font-bold uppercase text-[#174a86]">Subgrupos do curriculo</p>
-              <p className="mt-1 text-sm text-slate-600">Navegue pelas informacoes que compoem seu perfil profissional.</p>
-            </div>
-            <div className="grid gap-2 text-sm text-slate-600 sm:grid-cols-3 lg:min-w-[360px]">
-              <p className="flex justify-between gap-3 rounded-md bg-slate-50 px-3 py-2"><span>Documento</span><strong>{activeVersion ? "ok" : "pendente"}</strong></p>
-              <p className="flex justify-between gap-3 rounded-md bg-slate-50 px-3 py-2"><span>Experiencias</span><strong>{(experiences ?? []).length}</strong></p>
-              <p className="flex justify-between gap-3 rounded-md bg-slate-50 px-3 py-2"><span>Cursos</span><strong>{(courses ?? []).length}</strong></p>
-            </div>
-          </div>
-          <nav className="flex gap-2 overflow-x-auto px-4 py-3" aria-label="Subgrupos do curriculo">
-            {sections.map(([href, label]) => (
-              <a key={href} href={`#${href}`} className="shrink-0 rounded-md border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-bold text-slate-700 transition hover:border-[#174a86] hover:bg-[#eef5ff] hover:text-[#174a86]">
-                {label}
-              </a>
-            ))}
-          </nav>
-        </div>
+        <ResumeSectionNav sections={sections} />
 
         <div className="space-y-5">
           {params.error ? <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">Verifique os dados informados. Codigo: {params.error}</p> : null}

@@ -11,6 +11,7 @@ type ProcessRow = {
 
 type DemandRow = {
   id: string;
+  name: string | null;
   title: string;
   description: string;
   city: string;
@@ -99,7 +100,7 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
   const [{ data: professional }, { data: notifications }, { data: demands }] = await Promise.all([
     supabase.from("professionals").select("id,full_name,desired_role,summary,education_level,city,state,phone,status").eq("user_id", userData.user?.id).maybeSingle(),
     supabase.from("notifications").select("id,title,created_at,read_at").eq("user_id", userData.user?.id).order("created_at", { ascending: false }).limit(4),
-    supabase.from("demands").select("id,title,description,city,state,modality,contract_type,openings,created_at,company:companies(trade_name,segment)").in("status", ["active", "screening"]).order("created_at", { ascending: false }).limit(80)
+    supabase.from("demands").select("id,name,title,description,city,state,modality,contract_type,openings,created_at,company:companies(trade_name,segment)").in("status", ["active", "screening"]).order("created_at", { ascending: false }).limit(80)
   ]);
 
   const [
@@ -126,7 +127,12 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
   const allDemands = ((demands ?? []) as unknown as DemandRow[])
     .filter((demand) => {
       const company = one(demand.company);
-      const matchesQuery = containsText(demand.title, query) || containsText(demand.description, query) || containsText(company?.trade_name, query) || containsText(company?.segment, query);
+      const matchesQuery =
+        containsText(demand.name, query) ||
+        containsText(demand.title, query) ||
+        containsText(demand.description, query) ||
+        containsText(company?.trade_name, query) ||
+        containsText(company?.segment, query);
       const matchesLocal = !local || normalize(`${demand.city}/${demand.state}`).includes(local) || normalize(demand.city).includes(local) || normalize(demand.state).includes(local);
       const matchesModality = !modality || demand.modality === modality;
       return matchesQuery && matchesLocal && matchesModality;
@@ -169,10 +175,16 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
                 Busque por cargo, empresa, area ou cidade. As melhores correspondencias aparecem primeiro conforme seu perfil, cidades de interesse e curriculo.
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Link href="/professional/search-demands" className="rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Buscar demandas</Link>
-              <Link href="/professional/profile" className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700">Editar perfil</Link>
-              <Link href="/professional/resume" className="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white">Melhorar curriculo</Link>
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
+              <Link href="/professional/search-demands" className="inline-flex min-h-11 items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800">
+                Buscar demandas
+              </Link>
+              <Link href="/professional/profile" className="inline-flex min-h-11 items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:text-blue-700">
+                Editar perfil
+              </Link>
+              <Link href="/professional/resume" className="inline-flex min-h-11 items-center justify-center rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800">
+                Melhorar curriculo
+              </Link>
             </div>
           </div>
 
@@ -303,6 +315,7 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
                 <article key={demand.id} className="border border-slate-200 bg-slate-50 p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
+                      {demand.name ? <p className="text-xs font-bold uppercase text-blue-700">{demand.name}</p> : null}
                       <h3 className="text-base font-semibold text-slate-950">{demand.title}</h3>
                       <p className="mt-1 inline-flex items-center gap-1 text-sm text-slate-600">
                         <Building2 aria-hidden="true" size={14} />
@@ -340,6 +353,7 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
               {remaining.map((demand) => (
                 <article key={demand.id} className="grid gap-3 py-4 lg:grid-cols-[minmax(0,1fr)_180px] lg:items-center">
                   <div>
+                    {demand.name ? <p className="text-xs font-bold uppercase text-blue-700">{demand.name}</p> : null}
                     <h3 className="font-semibold">{demand.title}</h3>
                     <p className="mt-1 text-sm text-slate-600">{one(demand.company)?.trade_name ?? "Empresa cadastrada"} · {demand.city}/{demand.state} · {modalityLabels[demand.modality] ?? demand.modality}</p>
                   </div>

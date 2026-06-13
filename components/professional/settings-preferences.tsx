@@ -42,6 +42,69 @@ const languages = [
   { value: "es-ES", label: "Espanhol" }
 ];
 
+const localizedLabels = {
+  "pt-BR": {
+    notificationsTitle: "Notificacoes",
+    notificationsDescription: "Emails da plataforma e alertas de vagas.",
+    emailPlatformTitle: "Emails da plataforma",
+    emailPlatformDescription: "Receber avisos importantes sobre processos, triagens e mensagens.",
+    alertsTitle: "Alertas de vagas",
+    alertsDescription: "Receber oportunidades de acordo com cidades, perfil e curriculo.",
+    privacyTitle: "Privacidade do perfil",
+    privacyDescription: "Visibilidade do curriculo e contato por recrutadores.",
+    profileVisibleTitle: "Perfil visivel para triagem",
+    profileVisibleDescription: "Permitir que recrutadores internos encontrem seu curriculo.",
+    recruiterContactTitle: "Contato por recrutadores",
+    recruiterContactDescription: "Permitir contato em processos compativeis.",
+    salaryTitle: "Mostrar pretensao salarial",
+    salaryDescription: "Exibir essa informacao quando ela existir no perfil.",
+    languageTitle: "Idioma",
+    languageDescription: "Preferencia de idioma da sua experiencia.",
+    primaryLanguageLabel: "Idioma principal",
+    languageHelp: "A selecao fica salva no seu perfil e prepara a plataforma para exibir sua experiencia no idioma escolhido."
+  },
+  "en-US": {
+    notificationsTitle: "Notifications",
+    notificationsDescription: "Platform emails and job alerts.",
+    emailPlatformTitle: "Platform emails",
+    emailPlatformDescription: "Receive important updates about processes, screening and messages.",
+    alertsTitle: "Job alerts",
+    alertsDescription: "Receive opportunities based on cities, profile and resume.",
+    privacyTitle: "Profile privacy",
+    privacyDescription: "Resume visibility and recruiter contact.",
+    profileVisibleTitle: "Visible for screening",
+    profileVisibleDescription: "Allow internal recruiters to find your resume.",
+    recruiterContactTitle: "Recruiter contact",
+    recruiterContactDescription: "Allow contact in compatible processes.",
+    salaryTitle: "Show salary expectation",
+    salaryDescription: "Display this information when it exists in your profile.",
+    languageTitle: "Language",
+    languageDescription: "Language preference for your experience.",
+    primaryLanguageLabel: "Primary language",
+    languageHelp: "Your selection is saved in your profile and updates the platform experience to the chosen language."
+  },
+  "es-ES": {
+    notificationsTitle: "Notificaciones",
+    notificationsDescription: "Correos de la plataforma y alertas de vacantes.",
+    emailPlatformTitle: "Correos de la plataforma",
+    emailPlatformDescription: "Recibir avisos importantes sobre procesos, seleccion y mensajes.",
+    alertsTitle: "Alertas de vacantes",
+    alertsDescription: "Recibir oportunidades segun ciudades, perfil y curriculum.",
+    privacyTitle: "Privacidad del perfil",
+    privacyDescription: "Visibilidad del curriculum y contacto de reclutadores.",
+    profileVisibleTitle: "Perfil visible para seleccion",
+    profileVisibleDescription: "Permitir que reclutadores internos encuentren tu curriculum.",
+    recruiterContactTitle: "Contacto de reclutadores",
+    recruiterContactDescription: "Permitir contacto en procesos compatibles.",
+    salaryTitle: "Mostrar aspiracion salarial",
+    salaryDescription: "Mostrar esta informacion cuando exista en tu perfil.",
+    languageTitle: "Idioma",
+    languageDescription: "Preferencia de idioma de tu experiencia.",
+    primaryLanguageLabel: "Idioma principal",
+    languageHelp: "La seleccion se guarda en tu perfil y actualiza la experiencia de la plataforma al idioma elegido."
+  }
+} as const;
+
 function ToggleOption({ name, title, description, defaultChecked }: { name: string; title: string; description: string; defaultChecked: boolean }) {
   return (
     <label className="flex cursor-pointer items-start justify-between gap-4 border border-slate-200 bg-white p-4 text-sm transition hover:border-blue-200 hover:bg-blue-50/40">
@@ -58,31 +121,10 @@ function ToggleOption({ name, title, description, defaultChecked }: { name: stri
   );
 }
 
-const defaultLabels = {
-  notificationsTitle: "Notificacoes",
-  notificationsDescription: "Emails da plataforma e alertas de vagas.",
-  emailPlatformTitle: "Emails da plataforma",
-  emailPlatformDescription: "Receber avisos importantes sobre processos, triagens e mensagens.",
-  alertsTitle: "Alertas de vagas",
-  alertsDescription: "Receber oportunidades de acordo com cidades, perfil e curriculo.",
-  privacyTitle: "Privacidade do perfil",
-  privacyDescription: "Visibilidade do curriculo e contato por recrutadores.",
-  profileVisibleTitle: "Perfil visivel para triagem",
-  profileVisibleDescription: "Permitir que recrutadores internos encontrem seu curriculo.",
-  recruiterContactTitle: "Contato por recrutadores",
-  recruiterContactDescription: "Permitir contato em processos compativeis.",
-  salaryTitle: "Mostrar pretensao salarial",
-  salaryDescription: "Exibir essa informacao quando ela existir no perfil.",
-  languageTitle: "Idioma",
-  languageDescription: "Preferencia de idioma da sua experiencia.",
-  primaryLanguageLabel: "Idioma principal",
-  languageHelp: "A selecao fica salva no seu perfil e prepara a plataforma para exibir sua experiencia no idioma escolhido."
-};
-
 export function SettingsPreferences({ prefs, labels }: SettingsPreferencesProps) {
-  const copy = { ...defaultLabels, ...(labels ?? {}) };
   const [openPanel, setOpenPanel] = useState<PanelId | null>(null);
   const [language, setLanguage] = useState(prefs.preferred_language ?? "pt-BR");
+  const copy = { ...localizedLabels[language as keyof typeof localizedLabels], ...(labels ?? {}) };
 
   useEffect(() => {
     const savedLanguage = prefs.preferred_language || window.localStorage.getItem("triagem-preferred-language");
@@ -144,7 +186,23 @@ export function SettingsPreferences({ prefs, labels }: SettingsPreferencesProps)
           <label className="text-sm font-semibold text-slate-950">
             {copy.primaryLanguageLabel}
             <select name="preferredLanguage" value={language} onChange={(event) => updateLanguage(event.target.value)} className="field-input mt-2">
-              {languages.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+              {languages.map((item) => (
+                <option key={item.value} value={item.value}>
+                  {language === "en-US"
+                    ? item.value === "pt-BR"
+                      ? "Portuguese (Brazil)"
+                      : item.value === "en-US"
+                        ? "English"
+                        : "Spanish"
+                    : language === "es-ES"
+                      ? item.value === "pt-BR"
+                        ? "Portugues (Brasil)"
+                        : item.value === "en-US"
+                          ? "Ingles"
+                          : "Espanol"
+                      : item.label}
+                </option>
+              ))}
             </select>
           </label>
           <p className="mt-3 text-sm leading-6 text-slate-600">{copy.languageHelp}</p>

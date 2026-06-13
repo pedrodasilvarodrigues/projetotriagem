@@ -489,59 +489,68 @@ export async function updateCompanyProfileAction(formData: FormData) {
   const contactRole = String(formData.get("contactRole") ?? "").trim();
   const contactPhone = String(formData.get("contactPhone") ?? "");
 
+  const hasCnpj = cnpj.trim().length > 0;
+  const hasCorporateEmail = corporateEmail.length > 0;
+  const hasPhone = onlyDigits(phone).length > 0;
+  const hasCep = onlyDigits(cep).length > 0;
+  const hasContactPhone = onlyDigits(contactPhone).length > 0;
+
   if (
-    !isValidCnpj(cnpj) ||
-    tradeName.length < 2 ||
-    legalName.length < 3 ||
-    !corporateEmail.includes("@") ||
-    !isValidBrazilianPhone(phone) ||
-    onlyDigits(cep).length !== 8 ||
-    street.length < 2 ||
-    addressNumber.length < 1 ||
-    neighborhood.length < 2 ||
-    city.length < 2 ||
-    state.length !== 2 ||
-    segment.length < 2 ||
-    contactName.length < 3 ||
-    contactRole.length < 2 ||
-    !isValidBrazilianPhone(contactPhone)
+    (hasCnpj && !isValidCnpj(cnpj)) ||
+    (tradeName.length > 0 && tradeName.length < 2) ||
+    (legalName.length > 0 && legalName.length < 3) ||
+    (hasCorporateEmail && !corporateEmail.includes("@")) ||
+    (hasPhone && !isValidBrazilianPhone(phone)) ||
+    (hasCep && onlyDigits(cep).length !== 8) ||
+    (street.length > 0 && street.length < 2) ||
+    (neighborhood.length > 0 && neighborhood.length < 2) ||
+    (city.length > 0 && city.length < 2) ||
+    (state.length > 0 && state.length !== 2) ||
+    (segment.length > 0 && segment.length < 2) ||
+    (contactName.length > 0 && contactName.length < 3) ||
+    (contactRole.length > 0 && contactRole.length < 2) ||
+    (hasContactPhone && !isValidBrazilianPhone(contactPhone))
   ) {
     redirect("/company/profile?error=dados-invalidos");
   }
 
-  const normalizedCnpj = onlyDigits(cnpj);
-  const { data: company } = await supabase.from("companies").select("id").eq("owner_id", data.user.id).maybeSingle();
-  const { data: duplicatedCnpj } = await supabase.from("companies").select("id,owner_id").eq("cnpj", normalizedCnpj).neq("owner_id", data.user.id).maybeSingle();
-  if (duplicatedCnpj) redirect("/company/profile?error=cnpj-ja-cadastrado");
+  const normalizedCnpj = hasCnpj ? onlyDigits(cnpj) : null;
+  const { data: company } = await supabase.from("companies").select("id,cnpj,trade_name,legal_name,corporate_email,phone,cep,street,address_number,neighborhood,city,state,segment,description").eq("owner_id", data.user.id).maybeSingle();
+  if (normalizedCnpj) {
+    const { data: duplicatedCnpj } = await supabase.from("companies").select("id,owner_id").eq("cnpj", normalizedCnpj).neq("owner_id", data.user.id).maybeSingle();
+    if (duplicatedCnpj) redirect("/company/profile?error=cnpj-ja-cadastrado");
+  }
 
   await supabase
     .from("companies")
     .update({
-      cnpj: normalizedCnpj,
-      trade_name: tradeName,
-      legal_name: legalName,
-      corporate_email: corporateEmail,
-      phone: onlyDigits(phone),
-      cep: onlyDigits(cep),
-      street,
-      address_number: addressNumber,
-      neighborhood,
-      city,
-      state,
-      segment,
-      description
+      cnpj: normalizedCnpj ?? company?.cnpj ?? null,
+      trade_name: tradeName || company?.trade_name || fallbackCompanyName(data.user.email, null),
+      legal_name: legalName || company?.legal_name || fallbackCompanyName(data.user.email, null),
+      corporate_email: corporateEmail || company?.corporate_email || data.user.email || null,
+      phone: hasPhone ? onlyDigits(phone) : null,
+      cep: hasCep ? onlyDigits(cep) : null,
+      street: street || null,
+      address_number: addressNumber || null,
+      neighborhood: neighborhood || null,
+      city: city || company?.city || "Cidade",
+      state: state || company?.state || "UF",
+      segment: segment || null,
+      description: description || null
     })
     .eq("owner_id", data.user.id);
 
   if (company?.id) {
     await supabase.from("company_contacts").delete().eq("company_id", company.id);
-    await supabase.from("company_contacts").insert({
-      company_id: company.id,
-      name: contactName,
-      email: corporateEmail,
-      phone: onlyDigits(contactPhone),
-      role_title: contactRole
-    });
+    if (contactName || contactRole || hasContactPhone || corporateEmail) {
+      await supabase.from("company_contacts").insert({
+        company_id: company.id,
+        name: contactName || "Responsavel da empresa",
+        email: corporateEmail || data.user.email || "contato@pendente.local",
+        phone: hasContactPhone ? onlyDigits(contactPhone) : null,
+        role_title: contactRole || null
+      });
+    }
   }
 
   revalidatePath("/company/profile");

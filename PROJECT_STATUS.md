@@ -30,6 +30,11 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Auditoria do login corrigiu escrita de cookies em Server Components, validacao de env do Supabase, logs de auth e falhas do proxy.
 - Proxy usa `maybeSingle()` para roles, trata usuario sem role/perfil via onboarding e evita erro 500 em rotas protegidas.
 - Aliases `/profissional` e `/empresa` redirecionam para `/professional` e `/company`.
+- Login com Google pela tela de entrar nao prende mais o usuario no onboarding; contas sem cadastro completo voltam ao login com mensagem controlada.
+- Perfil da empresa passou a aceitar campos complementares sem obrigatoriedade e preserva os dados ja existentes quando o usuario salva campos em branco.
+- Preferencia de idioma agora atualiza a interface autenticada com persistencia no banco, traducao no menu e tradutor em tempo de execucao para textos principais.
+- Area profissional ganhou a aba `/professional/search-demands` para listar todas as demandas abertas com empresa, local e modalidade.
+- Minha Area profissional agora exibe tambem empresas com vagas abertas, deixando as empresas visiveis para os profissionais.
 - Script `npm run lint` atualizado para validacao TypeScript compativel com Next.js 16.
 - Suporte a email proprio de reset via Resend quando as variaveis seguras estiverem configuradas.
 - Guia AUTH_SETUP.md com configuracao de Supabase SMTP, URLs de redirect e Google OAuth/branding.
@@ -37,15 +42,16 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 
 # Pendente
 - Persistir as escolhas de modelo/cor do CV no banco, caso a personalizacao precise ser reutilizada em downloads futuros.
-- Persistir idioma preferido no banco quando houver uma coluna dedicada para isso.
 - Configurar SMTP personalizado e credenciais Google OAuth no painel Supabase/Google usando AUTH_SETUP.md.
 - Trocar o Site URL do Supabase para `https://projetotriagem.vercel.app` e configurar dominio customizado de Auth se quiser remover `.supabase.co` da tela do Google.
 - Configurar os templates de email do Supabase conforme AUTH_SETUP.md para usar token_hash em confirmacao e recuperacao nos fluxos legados.
+- Expandir a traducao textual para todas as paginas restantes, incluindo areas publicas e mensagens menos frequentes.
 - Revisar textos e acentuacao da interface em todo o projeto.
 
 # Proximos Passos
 - Melhorar a pre-visualizacao do CV antes do download.
 - Validar fluxos completos com contas reais de profissional, empresa e admin.
+- Validar Google OAuth em producao depois da configuracao final de branding e redirect URLs no painel do Supabase.
 - Validar recebimento real de recuperacao de senha com SMTP/Resend configurado em producao.
 - Atualizar a `SUPABASE_SERVICE_ROLE_KEY` em producao/local se o Supabase continuar retornando `Invalid API key` para fluxos administrativos.
 - Evoluir os filtros de vagas para salvar pesquisas e alertas por email quando SMTP estiver pronto.

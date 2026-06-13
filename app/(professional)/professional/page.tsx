@@ -23,6 +23,7 @@ type DemandRow = {
 };
 
 type PreferredCityRow = { city: string; state: string };
+type CompanySummary = { trade_name: string; segment: string | null };
 
 const modalityLabels: Record<string, string> = {
   presencial: "Presencial",
@@ -132,6 +133,15 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
     })
     .sort((a, b) => demandScore(b, professional, preferredSet) - demandScore(a, professional, preferredSet));
 
+  const activeCompanies = Array.from(
+    new Map(
+      allDemands
+        .map((demand) => one(demand.company))
+        .filter((company): company is CompanySummary => Boolean(company?.trade_name))
+        .map((company) => [company.trade_name, company])
+    ).values()
+  ).slice(0, 8);
+
   const recommended = allDemands.slice(0, 4);
   const remaining = allDemands.slice(4);
   const checklist = [
@@ -160,6 +170,7 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
+              <Link href="/professional/search-demands" className="rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Buscar demandas</Link>
               <Link href="/professional/profile" className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700">Editar perfil</Link>
               <Link href="/professional/resume" className="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white">Melhorar curriculo</Link>
             </div>
@@ -254,6 +265,25 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
             </div>
           </aside>
         </div>
+
+        <section className="border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-blue-700">Empresas visiveis para voce</p>
+              <h2 className="mt-1 text-xl font-semibold">Empresas com vagas abertas</h2>
+            </div>
+            <Link href="/professional/search-demands" className="text-sm font-semibold text-blue-700">Buscar demandas</Link>
+          </div>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+            {activeCompanies.map((company) => (
+              <article key={company.trade_name} className="border border-slate-200 bg-slate-50 p-4">
+                <p className="text-sm font-semibold text-slate-950">{company.trade_name}</p>
+                <p className="mt-1 text-sm text-slate-600">{company.segment ?? "Segmento em definicao"}</p>
+              </article>
+            ))}
+            {activeCompanies.length === 0 ? <p className="text-sm text-slate-500">Nenhuma empresa com demanda ativa no momento.</p> : null}
+          </div>
+        </section>
 
         <section className="border border-slate-200 bg-white p-5 shadow-sm">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">

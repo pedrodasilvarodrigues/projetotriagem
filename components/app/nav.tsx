@@ -14,6 +14,7 @@ import {
   History,
   LayoutGrid,
   LogOut,
+  Search,
   Settings,
   ShieldCheck,
   UserRoundCheck,
@@ -59,6 +60,7 @@ const navItems = {
     subtitle: "Perfil, triagem e encaminhamentos",
     items: [
       { href: "/professional", label: "Minha Area", icon: LayoutGrid },
+      { href: "/professional/search-demands", label: "Buscar demandas", icon: Search },
       { href: "/professional/profile", label: "Perfil", icon: UserRoundCog },
       { href: "/professional/resume", label: "Curriculo", icon: FileText },
       { href: "/professional/screening-status", label: "Status de Triagem", icon: ClipboardCheck },

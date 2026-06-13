@@ -91,6 +91,7 @@ function isLocalOrigin(value: string) {
 async function getAuthRedirectOrigin() {
   const headerStore = await headers();
   const candidates = [
+    normalizeOrigin(process.env.NEXT_PUBLIC_SITE_URL),
     normalizeOrigin(process.env.NEXT_PUBLIC_APP_URL),
     normalizeOrigin(process.env.VERCEL_PROJECT_PRODUCTION_URL),
     normalizeOrigin(process.env.VERCEL_URL),
@@ -322,25 +323,36 @@ async function saveCompanySignup(client: ReturnType<typeof createAdminClient>, u
 export async function signInWithGoogleAction(formData?: FormData) {
   if (!hasSupabasePublicEnv()) redirect("/login?error=configuracao-supabase-incompleta");
 
-  const supabase = await createServerClient();
-  const origin = await getAuthRedirectOrigin();
-  const accountType = formData instanceof FormData ? String(formData.get("accountType") ?? "") : "";
-  const signupRole = accountType === "professional" || accountType === "company" ? accountType : "";
-  const callbackUrl = new URL(`${origin}/auth/callback`);
-  if (signupRole) callbackUrl.searchParams.set("signupRole", signupRole);
+  try {
+    const supabase = await createServerClient();
+    const origin = await getAuthRedirectOrigin();
+    const accountType = formData instanceof FormData ? String(formData.get("accountType") ?? "") : "";
+    const signupRole = accountType === "professional" || accountType === "company" ? accountType : "";
+    const callbackUrl = new URL(`${origin}/auth/callback`);
+    if (signupRole) callbackUrl.searchParams.set("signupRole", signupRole);
 
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: callbackUrl.toString()
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: callbackUrl.toString(),
+        queryParams: {
+          prompt: "select_account",
+          access_type: "offline"
+        }
+      }
+    });
+
+    if (error || !data.url) {
+      logAuthError("Falha ao iniciar login Google", error ?? "missing-google-url", { redirectTo: callbackUrl.toString() });
+      redirect(`/login?error=${encodeURIComponent(error?.message ?? "nao-foi-possivel-iniciar-google")}`);
     }
-  });
 
-  if (error || !data.url) {
-    redirect(`/login?error=${encodeURIComponent(error?.message ?? "nao-foi-possivel-iniciar-google")}`);
+    logAuth("Redirecionando para Google OAuth", { redirectTo: callbackUrl.toString() });
+    redirect(data.url);
+  } catch (error) {
+    logAuthError("Excecao inesperada ao iniciar Google OAuth", error);
+    redirect("/login?error=nao-foi-possivel-iniciar-google");
   }
-
-  redirect(data.url);
 }
 
 export async function signInWithEmailAction(formData: FormData) {

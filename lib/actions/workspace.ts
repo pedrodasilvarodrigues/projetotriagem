@@ -184,14 +184,13 @@ export async function updateProfessionalProfileAction(formData: FormData) {
     redirect("/professional/profile?error=dados-invalidos");
   }
 
-  const { data: professional } = await supabase
+  let { data: professional } = await supabase
     .from("professionals")
     .select("id,email,cpf,birth_date,nationality,cep,street,address_number,neighborhood")
     .eq("user_id", data.user.id)
     .maybeSingle();
-  if (!professional?.id) redirect("/professional/profile?error=complete-cadastro");
 
-  if (normalizedCpf && normalizedCpf !== professional.cpf) {
+  if (normalizedCpf && normalizedCpf !== professional?.cpf) {
     const { data: duplicatedCpf } = await supabase.from("professionals").select("id,user_id").eq("cpf", normalizedCpf).neq("user_id", data.user.id).maybeSingle();
     if (duplicatedCpf) redirect("/professional/profile?error=cpf-ja-cadastrado");
   }
@@ -207,30 +206,44 @@ export async function updateProfessionalProfileAction(formData: FormData) {
     if (avatarError) redirect(`/professional/profile?error=${encodeURIComponent(avatarError.message)}`);
   }
 
-  const emailForProfile = email || professional.email || data.user.email || null;
-  const profilePayload: { full_name: string; phone: string; email?: string; avatar_path?: string } = { full_name: fullName, phone: onlyDigits(phone) };
+  const emailForProfile = email || professional?.email || data.user.email || null;
+  const profilePayload: { id: string; full_name: string; phone: string; email?: string; avatar_path?: string } = { id: data.user.id, full_name: fullName, phone: onlyDigits(phone) };
   if (emailForProfile) profilePayload.email = emailForProfile;
   if (avatarPath) profilePayload.avatar_path = avatarPath;
 
   const professionalPayload: Record<string, string | number | null> = {
+    user_id: data.user.id,
     full_name: fullName,
     desired_role: desiredRole,
     city,
     state,
     phone: onlyDigits(phone),
     available_in_days: Number.isFinite(availability) && availability >= 0 ? availability : 0,
-    nationality: nationality || professional.nationality || "Brasileira",
-    cep: hasCep ? onlyDigits(cep) : professional.cep ?? null,
-    street: street || professional.street || null,
-    address_number: addressNumber || professional.address_number || null,
-    neighborhood: neighborhood || professional.neighborhood || null
+    education_level: "medio",
+    status: "pending",
+    nationality: nationality || professional?.nationality || "Brasileira",
+    cep: hasCep ? onlyDigits(cep) : professional?.cep ?? null,
+    street: street || professional?.street || null,
+    address_number: addressNumber || professional?.address_number || null,
+    neighborhood: neighborhood || professional?.neighborhood || null
   };
   if (emailForProfile) professionalPayload.email = emailForProfile;
-  if (normalizedCpf || professional.cpf) professionalPayload.cpf = normalizedCpf ?? professional.cpf;
-  if (birthDate || professional.birth_date) professionalPayload.birth_date = birthDate || professional.birth_date;
+  if (normalizedCpf || professional?.cpf) professionalPayload.cpf = normalizedCpf ?? professional?.cpf ?? null;
+  if (birthDate || professional?.birth_date) professionalPayload.birth_date = birthDate || (professional?.birth_date ?? null);
 
-  await supabase.from("profiles").update(profilePayload).eq("id", data.user.id);
-  await supabase.from("professionals").update(professionalPayload).eq("user_id", data.user.id);
+  await supabase.from("profiles").upsert(profilePayload, { onConflict: "id" });
+  if (!professional?.id) {
+    const { data: createdProfessional, error: createError } = await supabase.from("professionals").insert(professionalPayload).select("id").single();
+    if (createError || !createdProfessional?.id) {
+      redirect(`/professional/profile?error=${encodeURIComponent(createError?.message ?? "perfil-nao-criado")}`);
+    }
+    professional = { ...professionalPayload, id: createdProfessional.id } as typeof professional;
+  } else {
+    const { education_level: _educationLevel, status: _status, user_id: _userId, ...updatePayload } = professionalPayload;
+    await supabase.from("professionals").update(updatePayload).eq("user_id", data.user.id);
+  }
+  const professionalId = professional?.id;
+  if (!professionalId) redirect("/professional/profile?error=perfil-nao-criado");
 
   const preferredCities = formData
     .getAll("preferredCity")
@@ -238,9 +251,9 @@ export async function updateProfessionalProfileAction(formData: FormData) {
     .filter((item): item is { city: string; state: string } => Boolean(item))
     .slice(0, 12);
 
-  await supabase.from("professional_preferred_cities").delete().eq("professional_id", professional.id);
+  await supabase.from("professional_preferred_cities").delete().eq("professional_id", professionalId);
   if (preferredCities.length > 0) {
-    await supabase.from("professional_preferred_cities").insert(preferredCities.map((item) => ({ professional_id: professional.id, city: item.city, state: item.state })));
+    await supabase.from("professional_preferred_cities").insert(preferredCities.map((item) => ({ professional_id: professionalId, city: item.city, state: item.state })));
   }
 
   revalidatePath("/professional/profile");
@@ -584,8 +597,8 @@ export async function updateCompanyProfileAction(formData: FormData) {
     street: street || company?.street || null,
     address_number: addressNumber || company?.address_number || null,
     neighborhood: neighborhood || company?.neighborhood || null,
-    city: city || company?.city || "Cidade",
-    state: state || company?.state || "UF",
+    city: city || company?.city || "",
+    state: state || company?.state || "",
     segment: segment || company?.segment || null,
     description: description || company?.description || null
   };

@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/app/shell";
+import { ensureProfessionalPublicProfile } from "@/lib/auth/public-profile-sync";
 import { updateProfessionalProfileAction } from "@/lib/actions/workspace";
 import { createServerClient } from "@/lib/supabase/server";
 
@@ -8,6 +9,7 @@ export default async function ProfessionalProfilePage({ searchParams }: { search
   const params = await searchParams;
   const supabase = await createServerClient();
   const { data: userData } = await supabase.auth.getUser();
+  if (userData.user) await ensureProfessionalPublicProfile(userData.user);
   const [{ data: professional }, { data: profile }, { data: demandCities }] = await Promise.all([
     supabase
       .from("professionals")

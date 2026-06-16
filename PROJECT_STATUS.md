@@ -40,6 +40,8 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Acoes principais da Minha Area profissional receberam botoes mais consistentes e menos quebrados em telas estreitas.
 - Perfis profissional e empresarial agora carregam automaticamente dados ja informados no cadastro, incluindo contato, documentos e endereco.
 - Edicao dos perfis preserva dados existentes no Supabase e cria fallback de empresa quando a conta antiga ainda nao possui linha completa em `companies`.
+- Contas antigas/Google com `user_roles` mas sem linha publica agora passam por sincronizacao automatica para criar `profiles`, `professionals` ou `companies` ao abrir o perfil.
+- Banco permite perfil profissional parcial com `birth_date` nulo, evitando dados falsos para contas criadas pelo Google sem cadastro completo.
 - Script `npm run lint` atualizado para validacao TypeScript compativel com Next.js 16.
 - Suporte a email proprio de reset via Resend quando as variaveis seguras estiverem configuradas.
 - Guia AUTH_SETUP.md com configuracao de Supabase SMTP, URLs de redirect e Google OAuth/branding.

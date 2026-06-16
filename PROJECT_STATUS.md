@@ -38,6 +38,8 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Busca profissional na Minha Area agora tambem considera e exibe o nome da demanda publicada pela empresa.
 - Barra fixa de subgrupos do curriculo ficou compacta, recolhivel por seta e sem textos auxiliares ocupando espaco.
 - Acoes principais da Minha Area profissional receberam botoes mais consistentes e menos quebrados em telas estreitas.
+- Perfis profissional e empresarial agora carregam automaticamente dados ja informados no cadastro, incluindo contato, documentos e endereco.
+- Edicao dos perfis preserva dados existentes no Supabase e cria fallback de empresa quando a conta antiga ainda nao possui linha completa em `companies`.
 - Script `npm run lint` atualizado para validacao TypeScript compativel com Next.js 16.
 - Suporte a email proprio de reset via Resend quando as variaveis seguras estiverem configuradas.
 - Guia AUTH_SETUP.md com configuracao de Supabase SMTP, URLs de redirect e Google OAuth/branding.

@@ -9,14 +9,40 @@ export default async function ProfessionalProfilePage({ searchParams }: { search
   const supabase = await createServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const [{ data: professional }, { data: profile }, { data: demandCities }] = await Promise.all([
-    supabase.from("professionals").select("id,full_name,desired_role,city,state,phone,available_in_days,status").eq("user_id", userData.user?.id).maybeSingle(),
-    supabase.from("profiles").select("avatar_path").eq("id", userData.user?.id).maybeSingle(),
+    supabase
+      .from("professionals")
+      .select("id,full_name,email,cpf,birth_date,nationality,desired_role,city,state,phone,available_in_days,status,cep,street,address_number,neighborhood")
+      .eq("user_id", userData.user?.id)
+      .maybeSingle(),
+    supabase.from("profiles").select("full_name,email,phone,avatar_path,status").eq("id", userData.user?.id).maybeSingle(),
     supabase.from("demands").select("city,state").in("status", ["active", "screening"]).order("state").order("city")
   ]);
+
+  const authEmail = userData.user?.email ?? "";
+  const metadataName = String(userData.user?.user_metadata?.full_name ?? userData.user?.user_metadata?.name ?? "").trim();
+  const fallbackName = metadataName || profile?.full_name || professional?.full_name || authEmail.split("@")[0] || "";
+  const profileData = {
+    fullName: professional?.full_name || profile?.full_name || fallbackName,
+    email: professional?.email || profile?.email || authEmail,
+    phone: professional?.phone || profile?.phone || "",
+    cpf: professional?.cpf ?? "",
+    birthDate: professional?.birth_date ?? "",
+    nationality: professional?.nationality ?? "Brasileira",
+    desiredRole: professional?.desired_role ?? "A definir",
+    city: professional?.city ?? "",
+    state: professional?.state ?? "",
+    availableInDays: professional?.available_in_days ?? 0,
+    cep: professional?.cep ?? "",
+    street: professional?.street ?? "",
+    addressNumber: professional?.address_number ?? "",
+    neighborhood: professional?.neighborhood ?? "",
+    status: professional?.status ?? profile?.status ?? "pending"
+  };
+
   const { data: preferredCities } = professional?.id ? await supabase.from("professional_preferred_cities").select("city,state").eq("professional_id", professional.id) : { data: [] };
   const selectedCities = new Set((preferredCities ?? []).map((item) => `${item.city}|${item.state}`));
   const cityOptionsMap = new Map<string, CityOption>();
-  if (professional?.city && professional?.state) cityOptionsMap.set(`${professional.city}|${professional.state}`, { city: professional.city, state: professional.state });
+  if (profileData.city && profileData.state) cityOptionsMap.set(`${profileData.city}|${profileData.state}`, { city: profileData.city, state: profileData.state });
   for (const item of (demandCities ?? []) as CityOption[]) cityOptionsMap.set(`${item.city}|${item.state}`, item);
   const cityOptions = Array.from(cityOptionsMap.values()).slice(0, 24);
   const { data: avatarUrl } = profile?.avatar_path ? await supabase.storage.from("avatars").createSignedUrl(profile.avatar_path, 60 * 60) : { data: null };
@@ -34,7 +60,7 @@ export default async function ProfessionalProfilePage({ searchParams }: { search
                 <img src={avatarUrl.signedUrl} alt="Foto do perfil" className="size-24 border border-slate-200 object-cover" />
               ) : (
                 <div className="flex size-24 items-center justify-center border border-slate-200 bg-slate-100 text-2xl font-semibold text-slate-500">
-                  {(professional?.full_name ?? "P").slice(0, 1).toUpperCase()}
+                  {(profileData.fullName || "P").slice(0, 1).toUpperCase()}
                 </div>
               )}
               <label className="text-sm font-semibold">
@@ -45,12 +71,20 @@ export default async function ProfessionalProfilePage({ searchParams }: { search
             </div>
           </section>
           <div className="grid gap-4 md:grid-cols-2">
-            <label className="text-sm font-semibold">Nome completo<input name="fullName" required defaultValue={professional?.full_name ?? ""} className="field-input mt-2" /></label>
-            <label className="text-sm font-semibold">Cargo desejado<input name="desiredRole" required defaultValue={professional?.desired_role ?? ""} className="field-input mt-2" /></label>
-            <label className="text-sm font-semibold">Telefone<input name="phone" required defaultValue={professional?.phone ?? ""} className="field-input mt-2" /></label>
-            <label className="text-sm font-semibold">Disponibilidade em dias<input name="availableInDays" type="number" min="0" defaultValue={professional?.available_in_days ?? 0} className="field-input mt-2" /></label>
-            <label className="text-sm font-semibold">Cidade<input name="city" required defaultValue={professional?.city ?? ""} className="field-input mt-2" /></label>
-            <label className="text-sm font-semibold">Estado<input name="state" required maxLength={2} defaultValue={professional?.state ?? ""} className="field-input mt-2" /></label>
+            <label className="text-sm font-semibold">Nome completo<input name="fullName" required defaultValue={profileData.fullName} className="field-input mt-2" /></label>
+            <label className="text-sm font-semibold">Email<input name="email" type="email" defaultValue={profileData.email} className="field-input mt-2" /></label>
+            <label className="text-sm font-semibold">CPF<input name="cpf" defaultValue={profileData.cpf} className="field-input mt-2" /></label>
+            <label className="text-sm font-semibold">Data de nascimento<input name="birthDate" type="date" defaultValue={profileData.birthDate} className="field-input mt-2" /></label>
+            <label className="text-sm font-semibold">Nacionalidade<input name="nationality" defaultValue={profileData.nationality} className="field-input mt-2" /></label>
+            <label className="text-sm font-semibold">Cargo desejado<input name="desiredRole" required defaultValue={profileData.desiredRole} className="field-input mt-2" /></label>
+            <label className="text-sm font-semibold">Telefone<input name="phone" required defaultValue={profileData.phone} className="field-input mt-2" /></label>
+            <label className="text-sm font-semibold">Disponibilidade em dias<input name="availableInDays" type="number" min="0" defaultValue={profileData.availableInDays} className="field-input mt-2" /></label>
+            <label className="text-sm font-semibold">CEP<input name="cep" defaultValue={profileData.cep} className="field-input mt-2" /></label>
+            <label className="text-sm font-semibold">Endereco<input name="street" defaultValue={profileData.street} className="field-input mt-2" /></label>
+            <label className="text-sm font-semibold">Numero<input name="addressNumber" defaultValue={profileData.addressNumber} className="field-input mt-2" /></label>
+            <label className="text-sm font-semibold">Bairro<input name="neighborhood" defaultValue={profileData.neighborhood} className="field-input mt-2" /></label>
+            <label className="text-sm font-semibold">Cidade<input name="city" required defaultValue={profileData.city} className="field-input mt-2" /></label>
+            <label className="text-sm font-semibold">Estado<input name="state" required maxLength={2} defaultValue={profileData.state} className="field-input mt-2" /></label>
           </div>
           <section className="mt-6">
             <h2 className="font-semibold">Cidades para receber vagas</h2>
@@ -72,7 +106,7 @@ export default async function ProfessionalProfilePage({ searchParams }: { search
         </form>
         <aside className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="font-semibold">Status cadastral</h2>
-          <p className="mt-3 rounded-md bg-slate-50 p-3 text-sm">{professional?.status ?? "pending"}</p>
+          <p className="mt-3 rounded-md bg-slate-50 p-3 text-sm">{profileData.status}</p>
           <p className="mt-3 text-sm leading-6 text-slate-600">Esses dados alimentam o motor de compatibilidade, a triagem e os encaminhamentos.</p>
         </aside>
       </div>

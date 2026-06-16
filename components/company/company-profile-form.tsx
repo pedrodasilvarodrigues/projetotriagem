@@ -43,6 +43,7 @@ type CompanyProfileFormProps = {
   } | null;
   contact?: {
     name?: string | null;
+    email?: string | null;
     role_title?: string | null;
     phone?: string | null;
   } | null;
@@ -78,6 +79,7 @@ export function CompanyProfileForm({ action, company, contact }: CompanyProfileF
   const [neighborhood, setNeighborhood] = useState(company?.neighborhood ?? "");
   const [city, setCity] = useState(company?.city ?? "");
   const [state, setState] = useState(company?.state ?? "");
+  const [contactEmail, setContactEmail] = useState(contact?.email ?? company?.corporate_email ?? "");
   const [contactPhone, setContactPhone] = useState(maskPhone(contact?.phone ?? ""));
 
   async function lookupCnpj(value: string) {
@@ -168,6 +170,7 @@ export function CompanyProfileForm({ action, company, contact }: CompanyProfileF
         <label className="text-sm font-semibold">Estado<input name="state" maxLength={2} disabled={!editing} value={state} onChange={(event) => setState(event.target.value.toUpperCase().slice(0, 2))} className="field-input mt-2 disabled:bg-slate-100" /></label>
         <label className="text-sm font-semibold">Responsavel<input name="contactName" disabled={!editing} defaultValue={contact?.name ?? ""} className="field-input mt-2 disabled:bg-slate-100" /></label>
         <label className="text-sm font-semibold">Cargo do responsavel<input name="contactRole" disabled={!editing} defaultValue={contact?.role_title ?? ""} className="field-input mt-2 disabled:bg-slate-100" /></label>
+        <label className="text-sm font-semibold">Email do responsavel<input name="contactEmail" type="email" disabled={!editing} value={contactEmail} onChange={(event) => setContactEmail(event.target.value)} className="field-input mt-2 disabled:bg-slate-100" /></label>
         <label className="text-sm font-semibold">Telefone do responsavel<input name="contactPhone" disabled={!editing} value={contactPhone} onChange={(event) => setContactPhone(maskPhone(event.target.value))} className="field-input mt-2 disabled:bg-slate-100" /></label>
         <label className="text-sm font-semibold md:col-span-2">Descricao<textarea name="description" disabled={!editing} defaultValue={company?.description ?? ""} className="field-input mt-2 min-h-28 disabled:bg-slate-100" /></label>
       </div>

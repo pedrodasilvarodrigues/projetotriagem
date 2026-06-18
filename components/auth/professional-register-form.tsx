@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Eye, EyeOff, Loader2, MapPin } from "lucide-react";
+import { BirthDateInput } from "@/components/auth/birth-date-input";
 import { ConsentFields } from "@/components/auth/onboarding-layout";
 import { registerProfessionalWithEmailAction } from "@/lib/actions/auth";
 
@@ -112,7 +113,7 @@ export function ProfessionalRegisterForm({ error }: { error?: string }) {
         </label>
         <label className="block text-sm font-medium text-slate-800">
           Data de Nascimento
-          <input name="birthDate" required type="date" className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-950 transition focus:border-blue-700" />
+          <BirthDateInput className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-950 transition focus:border-blue-700" />
         </label>
       </fieldset>
 

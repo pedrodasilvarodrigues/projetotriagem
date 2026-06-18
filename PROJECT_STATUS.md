@@ -19,11 +19,13 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Exportacao de curriculo em PDF respeitando modelo, cor e pretensao salarial selecionados.
 - Configuracoes profissionais com grupos clicaveis e opcao de idioma local.
 - Recuperacao de senha apontando para o dominio oficial da Vercel, com rota /auth/confirm para links por token hash.
+- Recuperacao de senha agora registra tentativas em `email_logs`, usa Resend quando configurado e avisa quando cair no provedor padrao limitado do Supabase.
 - Reenvio de confirmacao de cadastro pela pagina /confirm-email, com mensagens de erro do Supabase traduzidas para o usuario.
 - Cadastro por email/senha cria usuarios ja confirmados via Supabase Admin API, removendo bloqueio por email de confirmacao na entrada inicial.
 - Login com Google sem perfil cadastrado encerra a sessao local e volta ao login com mensagem clara, sem prender o usuario no cadastro.
 - Onboarding possui acao visivel de sair da conta e rota dedicada `/auth/sign-out`.
 - Cadastro empresarial aceita email corporativo opcional, usando o email de acesso como fallback quando necessario.
+- Cadastro profissional permite digitar a data de nascimento em `dd/mm/aaaa`, com mascara e validacao, sem navegar manualmente pelo calendario.
 - Callback de autenticacao e confirmacao automatica de emails antigos estao protegidos contra erro 500, redirecionando para mensagens controladas no login.
 - Pagina `/confirm-email` tenta liberar o acesso diretamente via Supabase Admin API antes de usar reenvio de email do Supabase.
 - Recuperacao de senha trata limite de 1 minuto do Supabase como solicitacao recente, sem exibir erro vermelho de falha.

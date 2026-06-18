@@ -4,6 +4,7 @@ import { requestPasswordResetAction } from "@/lib/actions/auth";
 
 const messageMap: Record<string, string> = {
   "email-enviado": "Enviamos as instrucoes para o email informado.",
+  "email-solicitado-supabase": "Solicitamos o envio pelo Supabase. Se o email nao chegar, configure um SMTP/Resend para entrega confiavel.",
   "email-recente": "Ja existe uma solicitacao recente para esse email. Confira sua caixa de entrada e tente novamente em cerca de 1 minuto se precisar de outro link."
 };
 

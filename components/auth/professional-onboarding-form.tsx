@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BirthDateInput } from "@/components/auth/birth-date-input";
 import { ConsentFields } from "@/components/auth/onboarding-layout";
 import { saveProfessionalBasicsAction } from "@/lib/actions/onboarding";
 
@@ -68,7 +69,7 @@ export function ProfessionalOnboardingForm({ email, error }: { email: string; er
         <label className="block text-sm font-medium text-slate-800">CPF<input name="cpf" required inputMode="numeric" value={cpf} onChange={(event) => setCpf(maskCpf(event.target.value))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
         <label className="block text-sm font-medium text-slate-800">Telefone<input name="phone" required inputMode="numeric" value={phone} onChange={(event) => setPhone(maskPhone(event.target.value))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
         <label className="block text-sm font-medium text-slate-800">Email<input name="email" required type="email" defaultValue={email} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
-        <label className="block text-sm font-medium text-slate-800">Data de Nascimento<input name="birthDate" required type="date" className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
+        <label className="block text-sm font-medium text-slate-800">Data de Nascimento<BirthDateInput className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
         <label className="block text-sm font-medium text-slate-800">CEP<input name="cep" required inputMode="numeric" value={cep} onBlur={(event) => lookupCep(event.target.value)} onChange={(event) => setCep(maskCep(event.target.value))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
         <label className="block text-sm font-medium text-slate-800 md:col-span-2">Endereco<input name="street" required value={street} onChange={(event) => setStreet(event.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
         <label className="block text-sm font-medium text-slate-800">Numero<input name="addressNumber" required className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>

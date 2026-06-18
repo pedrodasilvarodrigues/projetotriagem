@@ -171,6 +171,23 @@ function logAuthError(event: string, error: unknown, details?: Record<string, un
   console.error(`[auth] ${event}`, { ...details, error: message });
 }
 
+async function recordAuthEmailAttempt(input: { recipient: string; templateKey: string; providerId: string; status: string; errorMessage?: string | null }) {
+  if (!canUseAdminClient()) return;
+
+  try {
+    const admin = createAdminClient();
+    await admin.from("email_logs").insert({
+      recipient: input.recipient,
+      template_key: input.templateKey,
+      provider_id: input.providerId,
+      status: input.status,
+      error_message: input.errorMessage?.slice(0, 500) ?? null
+    });
+  } catch (error) {
+    logAuthError("Falha ao registrar tentativa de email", error, { recipient: input.recipient, templateKey: input.templateKey });
+  }
+}
+
 async function findAuthUserByEmail(client: ReturnType<typeof createAdminClient>, email: string) {
   const normalizedEmail = email.trim().toLowerCase();
 
@@ -506,14 +523,14 @@ export async function requestPasswordResetAction(formData: FormData) {
 
   const supabase = await createServerClient();
   const origin = await getAuthRedirectOrigin();
-  let brandedEmailSent = false;
+  const recipient = parsed.data.email;
 
   if (canSendBrandedAuthEmail()) {
     try {
       const admin = createAdminClient();
       const { data, error } = await admin.auth.admin.generateLink({
         type: "recovery",
-        email: parsed.data.email,
+        email: recipient,
         options: {
           redirectTo: `${origin}/auth/callback?next=/update-password`
         }
@@ -527,30 +544,71 @@ export async function requestPasswordResetAction(formData: FormData) {
         resetUrl.searchParams.set("next", "/update-password");
 
         const { error: emailError } = await sendTransactionalEmail({
-          to: parsed.data.email,
+          to: recipient,
           template: "password_reset",
           variables: { url: resetUrl.toString() }
         });
 
-        brandedEmailSent = !emailError;
+        if (!emailError) {
+          await recordAuthEmailAttempt({ recipient, templateKey: "password_reset", providerId: "resend", status: "sent" });
+          redirect("/forgot-password?message=email-enviado");
+        }
+
+        await recordAuthEmailAttempt({
+          recipient,
+          templateKey: "password_reset",
+          providerId: "resend",
+          status: "failed",
+          errorMessage: emailError.message
+        });
+        logAuthError("Falha ao enviar recuperacao via Resend", emailError, { recipient });
+      } else {
+        await recordAuthEmailAttempt({
+          recipient,
+          templateKey: "password_reset",
+          providerId: "supabase-admin-generate-link",
+          status: "failed",
+          errorMessage: error?.message ?? "Token de recuperacao nao foi gerado."
+        });
+        if (error) logAuthError("Falha ao gerar link de recuperacao", error, { recipient });
       }
-    } catch {
-      // If the branded sender is not ready, keep the recovery flow working through Supabase Auth.
+    } catch (error) {
+      await recordAuthEmailAttempt({
+        recipient,
+        templateKey: "password_reset",
+        providerId: "resend",
+        status: "failed",
+        errorMessage: error instanceof Error ? error.message : String(error)
+      });
+      logAuthError("Excecao no envio de recuperacao via Resend", error, { recipient });
     }
   }
 
-  if (brandedEmailSent) redirect("/forgot-password?message=email-enviado");
-
-  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+  const { error } = await supabase.auth.resetPasswordForEmail(recipient, {
     redirectTo: `${origin}/auth/callback?next=/update-password`
   });
 
   if (error) {
     const code = authErrorCode(error);
+    await recordAuthEmailAttempt({
+      recipient,
+      templateKey: "password_reset",
+      providerId: "supabase-auth",
+      status: "failed",
+      errorMessage: error.message
+    });
     if (code === "aguarde-um-minuto") redirect("/forgot-password?message=email-recente");
     redirect(`/forgot-password?error=${code}`);
   }
-  redirect("/forgot-password?message=email-enviado");
+
+  await recordAuthEmailAttempt({
+    recipient,
+    templateKey: "password_reset",
+    providerId: "supabase-auth",
+    status: "requested",
+    errorMessage: canSendBrandedAuthEmail() ? "Fallback usado apos falha do Resend." : "Envio solicitado pelo provedor padrao do Supabase. Configure SMTP/Resend para entrega confiavel."
+  });
+  redirect(canSendBrandedAuthEmail() ? "/forgot-password?message=email-enviado" : "/forgot-password?message=email-solicitado-supabase");
 }
 
 export async function resendSignupConfirmationAction(formData: FormData) {

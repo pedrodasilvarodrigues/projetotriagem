@@ -33,6 +33,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Proxy usa `maybeSingle()` para roles, trata usuario sem role/perfil via onboarding e evita erro 500 em rotas protegidas.
 - Aliases `/profissional` e `/empresa` redirecionam para `/professional` e `/company`.
 - Login com Google pela tela de entrar nao prende mais o usuario no onboarding; contas sem cadastro completo voltam ao login com mensagem controlada.
+- Inicio do Google OAuth redireciona fora do `try/catch`, evitando que a excecao interna do Next.js seja tratada como falha de login.
 - Perfil da empresa passou a aceitar campos complementares sem obrigatoriedade e preserva os dados ja existentes quando o usuario salva campos em branco.
 - Preferencia de idioma agora atualiza a interface autenticada com persistencia no banco, traducao no menu e tradutor em tempo de execucao para textos principais.
 - Tradutor em tempo de execucao nao reprocessa mais o mesmo texto em ciclo; troca de idioma na area empresarial permanece responsiva.

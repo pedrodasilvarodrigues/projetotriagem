@@ -340,6 +340,8 @@ async function saveCompanySignup(client: ReturnType<typeof createAdminClient>, u
 export async function signInWithGoogleAction(formData?: FormData) {
   if (!hasSupabasePublicEnv()) redirect("/login?error=configuracao-supabase-incompleta");
 
+  let target = "/login?error=nao-foi-possivel-iniciar-google";
+
   try {
     const supabase = await createServerClient();
     const origin = await getAuthRedirectOrigin();
@@ -361,15 +363,16 @@ export async function signInWithGoogleAction(formData?: FormData) {
 
     if (error || !data.url) {
       logAuthError("Falha ao iniciar login Google", error ?? "missing-google-url", { redirectTo: callbackUrl.toString() });
-      redirect(`/login?error=${encodeURIComponent(error?.message ?? "nao-foi-possivel-iniciar-google")}`);
+      target = `/login?error=${encodeURIComponent(error?.message ?? "nao-foi-possivel-iniciar-google")}`;
+    } else {
+      logAuth("Redirecionando para Google OAuth", { redirectTo: callbackUrl.toString() });
+      target = data.url;
     }
-
-    logAuth("Redirecionando para Google OAuth", { redirectTo: callbackUrl.toString() });
-    redirect(data.url);
   } catch (error) {
     logAuthError("Excecao inesperada ao iniciar Google OAuth", error);
-    redirect("/login?error=nao-foi-possivel-iniciar-google");
   }
+
+  redirect(target);
 }
 
 export async function signInWithEmailAction(formData: FormData) {

@@ -31,7 +31,10 @@ function translateTextNodes(root: HTMLElement, language: AppLanguage) {
 
     const translated = dictionary?.[normalized];
     if (translated) {
-      updates.push({ node: current, text: originalValue.replace(normalized, translated) });
+      const translatedValue = originalValue.replace(normalized, translated);
+      if (currentValue !== translatedValue) {
+        updates.push({ node: current, text: translatedValue });
+      }
     }
   }
 
@@ -43,9 +46,21 @@ function translateTextNodes(root: HTMLElement, language: AppLanguage) {
 export function LanguageRuntime({ preferredLanguage }: { preferredLanguage: AppLanguage }) {
   useEffect(() => {
     translateTextNodes(document.body, preferredLanguage);
+    let frameId: number | null = null;
 
     const observer = new MutationObserver(() => {
-      translateTextNodes(document.body, preferredLanguage);
+      if (frameId !== null) return;
+
+      frameId = window.requestAnimationFrame(() => {
+        frameId = null;
+        observer.disconnect();
+        translateTextNodes(document.body, preferredLanguage);
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true,
+          characterData: true
+        });
+      });
     });
 
     observer.observe(document.body, {
@@ -54,7 +69,10 @@ export function LanguageRuntime({ preferredLanguage }: { preferredLanguage: AppL
       characterData: true
     });
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (frameId !== null) window.cancelAnimationFrame(frameId);
+    };
   }, [preferredLanguage]);
 
   return null;

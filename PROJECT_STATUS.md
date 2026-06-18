@@ -35,6 +35,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Login com Google pela tela de entrar nao prende mais o usuario no onboarding; contas sem cadastro completo voltam ao login com mensagem controlada.
 - Perfil da empresa passou a aceitar campos complementares sem obrigatoriedade e preserva os dados ja existentes quando o usuario salva campos em branco.
 - Preferencia de idioma agora atualiza a interface autenticada com persistencia no banco, traducao no menu e tradutor em tempo de execucao para textos principais.
+- Tradutor em tempo de execucao nao reprocessa mais o mesmo texto em ciclo; troca de idioma na area empresarial permanece responsiva.
 - Area profissional ganhou a aba `/professional/search-demands` para listar todas as demandas abertas com empresa, local e modalidade.
 - Minha Area profissional agora exibe tambem empresas com vagas abertas, deixando as empresas visiveis para os profissionais.
 - Busca profissional na Minha Area agora tambem considera e exibe o nome da demanda publicada pela empresa.

@@ -47,7 +47,7 @@ export default async function AdminDemandsPage({ searchParams }: { searchParams:
         {params.error ? <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">Nao foi possivel concluir: {params.error}</p> : null}
         {params.message ? <p className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">Operacao realizada.</p> : null}
 
-        <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <section id="criar" className="scroll-mt-24 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
           <h2 className="text-lg font-semibold">Criar demanda</h2>
           <form action={createAdminDemandAction} className="mt-4 grid gap-3 md:grid-cols-2">
             <label className="text-sm font-semibold md:col-span-2">Empresa<select name="companyId" required className="field-input mt-2"><option value="">Selecionar empresa</option>{(companies ?? []).map((company) => <option key={company.id} value={company.id}>{company.trade_name}</option>)}</select></label>
@@ -77,7 +77,7 @@ export default async function AdminDemandsPage({ searchParams }: { searchParams:
           </form>
         </section>
 
-        <section className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
+        <section id="status" className="scroll-mt-24 rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
           <table className="data-table">
             <thead><tr><th>Demanda</th><th>Requisitos</th><th>Compatibilidades</th><th>Status</th><th>Controle</th></tr></thead>
             <tbody>

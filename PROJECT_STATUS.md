@@ -32,6 +32,8 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Configuracoes administrativas globais estruturadas para Termos, Privacidade, LGPD, emails automaticos, categorias, areas de atuacao e parametros do sistema.
 - Alias `/administrador` criado apontando para `/admin`; acesso segue protegido por `requireRole("admin")`.
 - Navegacao da area admin agora usa menu lateral fixo no desktop e gaveta lateral no mobile acionada por botao de tres tracos, sem afetar profissional ou empresa.
+- Dashboard administrativo simples adicionado na entrada `/admin`, com contagens reais de profissionais, empresas, demandas, processos, apresentacoes e contratacoes.
+- Menu administrativo reorganizado por subgrupos operacionais, exibindo acoes disponiveis para profissionais, empresas, demandas, processos e gestao.
 - Area de curriculo com painel de qualidade, checklist de preenchimento e proximos ajustes recomendados.
 - Navegacao superior por subgrupos na area de curriculo.
 - Painel de personalizacao para baixar CV com 3 modelos, 7 cores e opcao de pretensao salarial.

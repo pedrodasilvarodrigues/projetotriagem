@@ -28,7 +28,7 @@ export default async function AdminProfessionalsPage({ searchParams }: { searchP
         {params.error ? <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">Nao foi possivel concluir: {params.error}</p> : null}
         {params.message ? <p className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">Operacao realizada.</p> : null}
 
-        <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <section id="buscar" className="scroll-mt-24 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
           <h2 className="text-lg font-semibold">Buscar e filtrar profissionais</h2>
           <form className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_180px_auto]" action="/admin/professionals">
             <input name="q" defaultValue={params.q ?? ""} className="field-input" placeholder="Nome, email ou cargo" />
@@ -44,7 +44,8 @@ export default async function AdminProfessionalsPage({ searchParams }: { searchP
           </form>
         </section>
 
-        <section className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
+        <section id="apresentar" className="scroll-mt-24 rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
+          <span id="status" className="block scroll-mt-24" />
           <div className="mb-4">
             <h2 className="text-lg font-semibold">Gerenciamento completo</h2>
             <p className="text-sm text-slate-600">Visualize, bloqueie, arquive, reative e apresente profissionais para empresas.</p>

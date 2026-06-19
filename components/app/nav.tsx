@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Archive,
   Bell,
   BriefcaseBusiness,
   Building2,
@@ -17,13 +18,18 @@ import {
   LayoutGrid,
   LogOut,
   Menu,
+  Pencil,
   Plug,
+  RotateCcw,
   Search,
+  Send,
   Settings,
   ShieldCheck,
   UserRoundCheck,
   UserRoundCog,
   UserRoundSearch,
+  UserPlus,
+  UserX,
   X,
   type LucideIcon
 } from "lucide-react";
@@ -78,11 +84,73 @@ const navItems = {
   }
 } satisfies Record<AppRole, { title: string; subtitle: string; items: Array<{ href: string; label: string; icon: LucideIcon }> }>;
 
+const adminNavGroups = [
+  {
+    label: "Visao geral",
+    items: [
+      { href: "/admin", label: "Dashboard", icon: LayoutGrid }
+    ]
+  },
+  {
+    label: "Profissionais",
+    items: [
+      { href: "/admin/professionals", label: "Listar profissionais", icon: UserRoundSearch },
+      { href: "/admin/professionals#buscar", label: "Pesquisar / filtrar", icon: Search },
+      { href: "/admin/professionals#apresentar", label: "Encaminhar profissional", icon: Send },
+      { href: "/admin/professionals#status", label: "Editar / bloquear", icon: Pencil },
+      { href: "/admin/professionals#status", label: "Arquivar / reativar", icon: UserX },
+      { href: "/admin/professionals", label: "Adicionar profissional", icon: UserPlus }
+    ]
+  },
+  {
+    label: "Empresas",
+    items: [
+      { href: "/admin/companies", label: "Listar empresas", icon: Building2 },
+      { href: "/admin/companies#buscar", label: "Pesquisar / filtrar", icon: Search },
+      { href: "/admin/companies#status", label: "Editar / bloquear", icon: Pencil },
+      { href: "/admin/companies#status", label: "Arquivar / reativar", icon: Archive },
+      { href: "/admin/companies", label: "Ver demandas da empresa", icon: BriefcaseBusiness }
+    ]
+  },
+  {
+    label: "Demandas",
+    items: [
+      { href: "/admin/demands", label: "Listar demandas", icon: ClipboardCheck },
+      { href: "/admin/demands#criar", label: "Criar demanda", icon: BriefcaseBusiness },
+      { href: "/admin/demands#status", label: "Encerrar / reabrir", icon: RotateCcw },
+      { href: "/admin/demands#status", label: "Arquivar demanda", icon: Archive }
+    ]
+  },
+  {
+    label: "Processos",
+    items: [
+      { href: "/admin/processes", label: "Acompanhar processos", icon: ClipboardCheck },
+      { href: "/admin/processes", label: "Alterar status", icon: Pencil },
+      { href: "/admin/processes", label: "Registrar entrevista", icon: FileText }
+    ]
+  },
+  {
+    label: "Gestao",
+    items: [
+      { href: "/admin/courses", label: "Cursos", icon: GraduationCap },
+      { href: "/admin/reports", label: "Relatorios", icon: FileText },
+      { href: "/admin/settings", label: "Configuracoes", icon: Settings },
+      { href: "/admin/trainings", label: "Treinamentos", icon: ShieldCheck },
+      { href: "/admin/institutions", label: "Instituicoes", icon: Landmark },
+      { href: "/admin/integrations", label: "Integracoes", icon: Plug }
+    ]
+  }
+] satisfies Array<{ label: string; items: Array<{ href: string; label: string; icon: LucideIcon }> }>;
+
 export function AppNav({ role, preferredLanguage }: { role: AppRole; preferredLanguage: AppLanguage }) {
   const nav = navItems[role];
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
+  const isActiveHref = (href: string) => {
+    const cleanHref = href.split("#")[0];
+    return pathname === cleanHref || (cleanHref !== "/admin" && pathname.startsWith(`${cleanHref}/`));
+  };
   const translated = useMemo(() => ({
     title: translateUi(nav.title, preferredLanguage),
     subtitle:
@@ -176,28 +244,33 @@ export function AppNav({ role, preferredLanguage }: { role: AppRole; preferredLa
               </button>
             </div>
 
-            <nav aria-label={`Menu ${translated.title}`} className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-3 py-4">
-                {nav.items.map((item) => {
-                  const isActive = pathname === item.href || (item.href !== nav.items[0].href && pathname.startsWith(`${item.href}/`));
+            <nav aria-label={`Menu ${translated.title}`} className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-3 py-4">
+              {adminNavGroups.map((group) => (
+                <div key={group.label} className="space-y-1">
+                  <p className="px-3 text-[0.65rem] font-bold uppercase tracking-[0.18em] text-slate-400">{group.label}</p>
+                  {group.items.map((item) => {
+                    const isActive = isActiveHref(item.href);
 
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setIsAdminMenuOpen(false)}
-                      aria-current={isActive ? "page" : undefined}
-                      className={[
-                        "inline-flex min-h-11 min-w-0 items-center gap-3 border px-3 py-2 text-sm font-semibold transition",
-                        isActive
-                          ? "border-[#d6a238] bg-[#d6a238] text-[#18212f]"
-                          : "border-transparent text-slate-200 hover:border-white/25 hover:bg-white/10 hover:text-white"
-                      ].join(" ")}
-                    >
-                      <item.icon aria-hidden="true" className="shrink-0" size={18} />
-                      <span className="min-w-0 truncate">{translateUi(item.label, preferredLanguage)}</span>
-                    </Link>
-                  );
-                })}
+                    return (
+                      <Link
+                        key={`${group.label}-${item.href}-${item.label}`}
+                        href={item.href}
+                        onClick={() => setIsAdminMenuOpen(false)}
+                        aria-current={isActive ? "page" : undefined}
+                        className={[
+                          "inline-flex min-h-10 w-full min-w-0 items-center gap-3 border px-3 py-2 text-sm font-semibold transition",
+                          isActive
+                            ? "border-[#d6a238] bg-[#d6a238] text-[#18212f]"
+                            : "border-transparent text-slate-200 hover:border-white/25 hover:bg-white/10 hover:text-white"
+                        ].join(" ")}
+                      >
+                        <item.icon aria-hidden="true" className="shrink-0" size={17} />
+                        <span className="min-w-0 truncate">{translateUi(item.label, preferredLanguage)}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              ))}
             </nav>
 
             <div className="border-t border-white/10 p-3">
@@ -226,27 +299,32 @@ export function AppNav({ role, preferredLanguage }: { role: AppRole; preferredLa
             </Link>
           </div>
 
-          <nav aria-label={`Menu ${translated.title}`} className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-3 py-4">
-            {nav.items.map((item) => {
-              const isActive = pathname === item.href || (item.href !== nav.items[0].href && pathname.startsWith(`${item.href}/`));
+          <nav aria-label={`Menu ${translated.title}`} className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-3 py-4">
+            {adminNavGroups.map((group) => (
+              <div key={group.label} className="space-y-1">
+                <p className="px-3 text-[0.65rem] font-bold uppercase tracking-[0.18em] text-slate-400">{group.label}</p>
+                {group.items.map((item) => {
+                  const isActive = isActiveHref(item.href);
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={isActive ? "page" : undefined}
-                  className={[
-                    "inline-flex min-h-11 items-center gap-3 border px-3 py-2 text-sm font-semibold transition",
-                    isActive
-                      ? "border-[#d6a238] bg-[#d6a238] text-[#18212f] shadow-sm"
-                      : "border-transparent text-slate-200 hover:border-white/20 hover:bg-white/10 hover:text-white"
-                  ].join(" ")}
-                >
-                  <item.icon aria-hidden="true" className="shrink-0" size={18} />
-                  <span className="truncate">{translateUi(item.label, preferredLanguage)}</span>
-                </Link>
-              );
-            })}
+                  return (
+                    <Link
+                      key={`${group.label}-${item.href}-${item.label}`}
+                      href={item.href}
+                      aria-current={isActive ? "page" : undefined}
+                      className={[
+                        "inline-flex min-h-10 w-full items-center gap-3 border px-3 py-2 text-sm font-semibold transition",
+                        isActive
+                          ? "border-[#d6a238] bg-[#d6a238] text-[#18212f] shadow-sm"
+                          : "border-transparent text-slate-200 hover:border-white/20 hover:bg-white/10 hover:text-white"
+                      ].join(" ")}
+                    >
+                      <item.icon aria-hidden="true" className="shrink-0" size={17} />
+                      <span className="truncate">{translateUi(item.label, preferredLanguage)}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            ))}
           </nav>
 
           <div className="border-t border-white/10 p-3">

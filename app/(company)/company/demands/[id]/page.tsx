@@ -1,6 +1,6 @@
 import { AppShell } from "@/components/app/shell";
 import { CompanyDemandForm } from "@/components/company/company-demand-form";
-import { deleteDemandAction, updateDemandAction } from "@/lib/actions/workspace";
+import { closeDemandAction, deleteDemandAction, updateDemandAction } from "@/lib/actions/workspace";
 import { createServerClient } from "@/lib/supabase/server";
 
 type DemandPageParams = {
@@ -62,6 +62,20 @@ export default async function CompanyDemandEditPage({
             status: demand.status
           }}
         />
+
+        {!['closed', 'cancelled'].includes(demand.status) ? (
+          <form action={closeDemandAction} className="rounded-lg border border-slate-300 bg-white p-5 shadow-sm">
+            <input type="hidden" name="demandId" value={demand.id} />
+            <input type="hidden" name="redirectTo" value={`/company/demands/${demand.id}`} />
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900">Encerrar demanda</h2>
+                <p className="mt-1 text-sm text-slate-600">Use esta opcao quando a vaga ja tiver sido preenchida. A demanda deixa de receber novos candidatos.</p>
+              </div>
+              <button className="rounded-md bg-slate-800 px-4 py-2 text-sm font-semibold text-white" type="submit">Encerrar demanda</button>
+            </div>
+          </form>
+        ) : null}
 
         <form action={deleteDemandAction} className="rounded-lg border border-red-200 bg-red-50 p-5 shadow-sm">
           <input type="hidden" name="demandId" value={demand.id} />

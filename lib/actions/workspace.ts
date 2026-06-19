@@ -945,6 +945,43 @@ export async function deleteDemandAction(formData: FormData) {
   redirect("/company/demands?message=demanda-excluida");
 }
 
+export async function closeDemandAction(formData: FormData) {
+  await requireRole("company");
+
+  const demandId = String(formData.get("demandId") ?? "").trim();
+  const redirectTo = String(formData.get("redirectTo") ?? "/company/demands");
+  if (!demandId) redirect(encodeRouteMessage(redirectTo, "error", "demanda-invalida"));
+
+  const supabase = await createServerClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) redirect("/login");
+
+  const { data: company } = await supabase.from("companies").select("id").eq("owner_id", userData.user.id).maybeSingle();
+  if (!company?.id) redirect("/company/profile?error=complete-empresa");
+
+  const { data: closedDemand, error } = await supabase
+    .from("demands")
+    .update({ status: "closed", deleted_at: null })
+    .eq("id", demandId)
+    .eq("company_id", company.id)
+    .neq("status", "cancelled")
+    .select("id")
+    .maybeSingle();
+
+  if (error || !closedDemand?.id) {
+    redirect(encodeRouteMessage(redirectTo, "error", error?.message ?? "demanda-nao-encontrada"));
+  }
+
+  revalidatePath("/company");
+  revalidatePath("/company/demands");
+  revalidatePath(`/company/demands/${demandId}`);
+  revalidatePath("/company/candidates");
+  revalidatePath("/professional");
+  revalidatePath("/professional/search-demands");
+  revalidatePath("/vagas-publicas");
+  redirect(encodeRouteMessage(redirectTo, "message", "demanda-encerrada"));
+}
+
 export async function markNotificationsReadAction() {
   const supabase = await createServerClient();
   const { data } = await supabase.auth.getUser();

@@ -289,7 +289,7 @@ export function AppNav({ role, preferredLanguage }: { role: AppRole; preferredLa
         </div>
 
         <div className={`${isCollapsed ? "hidden" : "mt-4"}`}>
-          <nav aria-label={`Menu ${translated.title}`} className="grid max-w-full grid-cols-2 gap-2 border border-white/15 bg-white/8 p-1 sm:flex sm:gap-1 sm:overflow-x-auto">
+          <nav aria-label={`Menu ${translated.title}`} className="flex max-w-full gap-1 overflow-x-auto border border-white/15 bg-white/8 p-1">
             {nav.items.map((item) => {
               const isActive = pathname === item.href || (item.href !== nav.items[0].href && pathname.startsWith(`${item.href}/`));
 
@@ -299,7 +299,7 @@ export function AppNav({ role, preferredLanguage }: { role: AppRole; preferredLa
                   href={item.href}
                   aria-current={isActive ? "page" : undefined}
                   className={[
-                    "inline-flex min-h-10 min-w-0 items-center justify-center gap-2 border px-2 py-2 text-center text-xs font-semibold transition sm:shrink-0 sm:justify-start sm:px-3 sm:text-left sm:text-sm",
+                    "inline-flex min-h-10 shrink-0 items-center justify-start gap-2 border px-3 py-2 text-left text-xs font-semibold transition sm:text-sm",
                     isActive
                       ? "border-[#d6a238] bg-[#d6a238] text-[#18212f]"
                       : "border-transparent text-slate-200 hover:border-white/25 hover:bg-white/10 hover:text-white"
@@ -310,8 +310,8 @@ export function AppNav({ role, preferredLanguage }: { role: AppRole; preferredLa
                 </Link>
               );
             })}
-            <form action={signOutAction} className="contents sm:block">
-              <button className="inline-flex min-h-10 min-w-0 items-center justify-center gap-2 border border-transparent px-2 py-2 text-center text-xs font-semibold text-slate-200 transition hover:border-red-300/60 hover:bg-red-500/15 hover:text-white sm:shrink-0 sm:justify-start sm:px-3 sm:text-left sm:text-sm" type="submit">
+            <form action={signOutAction} className="shrink-0">
+              <button className="inline-flex min-h-10 shrink-0 items-center justify-start gap-2 border border-transparent px-3 py-2 text-left text-xs font-semibold text-slate-200 transition hover:border-red-300/60 hover:bg-red-500/15 hover:text-white sm:text-sm" type="submit">
                 <LogOut aria-hidden="true" size={16} />
                 <span className="min-w-0 truncate">{preferredLanguage === "en-US" ? "Sign out" : preferredLanguage === "es-ES" ? "Salir" : "Sair"}</span>
               </button>

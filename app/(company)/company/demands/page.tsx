@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app/shell";
+import { closeDemandAction } from "@/lib/actions/workspace";
 import { createServerClient } from "@/lib/supabase/server";
 
 export default async function CompanyDemandsPage({ searchParams }: { searchParams: Promise<{ message?: string; error?: string }> }) {
@@ -38,7 +39,18 @@ export default async function CompanyDemandsPage({ searchParams }: { searchParam
                   <td>{demand.city}/{demand.state}</td>
                   <td>{demand.status}</td>
                   <td>{new Date(demand.created_at).toLocaleDateString("pt-BR")}</td>
-                  <td><Link href={`/company/demands/${demand.id}`} className="font-semibold text-blue-700 hover:underline">Editar demanda</Link></td>
+                  <td>
+                    <div className="flex min-w-max items-center gap-3">
+                      <Link href={`/company/demands/${demand.id}`} className="font-semibold text-blue-700 hover:underline">Editar demanda</Link>
+                      {!['closed', 'cancelled'].includes(demand.status) ? (
+                        <form action={closeDemandAction}>
+                          <input type="hidden" name="demandId" value={demand.id} />
+                          <input type="hidden" name="redirectTo" value="/company/demands" />
+                          <button type="submit" className="rounded bg-slate-800 px-3 py-2 text-xs font-semibold text-white">Encerrar demanda</button>
+                        </form>
+                      ) : null}
+                    </div>
+                  </td>
                 </tr>
               ))}
               {(demands ?? []).length === 0 ? <tr><td colSpan={7}>Nenhuma demanda cadastrada.</td></tr> : null}

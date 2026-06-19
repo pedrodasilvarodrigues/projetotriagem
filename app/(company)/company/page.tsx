@@ -12,15 +12,32 @@ type CandidateRow = {
   status: string;
 };
 
+type PresentedCandidateRow = {
+  id: string;
+  status: string;
+  professional: CandidateRow | CandidateRow[] | null;
+  demand: { name: string | null; title: string; company_id: string } | Array<{ name: string | null; title: string; company_id: string }> | null;
+};
+
+function one<T>(value: T | T[] | null) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
 export default async function CompanyHomePage() {
   const supabase = await createServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const { data: company } = await supabase.from("companies").select("id,trade_name,city,state,status").eq("owner_id", userData.user?.id).maybeSingle();
-  const [{ count: activeDemands }, { count: candidatesInProcess }, { data: professionals }] = company?.id
+  const [{ count: activeDemands }, { count: candidatesInProcess }, { data: presentedCandidates }] = company?.id
     ? await Promise.all([
         supabase.from("demands").select("id", { count: "exact", head: true }).eq("company_id", company.id).in("status", ["active", "screening"]),
         supabase.from("screening_processes").select("id,demand:demands!inner(company_id)", { count: "exact", head: true }).eq("demand.company_id", company.id),
-        supabase.from("professionals").select("id,full_name,desired_role,city,state,education_level,status").is("deleted_at", null).order("updated_at", { ascending: false }).limit(8)
+        supabase
+          .from("screening_processes")
+          .select("id,status,updated_at,demand:demands!inner(name,title,company_id),professional:professionals!inner(id,full_name,desired_role,city,state,education_level,status)")
+          .eq("demand.company_id", company.id)
+          .neq("status", "waiting")
+          .order("updated_at", { ascending: false })
+          .limit(8)
       ])
     : [{ count: 0 }, { count: 0 }, { data: [] }];
 
@@ -45,24 +62,29 @@ export default async function CompanyHomePage() {
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-blue-700">Analise de candidatos</p>
-              <h3 className="mt-1 text-xl font-semibold">Profissionais cadastrados no portal</h3>
+              <h3 className="mt-1 text-xl font-semibold">Profissionais apresentados pelo administrador</h3>
             </div>
             <Link href="/company/candidates" className="text-sm font-semibold text-blue-700 hover:underline">Ver todos</Link>
           </div>
           <div className="overflow-x-auto">
             <table className="data-table">
-              <thead><tr><th>Candidato</th><th>Objetivo</th><th>Local</th><th>Escolaridade</th><th>Status</th></tr></thead>
+              <thead><tr><th>Candidato</th><th>Objetivo</th><th>Demanda</th><th>Escolaridade</th><th>Status</th></tr></thead>
               <tbody>
-                {((professionals ?? []) as unknown as CandidateRow[]).map((candidate) => (
-                  <tr key={candidate.id}>
-                    <td>{candidate.full_name}</td>
-                    <td>{candidate.desired_role}</td>
-                    <td>{candidate.city}/{candidate.state}</td>
-                    <td>{candidate.education_level}</td>
-                    <td>{candidate.status}</td>
-                  </tr>
-                ))}
-                {(professionals ?? []).length === 0 ? <tr><td colSpan={5}>Nenhum candidato cadastrado ainda.</td></tr> : null}
+                {((presentedCandidates ?? []) as unknown as PresentedCandidateRow[]).map((process) => {
+                  const candidate = one(process.professional);
+                  const demand = one(process.demand);
+                  if (!candidate || !demand) return null;
+                  return (
+                    <tr key={process.id}>
+                      <td>{candidate.full_name}</td>
+                      <td>{candidate.desired_role}</td>
+                      <td>{demand.name ?? demand.title}</td>
+                      <td>{candidate.education_level}</td>
+                      <td>{process.status}</td>
+                    </tr>
+                  );
+                })}
+                {(presentedCandidates ?? []).length === 0 ? <tr><td colSpan={5}>Nenhum candidato apresentado ainda.</td></tr> : null}
               </tbody>
             </table>
           </div>

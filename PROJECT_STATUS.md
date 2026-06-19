@@ -39,6 +39,9 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Criado catalogo de instituicoes com tabela `institutions`, RLS, status `active/pending/archived`, autocomplete inteligente em campos de Instituicao e cadastro de novas instituicoes como pendentes.
 - Area administrativa de Instituicoes implementada com listagem, pesquisa, edicao, aprovacao, arquivamento e exclusao.
 - Campos de data restantes em curriculo/onboarding foram trocados de calendario para digitacao no formato `dd/mm/aaaa`.
+- Menus das areas profissional e empresarial voltaram a usar navegacao horizontal rolante em todas as larguras de tela.
+- Area empresarial agora mostra somente candidatos efetivamente apresentados pelo administrador, vinculados a cada demanda, com contato, perfil e situacao do processo; a fila reserva permanece oculta.
+- Empresas podem encerrar uma demanda diretamente na listagem ou na edicao quando a vaga for preenchida, removendo-a das oportunidades abertas.
 - Area de curriculo com painel de qualidade, checklist de preenchimento e proximos ajustes recomendados.
 - Navegacao superior por subgrupos na area de curriculo.
 - Painel de personalizacao para baixar CV com 3 modelos, 7 cores e opcao de pretensao salarial.

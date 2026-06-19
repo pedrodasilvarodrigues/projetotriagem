@@ -19,7 +19,7 @@ export default async function AdminReferralsPage() {
 
   return (
     <AppShell eyebrow="Administrador" title="Encaminhamentos">
-      <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
         <table className="data-table">
           <thead><tr><th>Candidato</th><th>Empresa</th><th>Demanda</th><th>Status</th><th>Controle</th></tr></thead>
           <tbody>

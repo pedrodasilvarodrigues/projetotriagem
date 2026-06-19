@@ -8,7 +8,7 @@ export default async function AdminCandidatesPage() {
 
   return (
     <AppShell eyebrow="Administrador" title="Gestao de Candidatos">
-      <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
         <table className="data-table">
           <thead><tr><th>Nome</th><th>Cargo</th><th>Cidade</th><th>Status</th><th>Alterar status</th></tr></thead>
           <tbody>

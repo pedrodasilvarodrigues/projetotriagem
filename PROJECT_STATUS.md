@@ -20,6 +20,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Salvamento da aba Curriculo passou a usar funcoes RPC `SECURITY DEFINER` especificas para objetivo, formacao, cursos, idiomas, habilidades e experiencias, evitando falhas de RLS nas tabelas filhas.
 - Corrigida em producao a funcao `invalidate_resume_cache`, que quebrava updates em `professionals` e inserts em partes do curriculo por tentar ler `new.professional_id` onde o campo nao existia.
 - Usuario `flaviooliveirarodri44@gmail.com` promovido para `admin` em `user_roles`.
+- Responsividade mobile da area admin ajustada: topo/menu em grade no celular, conteudo com padding menor, titulos compactos, cards do dashboard adaptaveis e tabelas convertidas em cards empilhados em telas pequenas.
 - Area de curriculo com painel de qualidade, checklist de preenchimento e proximos ajustes recomendados.
 - Navegacao superior por subgrupos na area de curriculo.
 - Painel de personalizacao para baixar CV com 3 modelos, 7 cores e opcao de pretensao salarial.

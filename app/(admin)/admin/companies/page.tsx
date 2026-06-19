@@ -8,7 +8,7 @@ export default async function AdminCompaniesPage() {
 
   return (
     <AppShell eyebrow="Administrador" title="Empresas cadastradas">
-      <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
         <table className="data-table">
           <thead><tr><th>Empresa</th><th>Local</th><th>Status</th><th>Acoes</th></tr></thead>
           <tbody>

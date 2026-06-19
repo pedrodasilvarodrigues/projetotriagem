@@ -118,4 +118,76 @@ a.bg-white {
 .data-table td {
   border-bottom: 1px solid #e2e8f0;
   padding: 0.85rem 1rem;
+  vertical-align: top;
+}
+
+.data-table td form {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.data-table td select,
+.data-table td button,
+.data-table td input {
+  max-width: 100%;
+}
+
+@media (max-width: 639px) {
+  .data-table,
+  .data-table thead,
+  .data-table tbody,
+  .data-table tr,
+  .data-table th,
+  .data-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .data-table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .data-table thead {
+    position: absolute;
+    height: 1px;
+    width: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .data-table tbody {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .data-table tr {
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  }
+
+  .data-table td {
+    border-bottom: 1px solid #eef2f7;
+    padding: 0.75rem;
+    overflow-wrap: anywhere;
+  }
+
+  .data-table td:last-child {
+    border-bottom: 0;
+  }
+
+  .data-table td form {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .data-table td select,
+  .data-table td button {
+    min-height: 2.5rem;
+    width: 100%;
+  }
 }

@@ -22,10 +22,10 @@ export default async function AdminHomePage() {
 
   return (
     <AppShell eyebrow="Administrador" title="Dashboard">
-      <div className="grid gap-4 md:grid-cols-5">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {cards.map(([label, value, href]) => (
           <Link key={label} href={href} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-            <strong className="block text-3xl font-semibold">{value}</strong>
+            <strong className="block text-2xl font-semibold sm:text-3xl">{value}</strong>
             <span className="mt-2 block text-sm text-slate-600">{label}</span>
           </Link>
         ))}

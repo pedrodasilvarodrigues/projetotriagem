@@ -11,7 +11,7 @@ export default async function AdminTalentBankPage({ searchParams }: { searchPara
 
   return (
     <AppShell eyebrow="Administrador" title="Banco de Talentos">
-      <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
         <form className="mb-5 grid gap-3 md:grid-cols-[1fr_220px_auto]">
           <input name="q" defaultValue={params.q ?? ""} placeholder="Nome, cargo, habilidade" className="field-input" />
           <input name="city" defaultValue={params.city ?? ""} placeholder="Cidade" className="field-input" />

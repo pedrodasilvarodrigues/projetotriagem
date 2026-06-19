@@ -13,7 +13,7 @@ type ProcessRow = {
 
 const statusLabels: Record<string, string> = {
   received: "Compatibilidade",
-  analysis: "Em analise",
+  analysis: "Em análise",
   screening: "Triagem",
   pre_approved: "Aprovado",
   training: "Triagem",
@@ -39,12 +39,12 @@ export default async function AdminProcessesPage({ searchParams }: { searchParam
   if (params.status) query = query.eq("status", params.status);
   const { data: processes } = await query;
 
-  const flow = ["Demanda", "Compatibilidade", "Triagem", "Apresentacao", "Entrevista", "Contratacao"];
+  const flow = ["Demanda", "Compatibilidade", "Triagem", "Apresentação", "Entrevista", "Contratação"];
 
   return (
     <AppShell eyebrow="Administrador" title="Processos">
       <div className="space-y-5">
-        {params.error ? <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">Nao foi possivel concluir: {params.error}</p> : null}
+        {params.error ? <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">Não foi possível concluir: {params.error}</p> : null}
         {params.message ? <p className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">Processo atualizado.</p> : null}
 
         <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
@@ -56,14 +56,14 @@ export default async function AdminProcessesPage({ searchParams }: { searchParam
 
         <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
           <form className="grid gap-3 md:grid-cols-[220px_auto]" action="/admin/processes">
-            <select name="status" defaultValue={params.status ?? ""} className="field-input"><option value="">Todos os status</option><option value="screening">Triagem</option><option value="analysis">Em analise</option><option value="forwarded">Apresentado</option><option value="interview">Entrevista</option><option value="pre_approved">Aprovado</option><option value="rejected">Reprovado</option><option value="hired">Contratado</option><option value="waiting">Encerrado</option></select>
+            <select name="status" defaultValue={params.status ?? ""} className="field-input"><option value="">Todas as situações</option><option value="screening">Triagem</option><option value="analysis">Em análise</option><option value="forwarded">Apresentado</option><option value="interview">Entrevista</option><option value="pre_approved">Aprovado</option><option value="rejected">Reprovado</option><option value="hired">Contratado</option><option value="waiting">Encerrado</option></select>
             <button className="rounded bg-slate-950 px-4 py-2 text-sm font-semibold text-white">Filtrar</button>
           </form>
         </section>
 
         <section className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
           <table className="data-table">
-            <thead><tr><th>Profissional</th><th>Demanda</th><th>Etapa</th><th>Observacoes / resultado</th><th>Atualizar</th></tr></thead>
+            <thead><tr><th>Profissional</th><th>Demanda</th><th>Etapa</th><th>Observações / resultado</th><th>Atualizar</th></tr></thead>
             <tbody>
               {((processes ?? []) as unknown as ProcessRow[]).map((process) => {
                 const professional = one(process.professional);
@@ -74,14 +74,14 @@ export default async function AdminProcessesPage({ searchParams }: { searchParam
                     <td><strong>{professional?.full_name}</strong><p className="text-xs text-slate-500">{professional?.desired_role}</p></td>
                     <td>{demand?.title}<p className="text-xs text-slate-500">{company?.trade_name}</p></td>
                     <td>{statusLabels[process.status] ?? process.status}</td>
-                    <td>{process.company_result ?? "Sem observacoes registradas."}</td>
+                    <td>{process.company_result ?? "Sem observações registradas."}</td>
                     <td>
                       <form action={updateProcessStatusAction} className="grid gap-2">
                         <input type="hidden" name="processId" value={process.id} />
                         <input type="hidden" name="redirectTo" value="/admin/processes" />
                         <select name="status" defaultValue={process.status} className="rounded border border-slate-300 px-2 py-2 text-xs">
                           <option value="screening">Triagem</option>
-                          <option value="analysis">Em analise</option>
+                          <option value="analysis">Em análise</option>
                           <option value="forwarded">Apresentado</option>
                           <option value="interview">Entrevista</option>
                           <option value="pre_approved">Aprovado</option>
@@ -89,7 +89,7 @@ export default async function AdminProcessesPage({ searchParams }: { searchParam
                           <option value="hired">Contratado</option>
                           <option value="waiting">Encerrado</option>
                         </select>
-                        <textarea name="companyResult" defaultValue={process.company_result ?? ""} className="rounded border border-slate-300 px-2 py-2 text-xs" placeholder="Observacao, entrevista ou resultado" />
+                        <textarea name="companyResult" defaultValue={process.company_result ?? ""} className="rounded border border-slate-300 px-2 py-2 text-xs" placeholder="Observação, entrevista ou resultado" />
                         <button className="rounded bg-slate-950 px-3 py-2 text-xs font-semibold text-white">Salvar processo</button>
                       </form>
                     </td>

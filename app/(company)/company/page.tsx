@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app/shell";
 import { createServerClient } from "@/lib/supabase/server";
+import { statusLabel } from "@/lib/status-labels";
 
 type CandidateRow = {
   id: string;
@@ -45,30 +46,30 @@ export default async function CompanyHomePage() {
     <AppShell eyebrow="Empresa" title="Minha Empresa">
       <div className="space-y-5">
         <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-semibold text-blue-700">Area empresarial</p>
+          <p className="text-sm font-semibold text-blue-700">Área empresarial</p>
           <h2 className="mt-2 text-2xl font-semibold">{company?.trade_name ?? "Empresa"}</h2>
-          <p className="mt-2 text-sm text-slate-600">{company?.city ?? "Cidade"}/{company?.state ?? "UF"} · {company?.status ?? "pending"}</p>
+          <p className="mt-2 text-sm text-slate-600">{company?.city ?? "Cidade"}/{company?.state ?? "UF"} · {statusLabel(company?.status ?? "pending")}</p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <div className="rounded-md bg-slate-50 p-4"><strong className="text-2xl">{activeDemands ?? 0}</strong><p className="text-sm text-slate-600">Demandas ativas</p></div>
             <div className="rounded-md bg-slate-50 p-4"><strong className="text-2xl">{candidatesInProcess ?? 0}</strong><p className="text-sm text-slate-600">Candidatos em processo</p></div>
           </div>
           <div className="mt-5 flex flex-wrap gap-2">
             <Link href="/company/demands/new" className="rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Criar demanda</Link>
-            <Link href="/company/candidates" className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700">Analise de candidatos</Link>
+            <Link href="/company/candidates" className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700">Análise de candidatos</Link>
           </div>
         </section>
 
         <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-blue-700">Analise de candidatos</p>
+              <p className="text-sm font-semibold text-blue-700">Análise de candidatos</p>
               <h3 className="mt-1 text-xl font-semibold">Profissionais apresentados pelo administrador</h3>
             </div>
             <Link href="/company/candidates" className="text-sm font-semibold text-blue-700 hover:underline">Ver todos</Link>
           </div>
           <div className="overflow-x-auto">
             <table className="data-table">
-              <thead><tr><th>Candidato</th><th>Objetivo</th><th>Demanda</th><th>Escolaridade</th><th>Status</th></tr></thead>
+              <thead><tr><th>Candidato</th><th>Objetivo</th><th>Demanda</th><th>Escolaridade</th><th>Situação</th></tr></thead>
               <tbody>
                 {((presentedCandidates ?? []) as unknown as PresentedCandidateRow[]).map((process) => {
                   const candidate = one(process.professional);
@@ -80,7 +81,7 @@ export default async function CompanyHomePage() {
                       <td>{candidate.desired_role}</td>
                       <td>{demand.name ?? demand.title}</td>
                       <td>{candidate.education_level}</td>
-                      <td>{process.status}</td>
+                      <td>{statusLabel(process.status)}</td>
                     </tr>
                   );
                 })}

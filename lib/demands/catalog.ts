@@ -29,7 +29,7 @@ export async function listProfessionalDemands(limit = 120): Promise<Professional
     .limit(limit);
 
   if (error) {
-    console.error("[demands] Falha ao carregar catalogo profissional", { error: error.message });
+    console.error("[demands] Falha ao carregar catálogo profissional", { error: error.message });
     return [];
   }
 

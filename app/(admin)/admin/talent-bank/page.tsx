@@ -1,5 +1,6 @@
 import { AppShell } from "@/components/app/shell";
 import { createServerClient } from "@/lib/supabase/server";
+import { statusLabel } from "@/lib/status-labels";
 
 export default async function AdminTalentBankPage({ searchParams }: { searchParams: Promise<{ q?: string; city?: string }> }) {
   const params = await searchParams;
@@ -18,9 +19,9 @@ export default async function AdminTalentBankPage({ searchParams }: { searchPara
           <button className="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white">Pesquisar</button>
         </form>
         <table className="data-table">
-          <thead><tr><th>Profissional</th><th>Cargo</th><th>Escolaridade</th><th>Cidade</th><th>Disponibilidade</th><th>Status</th></tr></thead>
+          <thead><tr><th>Profissional</th><th>Cargo</th><th>Escolaridade</th><th>Cidade</th><th>Disponibilidade</th><th>Situação</th></tr></thead>
           <tbody>
-            {(professionals ?? []).map((item) => <tr key={item.id}><td>{item.full_name}</td><td>{item.desired_role}</td><td>{item.education_level}</td><td>{item.city}/{item.state}</td><td>{item.available_in_days} dias</td><td>{item.status}</td></tr>)}
+            {(professionals ?? []).map((item) => <tr key={item.id}><td>{item.full_name}</td><td>{item.desired_role}</td><td>{item.education_level}</td><td>{item.city}/{item.state}</td><td>{item.available_in_days} dias</td><td>{statusLabel(item.status)}</td></tr>)}
             {(professionals ?? []).length === 0 ? <tr><td colSpan={6}>Nenhum profissional encontrado.</td></tr> : null}
           </tbody>
         </table>

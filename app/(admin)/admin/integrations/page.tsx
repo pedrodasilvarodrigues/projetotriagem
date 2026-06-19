@@ -3,8 +3,8 @@ import { DevelopmentModule } from "@/components/app/development-module";
 
 export default function AdminIntegrationsPage() {
   return (
-    <AppShell eyebrow="Administrador" title="Integracoes">
-      <DevelopmentModule moduleName="Integracoes futuras" description="Estamos trabalhando nesta funcionalidade. Em breve sera possivel conectar servicos externos, automacoes e integracoes corporativas." />
+    <AppShell eyebrow="Administrador" title="Integrações">
+      <DevelopmentModule moduleName="Integrações futuras" description="Estamos trabalhando nesta funcionalidade. Em breve será possível conectar serviços externos, automações e integrações corporativas." />
     </AppShell>
   );
 }

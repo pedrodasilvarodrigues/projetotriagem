@@ -47,22 +47,22 @@ export function ProfessionalOnboardingForm({ email, error }: { email: string; er
       const response = await fetch(`https://viacep.com.br/ws/${rawCep}/json/`);
       const data = (await response.json()) as ViaCepResponse;
       if (data.erro) {
-        setCepStatus("CEP nao encontrado. Preencha o endereco manualmente.");
+        setCepStatus("CEP não encontrado. Preencha o endereço manualmente.");
         return;
       }
       setStreet(data.logradouro ?? "");
       setNeighborhood(data.bairro ?? "");
       setCity(data.localidade ?? "");
       setState(data.uf ?? "");
-      setCepStatus("Endereco preenchido automaticamente.");
+      setCepStatus("Endereço preenchido automaticamente.");
     } catch {
-      setCepStatus("Nao foi possivel consultar o CEP. Preencha manualmente.");
+      setCepStatus("Não foi possível consultar o CEP. Preencha manualmente.");
     }
   }
 
   return (
     <form action={saveProfessionalBasicsAction} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-      {error ? <div className="mb-5 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">Verifique os dados informados. Codigo: {error}</div> : null}
+      {error ? <div className="mb-5 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">Verifique os dados informados. Código: {error}</div> : null}
       <h2 className="text-lg font-semibold">Dados pessoais</h2>
       <div className="mt-5 grid gap-4 md:grid-cols-2">
         <label className="block text-sm font-medium text-slate-800">Nome Completo<input name="fullName" required pattern="^[A-Za-zÀ-ÿ\\s]+$" className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
@@ -71,8 +71,8 @@ export function ProfessionalOnboardingForm({ email, error }: { email: string; er
         <label className="block text-sm font-medium text-slate-800">Email<input name="email" required type="email" defaultValue={email} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
         <label className="block text-sm font-medium text-slate-800">Data de Nascimento<BirthDateInput className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
         <label className="block text-sm font-medium text-slate-800">CEP<input name="cep" required inputMode="numeric" value={cep} onBlur={(event) => lookupCep(event.target.value)} onChange={(event) => setCep(maskCep(event.target.value))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
-        <label className="block text-sm font-medium text-slate-800 md:col-span-2">Endereco<input name="street" required value={street} onChange={(event) => setStreet(event.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
-        <label className="block text-sm font-medium text-slate-800">Numero<input name="addressNumber" required className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
+        <label className="block text-sm font-medium text-slate-800 md:col-span-2">Endereço<input name="street" required value={street} onChange={(event) => setStreet(event.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
+        <label className="block text-sm font-medium text-slate-800">Número<input name="addressNumber" required className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
         <label className="block text-sm font-medium text-slate-800">Bairro<input name="neighborhood" required value={neighborhood} onChange={(event) => setNeighborhood(event.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
         <label className="block text-sm font-medium text-slate-800">Cidade<input name="city" required value={city} onChange={(event) => setCity(event.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
         <label className="block text-sm font-medium text-slate-800">Estado<input name="state" required value={state} onChange={(event) => setState(event.target.value.toUpperCase().slice(0, 2))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>

@@ -1,10 +1,10 @@
 import { PublicPageShell } from "@/components/app/public-page-shell";
 
-const steps = ["Cadastro", "Banco de Talentos", "Compatibilidade", "Validacao do recrutador", "Encaminhamento"];
+const steps = ["Cadastro", "Banco de Talentos", "Compatibilidade", "Validação do recrutador", "Encaminhamento"];
 
 export default function HowItWorksPage() {
   return (
-    <PublicPageShell title="Como funciona" description="O processo combina cadastro, analise automatica e validacao humana antes de encaminhar candidatos para empresas.">
+    <PublicPageShell title="Como funciona" description="O processo combina cadastro, análise automática e validação humana antes de encaminhar candidatos para empresas.">
       <ol className="grid gap-4 md:grid-cols-5">
         {steps.map((step, index) => (
           <li key={step} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">

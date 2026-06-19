@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function CompanyDashboardRedirectPage() {
+export default function CompanyPainelRedirectPage() {
   redirect("/company");
 }

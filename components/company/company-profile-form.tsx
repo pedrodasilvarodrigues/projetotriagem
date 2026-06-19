@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { statusLabel } from "@/lib/status-labels";
 
 type BrasilApiCnpj = {
   razao_social?: string;
@@ -89,7 +90,7 @@ export function CompanyProfileForm({ action, company, contact }: CompanyProfileF
     try {
       const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${rawCnpj}`);
       if (!response.ok) {
-        setStatusMessage("CNPJ nao encontrado. Continue preenchendo manualmente.");
+        setStatusMessage("CNPJ não encontrado. Continue preenchendo manualmente.");
         return;
       }
       const data = (await response.json()) as BrasilApiCnpj;
@@ -105,7 +106,7 @@ export function CompanyProfileForm({ action, company, contact }: CompanyProfileF
       setState(data.uf ?? "");
       setStatusMessage("Dados do CNPJ preenchidos automaticamente.");
     } catch {
-      setStatusMessage("Nao foi possivel consultar o CNPJ. Continue preenchendo manualmente.");
+      setStatusMessage("Não foi possível consultar o CNPJ. Continue preenchendo manualmente.");
     }
   }
 
@@ -117,16 +118,16 @@ export function CompanyProfileForm({ action, company, contact }: CompanyProfileF
       const response = await fetch(`https://viacep.com.br/ws/${rawCep}/json/`);
       const data = (await response.json()) as ViaCepResponse;
       if (data.erro) {
-        setStatusMessage("CEP nao encontrado. Continue preenchendo manualmente.");
+        setStatusMessage("CEP não encontrado. Continue preenchendo manualmente.");
         return;
       }
       setStreet(data.logradouro ?? "");
       setNeighborhood(data.bairro ?? "");
       setCity(data.localidade ?? "");
       setState(data.uf ?? "");
-      setStatusMessage("Endereco preenchido automaticamente.");
+      setStatusMessage("Endereço preenchido automaticamente.");
     } catch {
-      setStatusMessage("Nao foi possivel consultar o CEP. Continue preenchendo manualmente.");
+      setStatusMessage("Não foi possível consultar o CEP. Continue preenchendo manualmente.");
     }
   }
 
@@ -134,8 +135,8 @@ export function CompanyProfileForm({ action, company, contact }: CompanyProfileF
     <form action={action} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-sm text-slate-600">Os dados do cadastro da empresa ficam aqui e podem ser atualizados quando necessario.</p>
-          <p className="mt-2 text-sm text-slate-500">Status: {company?.status ?? "pending"}</p>
+          <p className="text-sm text-slate-600">Os dados do cadastro da empresa ficam aqui e podem ser atualizados quando necessário.</p>
+          <p className="mt-2 text-sm text-slate-500">Situação: {statusLabel(company?.status ?? "pending")}</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -157,22 +158,22 @@ export function CompanyProfileForm({ action, company, contact }: CompanyProfileF
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="text-sm font-semibold">CNPJ<input name="cnpj" disabled={!editing} value={cnpj} onBlur={(event) => lookupCnpj(event.target.value)} onChange={(event) => setCnpj(maskCnpj(event.target.value))} className="field-input mt-2 disabled:bg-slate-100" /></label>
-        <label className="text-sm font-semibold">Razao social<input name="legalName" disabled={!editing} value={legalName} onChange={(event) => setLegalName(event.target.value)} className="field-input mt-2 disabled:bg-slate-100" /></label>
+        <label className="text-sm font-semibold">Razão social<input name="legalName" disabled={!editing} value={legalName} onChange={(event) => setLegalName(event.target.value)} className="field-input mt-2 disabled:bg-slate-100" /></label>
         <label className="text-sm font-semibold">Nome fantasia<input name="tradeName" disabled={!editing} value={tradeName} onChange={(event) => setTradeName(event.target.value)} className="field-input mt-2 disabled:bg-slate-100" /></label>
         <label className="text-sm font-semibold">Email corporativo<input name="corporateEmail" type="email" disabled={!editing} value={corporateEmail} onChange={(event) => setCorporateEmail(event.target.value)} className="field-input mt-2 disabled:bg-slate-100" /></label>
         <label className="text-sm font-semibold">Telefone<input name="phone" disabled={!editing} value={phone} onChange={(event) => setPhone(maskPhone(event.target.value))} className="field-input mt-2 disabled:bg-slate-100" /></label>
         <label className="text-sm font-semibold">Segmento<input name="segment" disabled={!editing} defaultValue={company?.segment ?? ""} className="field-input mt-2 disabled:bg-slate-100" /></label>
         <label className="text-sm font-semibold">CEP<input name="cep" disabled={!editing} value={cep} onBlur={(event) => lookupCep(event.target.value)} onChange={(event) => setCep(maskCep(event.target.value))} className="field-input mt-2 disabled:bg-slate-100" /></label>
-        <label className="text-sm font-semibold md:col-span-2">Endereco<input name="street" disabled={!editing} value={street} onChange={(event) => setStreet(event.target.value)} className="field-input mt-2 disabled:bg-slate-100" /></label>
-        <label className="text-sm font-semibold">Numero<input name="addressNumber" disabled={!editing} value={addressNumber} onChange={(event) => setAddressNumber(event.target.value)} className="field-input mt-2 disabled:bg-slate-100" /></label>
+        <label className="text-sm font-semibold md:col-span-2">Endereço<input name="street" disabled={!editing} value={street} onChange={(event) => setStreet(event.target.value)} className="field-input mt-2 disabled:bg-slate-100" /></label>
+        <label className="text-sm font-semibold">Número<input name="addressNumber" disabled={!editing} value={addressNumber} onChange={(event) => setAddressNumber(event.target.value)} className="field-input mt-2 disabled:bg-slate-100" /></label>
         <label className="text-sm font-semibold">Bairro<input name="neighborhood" disabled={!editing} value={neighborhood} onChange={(event) => setNeighborhood(event.target.value)} className="field-input mt-2 disabled:bg-slate-100" /></label>
         <label className="text-sm font-semibold">Cidade<input name="city" disabled={!editing} value={city} onChange={(event) => setCity(event.target.value)} className="field-input mt-2 disabled:bg-slate-100" /></label>
         <label className="text-sm font-semibold">Estado<input name="state" maxLength={2} disabled={!editing} value={state} onChange={(event) => setState(event.target.value.toUpperCase().slice(0, 2))} className="field-input mt-2 disabled:bg-slate-100" /></label>
-        <label className="text-sm font-semibold">Responsavel<input name="contactName" disabled={!editing} defaultValue={contact?.name ?? ""} className="field-input mt-2 disabled:bg-slate-100" /></label>
-        <label className="text-sm font-semibold">Cargo do responsavel<input name="contactRole" disabled={!editing} defaultValue={contact?.role_title ?? ""} className="field-input mt-2 disabled:bg-slate-100" /></label>
-        <label className="text-sm font-semibold">Email do responsavel<input name="contactEmail" type="email" disabled={!editing} value={contactEmail} onChange={(event) => setContactEmail(event.target.value)} className="field-input mt-2 disabled:bg-slate-100" /></label>
-        <label className="text-sm font-semibold">Telefone do responsavel<input name="contactPhone" disabled={!editing} value={contactPhone} onChange={(event) => setContactPhone(maskPhone(event.target.value))} className="field-input mt-2 disabled:bg-slate-100" /></label>
-        <label className="text-sm font-semibold md:col-span-2">Descricao<textarea name="description" disabled={!editing} defaultValue={company?.description ?? ""} className="field-input mt-2 min-h-28 disabled:bg-slate-100" /></label>
+        <label className="text-sm font-semibold">Responsável<input name="contactName" disabled={!editing} defaultValue={contact?.name ?? ""} className="field-input mt-2 disabled:bg-slate-100" /></label>
+        <label className="text-sm font-semibold">Cargo do responsável<input name="contactRole" disabled={!editing} defaultValue={contact?.role_title ?? ""} className="field-input mt-2 disabled:bg-slate-100" /></label>
+        <label className="text-sm font-semibold">Email do responsável<input name="contactEmail" type="email" disabled={!editing} value={contactEmail} onChange={(event) => setContactEmail(event.target.value)} className="field-input mt-2 disabled:bg-slate-100" /></label>
+        <label className="text-sm font-semibold">Telefone do responsável<input name="contactPhone" disabled={!editing} value={contactPhone} onChange={(event) => setContactPhone(maskPhone(event.target.value))} className="field-input mt-2 disabled:bg-slate-100" /></label>
+        <label className="text-sm font-semibold md:col-span-2">Descrição<textarea name="description" disabled={!editing} defaultValue={company?.description ?? ""} className="field-input mt-2 min-h-28 disabled:bg-slate-100" /></label>
       </div>
       {statusMessage ? <p className="mt-4 text-sm text-slate-600">{statusMessage}</p> : null}
     </form>

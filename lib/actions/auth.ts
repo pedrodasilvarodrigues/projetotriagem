@@ -400,7 +400,7 @@ export async function signInWithEmailAction(formData: FormData) {
         if (code === "email-nao-confirmado" && (await confirmAuthEmailByAddress(parsed.data.email))) {
           const { data: retryData, error: retryError } = await supabase.auth.signInWithPassword(parsed.data);
           if (!retryError && retryData.user) {
-            logAuth("Usuario autenticado apos confirmacao automatica", { userId: retryData.user.id });
+            logAuth("Usuário autenticado após confirmação automática", { userId: retryData.user.id });
             target = "/auth/callback";
           } else {
             if (retryError) logAuthError("Falha no retry de login", retryError, { email: parsed.data.email });
@@ -410,10 +410,10 @@ export async function signInWithEmailAction(formData: FormData) {
           target = `/login?error=${code}`;
         }
       } else if (data.user) {
-        logAuth("Usuario autenticado", { userId: data.user.id });
+        logAuth("Usuário autenticado", { userId: data.user.id });
         target = "/auth/callback";
       } else {
-        logAuthError("Login sem usuario na resposta", "missing-user", { email: parsed.data.email });
+        logAuthError("Login sem usuário na resposta", "missing-user", { email: parsed.data.email });
         target = "/login?error=erro-autenticacao";
       }
     }
@@ -422,7 +422,7 @@ export async function signInWithEmailAction(formData: FormData) {
     target = "/login?error=erro-servidor-login";
   }
 
-  logAuth("Redirecionando apos login", { route: target });
+  logAuth("Redirecionando após o acesso", { route: target });
   redirect(target);
 }
 
@@ -564,16 +564,16 @@ export async function requestPasswordResetAction(formData: FormData) {
           status: "failed",
           errorMessage: emailError.message
         });
-        logAuthError("Falha ao enviar recuperacao via Resend", emailError, { recipient });
+        logAuthError("Falha ao enviar recuperação via Resend", emailError, { recipient });
       } else {
         await recordAuthEmailAttempt({
           recipient,
           templateKey: "password_reset",
           providerId: "supabase-admin-generate-link",
           status: "failed",
-          errorMessage: error?.message ?? "Token de recuperacao nao foi gerado."
+          errorMessage: error?.message ?? "Token de recuperação não foi gerado."
         });
-        if (error) logAuthError("Falha ao gerar link de recuperacao", error, { recipient });
+        if (error) logAuthError("Falha ao gerar link de recuperação", error, { recipient });
       }
     } catch (error) {
       await recordAuthEmailAttempt({
@@ -583,7 +583,7 @@ export async function requestPasswordResetAction(formData: FormData) {
         status: "failed",
         errorMessage: error instanceof Error ? error.message : String(error)
       });
-      logAuthError("Excecao no envio de recuperacao via Resend", error, { recipient });
+      logAuthError("Excecao no envio de recuperação via Resend", error, { recipient });
     }
   }
 
@@ -609,7 +609,7 @@ export async function requestPasswordResetAction(formData: FormData) {
     templateKey: "password_reset",
     providerId: "supabase-auth",
     status: "requested",
-    errorMessage: canSendBrandedAuthEmail() ? "Fallback usado apos falha do Resend." : "Envio solicitado pelo provedor padrao do Supabase. Configure SMTP/Resend para entrega confiavel."
+    errorMessage: canSendBrandedAuthEmail() ? "Alternativa usada após falha do Resend." : "Envio solicitado pelo provedor padrão do Supabase. Configure SMTP/Resend para entrega confiável."
   });
   redirect(canSendBrandedAuthEmail() ? "/forgot-password?message=email-enviado" : "/forgot-password?message=email-solicitado-supabase");
 }

@@ -11,7 +11,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="pt-BR">
       <body>
         <a className="sr-only focus:not-sr-only" href="#conteudo">
-          Pular para conteudo principal
+          Pular para conteúdo principal
         </a>
         {children}
       </body>

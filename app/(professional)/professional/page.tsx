@@ -3,6 +3,7 @@ import { Bell, BriefcaseBusiness, Building2, CheckCircle2, Clock3, FileText, Map
 import { AppShell } from "@/components/app/shell";
 import { listProfessionalDemands } from "@/lib/demands/catalog";
 import { createServerClient } from "@/lib/supabase/server";
+import { statusLabel } from "@/lib/status-labels";
 
 type ProcessRow = {
   id: string;
@@ -155,8 +156,8 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
     { label: "Dados pessoais", done: Boolean(professional?.full_name && professional?.phone && professional?.city && professional?.state), href: "/professional/profile" },
     { label: "Objetivo", done: Boolean(professional?.desired_role && professional?.summary), href: "/professional/resume#objetivo" },
     { label: "Documento", done: Boolean(resume?.id), href: "/professional/resume#documento" },
-    { label: "Experiencias", done: Number(experiencesCount.count ?? 0) > 0, href: "/professional/resume#experiencias" },
-    { label: "Formacao", done: Number(educationsCount.count ?? 0) > 0, href: "/professional/resume#formacao" },
+    { label: "Experiências", done: Number(experiencesCount.count ?? 0) > 0, href: "/professional/resume#experiencias" },
+    { label: "Formação", done: Number(educationsCount.count ?? 0) > 0, href: "/professional/resume#formacao" },
     { label: "Cursos", done: Number(coursesCount.count ?? 0) > 0, href: "/professional/resume#cursos" },
     { label: "Habilidades", done: Number(skillsCount.count ?? 0) > 0, href: "/professional/resume#habilidades" },
     { label: "Cidades de interesse", done: (preferredCities ?? []).length > 0, href: "/professional/profile" }
@@ -165,7 +166,7 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
   const quickLinks = quickSearches(professional, (preferredCities ?? []) as PreferredCityRow[]);
 
   return (
-    <AppShell eyebrow="Profissional" title="Minha Area">
+    <AppShell eyebrow="Profissional" title="Minha Área">
       <div className="space-y-5">
         <section className="border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -173,7 +174,7 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
               <p className="text-sm font-semibold text-blue-700">Oportunidades para seu perfil</p>
               <h2 className="mt-2 text-2xl font-semibold text-slate-950">Encontre vagas das empresas cadastradas</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Busque por cargo, empresa, area ou cidade. As melhores correspondencias aparecem primeiro conforme seu perfil, cidades de interesse e curriculo.
+                Busque por cargo, empresa, área ou cidade. As melhores correspondencias aparecem primeiro conforme seu perfil, cidades de interesse e currículo.
               </p>
             </div>
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
@@ -184,7 +185,7 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
                 Editar perfil
               </Link>
               <Link href="/professional/resume" className="inline-flex min-h-11 items-center justify-center rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800">
-                Melhorar curriculo
+                Melhorar currículo
               </Link>
             </div>
           </div>
@@ -238,11 +239,11 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
                 <p className="text-sm font-semibold text-blue-700">Perfil profissional</p>
                 <h2 className="mt-2 text-2xl font-semibold">{professional?.full_name ?? "Complete seu cadastro"}</h2>
                 <p className="mt-2 text-sm text-slate-600">
-                  {professional?.desired_role ?? "Cargo desejado nao informado"} · {professional?.city ?? "Cidade"}/{professional?.state ?? "UF"}
+                  {professional?.desired_role ?? "Cargo desejado não informado"} · {professional?.city ?? "Cidade"}/{professional?.state ?? "UF"}
                 </p>
               </div>
               <div className="min-w-[160px] rounded-md border border-blue-100 bg-blue-50 p-3">
-                <p className="text-xs font-bold uppercase text-blue-700">Forca do curriculo</p>
+                <p className="text-xs font-bold uppercase text-blue-700">Forca do currículo</p>
                 <div className="mt-2 flex items-end gap-2">
                   <strong className="text-3xl leading-none text-slate-950">{completion}%</strong>
                   <span className="text-xs font-semibold text-slate-500">completo</span>
@@ -264,11 +265,11 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
 
           <aside className="border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="inline-flex items-center gap-2 text-base font-semibold"><Bell aria-hidden="true" size={17} /> Notificacoes</h2>
+              <h2 className="inline-flex items-center gap-2 text-base font-semibold"><Bell aria-hidden="true" size={17} /> Notificações</h2>
               <Link href="/professional/notifications" className="text-sm font-semibold text-blue-700">Ver todas</Link>
             </div>
             <div className="mt-4 space-y-3">
-              {(notifications ?? []).length === 0 ? <p className="text-sm text-slate-500">Nenhuma notificacao por enquanto.</p> : null}
+              {(notifications ?? []).length === 0 ? <p className="text-sm text-slate-500">Nenhuma notificação por enquanto.</p> : null}
               {(notifications ?? []).map((notification) => (
                 <div key={notification.id} className="border border-slate-200 bg-slate-50 p-3 text-sm">
                   <p className="font-medium">{notification.title}</p>
@@ -282,7 +283,7 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
         <section className="border border-slate-200 bg-white p-5 shadow-sm">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-blue-700">Empresas visiveis para voce</p>
+              <p className="text-sm font-semibold text-blue-700">Empresas visiveis para você</p>
               <h2 className="mt-1 text-xl font-semibold">Empresas com vagas abertas</h2>
             </div>
             <Link href="/professional/search-demands" className="text-sm font-semibold text-blue-700">Buscar demandas</Link>
@@ -335,7 +336,7 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">
                     <Link href="/professional/compatibility" className="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white">Ver compatibilidade</Link>
-                    <Link href="/professional/resume" className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700">Ajustar curriculo</Link>
+                    <Link href="/professional/resume" className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700">Ajustar currículo</Link>
                   </div>
                 </article>
               );
@@ -372,12 +373,12 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
           </div>
           <div className="overflow-x-auto">
             <table className="data-table">
-              <thead><tr><th>Oportunidade</th><th>Status</th><th>Proximo passo</th></tr></thead>
+              <thead><tr><th>Oportunidade</th><th>Situação</th><th>Próximo passo</th></tr></thead>
               <tbody>
                 {((processes ?? []) as unknown as ProcessRow[]).map((process) => (
                   <tr key={process.id}>
                     <td>{one(process.demand)?.title ?? "Demanda em triagem"}</td>
-                    <td>{process.status}</td>
+                    <td>{statusLabel(process.status)}</td>
                     <td><Link href="/professional/screening-status" className="font-semibold text-blue-700">Acompanhar</Link></td>
                   </tr>
                 ))}
@@ -390,8 +391,8 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
         <section className="grid gap-3 md:grid-cols-3">
           <Link href="/professional/resume" className="border border-slate-200 bg-white p-4 shadow-sm">
             <FileText aria-hidden="true" className="text-blue-700" size={20} />
-            <strong className="mt-3 block">Atualizar curriculo</strong>
-            <span className="mt-1 block text-sm leading-6 text-slate-600">Mantenha dados, cursos e experiencias prontos para triagem.</span>
+            <strong className="mt-3 block">Atualizar currículo</strong>
+            <span className="mt-1 block text-sm leading-6 text-slate-600">Mantenha dados, cursos e experiências prontos para triagem.</span>
           </Link>
           <Link href="/professional/profile" className="border border-slate-200 bg-white p-4 shadow-sm">
             <MapPin aria-hidden="true" className="text-blue-700" size={20} />
@@ -401,7 +402,7 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
           <Link href="/professional/development" className="border border-slate-200 bg-white p-4 shadow-sm">
             <Sparkles aria-hidden="true" className="text-blue-700" size={20} />
             <strong className="mt-3 block">Desenvolvimento</strong>
-            <span className="mt-1 block text-sm leading-6 text-slate-600">Veja competencias que podem melhorar sua aderencia.</span>
+            <span className="mt-1 block text-sm leading-6 text-slate-600">Veja competências que podem melhorar sua aderência.</span>
           </Link>
         </section>
       </div>

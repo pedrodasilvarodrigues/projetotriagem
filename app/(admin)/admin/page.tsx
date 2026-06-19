@@ -6,7 +6,7 @@ const quickActions = [
   ["Gerenciar profissionais", "Buscar, editar, bloquear, arquivar e encaminhar profissionais.", "/admin/professionals"],
   ["Gerenciar empresas", "Acompanhar empresas, status, demandas e profissionais apresentados.", "/admin/companies"],
   ["Gerenciar demandas", "Acompanhar demandas, apresentar candidatos por compatibilidade e controlar fila reserva.", "/admin/demands"],
-  ["Acompanhar processos", "Controlar triagem, apresentacao, entrevista, resultado e contratacao.", "/admin/processes"]
+  ["Acompanhar processos", "Controlar triagem, apresentação, entrevista, resultado e contratação.", "/admin/processes"]
 ] as const;
 
 function formatCount(value: number | null) {
@@ -79,11 +79,11 @@ export default async function AdminHomePage() {
   ];
 
   return (
-    <AppShell eyebrow="Administrador" title="Dashboard Administrativo">
+    <AppShell eyebrow="Administrador" title="Painel Administrativo">
       <div className="space-y-6">
         <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           <p className="max-w-3xl text-sm leading-6 text-slate-600">
-            Visao rapida da operacao do Portal de Triagem Profissional. A ideia aqui e mostrar o essencial: quantos profissionais, empresas, demandas e processos existem, sem transformar a area administrativa em um painel pesado.
+            Visão rapida da operação do Portal de Triagem Profissional. A ideia aqui e mostrar o essencial: quantos profissionais, empresas, demandas e processos existem, sem transformar a área administrativa em um painel pesado.
           </p>
         </section>
 
@@ -99,8 +99,8 @@ export default async function AdminHomePage() {
 
         <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           <div>
-            <h2 className="text-lg font-semibold text-slate-950">Acoes principais</h2>
-            <p className="mt-1 text-sm text-slate-600">Atalhos para as areas onde a operacao acontece no dia a dia.</p>
+            <h2 className="text-lg font-semibold text-slate-950">Ações principais</h2>
+            <p className="mt-1 text-sm text-slate-600">Atalhos para as áreas onde a operação acontece no dia a dia.</p>
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             {quickActions.map(([title, description, href]) => (

@@ -11,19 +11,19 @@ const base = (title: string, body: string) => `
 </html>`;
 
 export const emailTemplates = {
-  welcome_professional: (v: Record<string, string>) => ({ subject: "Bem-vindo ao Portal de Triagem", html: base("Bem-vindo, profissional", `<p>Ola ${v.name}. Seu perfil foi criado e sera analisado pela equipe.</p>`) }),
-  welcome_company: (v: Record<string, string>) => ({ subject: "Empresa cadastrada no Portal", html: base("Cadastro empresarial recebido", `<p>Ola ${v.name}. Sua empresa ja pode registrar demandas internas apos aprovacao.</p>`) }),
+  welcome_professional: (v: Record<string, string>) => ({ subject: "Bem-vindo ao Portal de Triagem", html: base("Bem-vindo, profissional", `<p>Ola ${v.name}. Seu perfil foi criado e será analisado pela equipe.</p>`) }),
+  welcome_company: (v: Record<string, string>) => ({ subject: "Empresa cadastrada no Portal", html: base("Cadastro empresarial recebido", `<p>Olá ${v.name}. Sua empresa já pode registrar demandas internas após aprovação.</p>`) }),
   email_verification: (v: Record<string, string>) => ({ subject: "Verifique seu email", html: base("Verificacao de email", `<p>Use o link seguro para confirmar seu acesso: <a href="${v.url}">confirmar email</a>.</p>`) }),
   password_reset: (v: Record<string, string>) => ({ subject: "Redefinicao de senha", html: base("Redefina sua senha", `<p>Acesse o link seguro para criar uma nova senha: <a href="${v.url}">redefinir senha</a>.</p>`) }),
   profile_approved: (v: Record<string, string>) => ({ subject: "Perfil aprovado", html: base("Perfil aprovado", `<p>Ola ${v.name}. Seu cadastro foi aprovado pela equipe de triagem.</p>`) }),
   profile_rejected: (v: Record<string, string>) => ({ subject: "Perfil reprovado", html: base("Perfil reprovado", `<p>Ola ${v.name}. Motivo informado: ${v.reason}.</p>`) }),
-  process_status_update: (v: Record<string, string>) => ({ subject: "Atualizacao no processo", html: base("Status atualizado", `<p>Seu processo agora esta em: <strong>${v.status}</strong>.</p>`) }),
+  process_status_update: (v: Record<string, string>) => ({ subject: "Atualização no processo", html: base("Situação atualizada", `<p>Seu processo agora está em: <strong>${v.status}</strong>.</p>`) }),
   candidate_forwarded: (v: Record<string, string>) => ({ subject: "Candidato encaminhado", html: base("Novo candidato encaminhado", `<p>${v.candidate} foi encaminhado para a demanda ${v.demand}.</p>`) }),
   support_ticket_opened: (v: Record<string, string>) => ({ subject: "Chamado aberto", html: base("Recebemos seu chamado", `<p>Protocolo: <strong>${v.protocol}</strong>.</p>`) }),
   support_ticket_response: (v: Record<string, string>) => ({ subject: "Resposta no chamado", html: base("Nova resposta do suporte", `<p>${v.message}</p>`) }),
-  training_available: (v: Record<string, string>) => ({ subject: "Treinamento disponivel", html: base("Treinamento liberado", `<p>A trilha ${v.track} esta disponivel para acompanhamento.</p>`) }),
-  lgpd_data_export: (v: Record<string, string>) => ({ subject: "Exportacao de dados", html: base("Seus dados estao prontos", `<p>Acesse sua exportacao pelo link seguro: <a href="${v.url}">baixar dados</a>.</p>`) }),
-  account_deletion_confirm: (v: Record<string, string>) => ({ subject: "Exclusao de conta confirmada", html: base("Conta removida", `<p>O processo de exclusao/anonimizacao foi concluido em ${v.date}.</p>`) })
+  training_available: (v: Record<string, string>) => ({ subject: "Treinamento disponível", html: base("Treinamento liberado", `<p>A trilha ${v.track} está disponível para acompanhamento.</p>`) }),
+  lgpd_data_export: (v: Record<string, string>) => ({ subject: "Exportação de dados", html: base("Seus dados estao prontos", `<p>Acesse sua exportação pelo link seguro: <a href="${v.url}">baixar dados</a>.</p>`) }),
+  account_deletion_confirm: (v: Record<string, string>) => ({ subject: "Exclusão de conta confirmada", html: base("Conta removida", `<p>O processo de exclusão/anonimização foi concluído em ${v.date}.</p>`) })
 };
 
 export type EmailTemplateKey = keyof typeof emailTemplates;

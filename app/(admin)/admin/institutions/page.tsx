@@ -28,7 +28,7 @@ export default async function AdminInstitutionsPage({ searchParams }: { searchPa
           <form className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_auto]" action="/admin/institutions">
             <input name="q" defaultValue={params.q ?? ""} className="field-input" placeholder="Pesquisar instituição" />
             <select name="status" defaultValue={params.status ?? ""} className="field-input">
-              <option value="">Todos os status</option>
+              <option value="">Todas as situações</option>
               <option value="pending">Pendente</option>
               <option value="active">Ativa</option>
               <option value="archived">Arquivada</option>
@@ -42,7 +42,7 @@ export default async function AdminInstitutionsPage({ searchParams }: { searchPa
             <thead>
               <tr>
                 <th>Instituição</th>
-                <th>Status</th>
+                <th>Situação</th>
                 <th>Criada em</th>
                 <th>Ações</th>
               </tr>

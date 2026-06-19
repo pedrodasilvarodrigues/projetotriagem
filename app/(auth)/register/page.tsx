@@ -31,7 +31,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
       authenticatedRedirect = entryPath ?? "/onboarding";
     }
   } catch (error) {
-    console.error("[auth] Falha ao recuperar sessao na pagina de cadastro", { error: error instanceof Error ? error.message : String(error) });
+    console.error("[auth] Falha ao recuperar sessão na página de cadastro", { error: error instanceof Error ? error.message : String(error) });
   }
 
   if (authenticatedRedirect) redirect(authenticatedRedirect);
@@ -46,7 +46,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
       <section className="relative hidden overflow-hidden lg:block">
         <img
           src="https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1500&q=85"
-          alt="Reuniao profissional para contratacao"
+          alt="Reuniao profissional para contratação"
           className="h-full w-full object-cover"
         />
         <div className="absolute inset-0 bg-slate-950/38" />
@@ -77,14 +77,14 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
 
           <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-3xl font-semibold tracking-normal">Crie sua conta</h2>
-            <p className="mt-3 text-sm leading-6 text-slate-600">Escolha o perfil agora para acessar a area correta depois do login.</p>
+            <p className="mt-3 text-sm leading-6 text-slate-600">Escolha o perfil agora para acessar a área correta depois do login.</p>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               <Link href="/register?type=professional" className={`flex items-start gap-3 rounded-md border p-4 text-left transition ${!isCompany ? "border-blue-700 bg-blue-50 text-blue-950" : "border-slate-200 bg-white text-slate-700 hover:border-blue-200"}`}>
                 <UserRoundCheck aria-hidden="true" className={!isCompany ? "text-blue-700" : "text-slate-500"} size={22} />
                 <span>
                   <strong className="block text-sm">Sou Profissional</strong>
-                  <span className="mt-1 block text-xs leading-5">Perfil, curriculo e processos.</span>
+                  <span className="mt-1 block text-xs leading-5">Perfil, currículo e processos.</span>
                 </span>
               </Link>
               <Link href="/register?type=company" className={`flex items-start gap-3 rounded-md border p-4 text-left transition ${isCompany ? "border-blue-700 bg-blue-50 text-blue-950" : "border-slate-200 bg-white text-slate-700 hover:border-blue-200"}`}>
@@ -114,7 +114,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
           </div>
 
           <div className="mt-5 rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm leading-6 text-blue-950">
-            Depois do cadastro, entre com email/senha ou Google e voce sera levado direto para sua area.
+            Depois do cadastro, entre com email/senha ou Google e você será levado direto para sua área.
             <ArrowRight aria-hidden="true" className="ml-1 inline" size={15} />
           </div>
         </div>

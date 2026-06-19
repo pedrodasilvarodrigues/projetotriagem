@@ -15,7 +15,7 @@ export function PublicPageShell({ title, description, children }: { title: strin
           <nav className="flex gap-4 text-sm font-semibold text-slate-600">
             <Link href="/sobre">Sobre</Link>
             <Link href="/como-funciona">Como Funciona</Link>
-            <Link href="/vagas-publicas">Vagas Publicas</Link>
+            <Link href="/vagas-publicas">Vagas Públicas</Link>
             <Link href="/empresas-parceiras">Empresas Parceiras</Link>
             <Link href="/login">Login</Link>
           </nav>

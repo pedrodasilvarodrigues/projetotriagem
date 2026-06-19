@@ -129,7 +129,7 @@ function fallbackCompanyName(email?: string | null, fullName?: string | null) {
   const localPart = (email ?? "").split("@")[0]?.trim();
   if (localPart && localPart.length >= 3) return localPart;
 
-  return "Empresa em configuracao";
+  return "Empresa em configuração";
 }
 
 function placeholderCnpj(userId: string) {
@@ -142,7 +142,7 @@ function encodeRouteMessage(route: string, key: "error" | "message", value: stri
 }
 
 function professionalFormError(route: "/professional/profile" | "/professional/resume", code: string, details?: Record<string, unknown>): never {
-  console.warn("[professional-form] Operacao interrompida", { route, code, ...details });
+  console.warn("[professional-form] Operação interrompida", { route, code, ...details });
   redirect(`${route}?error=${encodeURIComponent(code)}`);
 }
 
@@ -177,7 +177,7 @@ async function getProfessionalContext(errorRoute: "/professional/profile" | "/pr
     .maybeSingle();
 
   if (!professional?.id) {
-    console.warn("[professional-form] Perfil nao visivel na primeira leitura", {
+    console.warn("[professional-form] Perfil não visível na primeira leitura", {
       userId: data.user.id,
       error: professionalError?.message ?? null
     });
@@ -751,7 +751,7 @@ export async function updateCompanyProfileAction(formData: FormData) {
     if (contactName || contactRole || hasContactPhone || hasContactEmail || finalCorporateEmail) {
       await supabase.from("company_contacts").insert({
         company_id: company.id,
-        name: contactName || "Responsavel da empresa",
+        name: contactName || "Responsável da empresa",
         email: finalContactEmail,
         phone: finalContactPhone,
         role_title: contactRole || null

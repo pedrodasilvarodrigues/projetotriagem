@@ -85,7 +85,7 @@ export function ResumeDownloadCustomizer({ exportUrl, hasDocument, showSalaryExp
         className="inline-flex items-center justify-center gap-2 rounded-md bg-[#174a86] px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#103765]"
       >
         <Download aria-hidden="true" size={18} />
-        Baixar curriculo
+        Baixar currículo
       </button>
 
       {open ? (
@@ -94,15 +94,15 @@ export function ResumeDownloadCustomizer({ exportUrl, hasDocument, showSalaryExp
             <div className="mx-auto mb-5 h-1.5 w-40 rounded-full bg-slate-200" />
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-bold uppercase text-[#174a86]">Curriculo</p>
+                <p className="text-xs font-bold uppercase text-[#174a86]">Currículo</p>
                 <h2 className="mt-1 text-2xl font-bold tracking-normal">Personalize seu CV</h2>
               </div>
-              <button type="button" onClick={() => setOpen(false)} className="rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-950" aria-label="Fechar personalizacao">
+              <button type="button" onClick={() => setOpen(false)} className="rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-950" aria-label="Fechar personalização">
                 <X aria-hidden="true" size={26} />
               </button>
             </div>
 
-            <p className="mt-5 max-w-2xl text-xl leading-8 text-slate-700">Escolha um dos 3 modelos de design disponiveis para destacar seu curriculo.</p>
+            <p className="mt-5 max-w-2xl text-xl leading-8 text-slate-700">Escolha um dos 3 modelos de visual disponíveis para destacar seu currículo.</p>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
               {templates.map((item) => {
@@ -125,7 +125,7 @@ export function ResumeDownloadCustomizer({ exportUrl, hasDocument, showSalaryExp
               })}
             </div>
 
-            <p className="mt-7 text-xl leading-8 text-slate-700">Selecione uma das 7 cores disponiveis para finalizar sua personalizacao.</p>
+            <p className="mt-7 text-xl leading-8 text-slate-700">Selecione uma das 7 cores disponíveis para finalizar sua personalização.</p>
             <div className="mt-5 flex flex-wrap gap-4">
               {colors.map((item) => {
                 const selected = item.id === selectedColor.id;
@@ -146,14 +146,14 @@ export function ResumeDownloadCustomizer({ exportUrl, hasDocument, showSalaryExp
 
             <label className="mt-7 flex items-center gap-3 text-base font-bold text-slate-700">
               <input type="checkbox" checked={salary} onChange={(event) => setSalary(event.target.checked)} className="size-6 rounded border-slate-300 text-[#174a86]" />
-              Mostrar pretensao salarial
+              Mostrar pretensão salarial
             </label>
 
             <div className="mt-7 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-sm font-bold text-slate-950">Resumo da exportacao</p>
+              <p className="text-sm font-bold text-slate-950">Resumo da exportação</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Modelo {selectedTemplate.title.toLowerCase()}, cor {selectedColor.label.toLowerCase()} e pretensao salarial {salary ? "visivel" : "oculta"}.
-                {hasDocument ? " O PDF sera recriado com os dados do seu perfil e as escolhas acima." : " O PDF sera gerado com os dados preenchidos no curriculo."}
+                Modelo {selectedTemplate.title.toLowerCase()}, cor {selectedColor.label.toLowerCase()} e pretensão salarial {salary ? "visível" : "oculta"}.
+                {hasDocument ? " O PDF será recriado com os dados do seu perfil e as escolhas acima." : " O PDF será gerado com os dados preenchidos no currículo."}
               </p>
             </div>
 

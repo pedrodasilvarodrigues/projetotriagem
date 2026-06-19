@@ -93,7 +93,7 @@ export default async function PublicJobsPage({ searchParams }: { searchParams: P
   const buckets = areaBuckets(demands);
 
   return (
-    <PublicPageShell title="Vagas Publicas" description="Oportunidades abertas por empresas cadastradas, com cadastro profissional para triagem e encaminhamento.">
+    <PublicPageShell title="Vagas Públicas" description="Oportunidades abertas por empresas cadastradas, com cadastro profissional para triagem e encaminhamento.">
       <div className="space-y-6">
         <section className="border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -108,7 +108,7 @@ export default async function PublicJobsPage({ searchParams }: { searchParams: P
               O que?
               <span className="mt-2 flex items-center gap-2 border border-slate-300 bg-slate-50 px-3 py-2.5 focus-within:border-blue-700 focus-within:bg-white">
                 <Search aria-hidden="true" className="text-slate-400" size={17} />
-                <input name="q" defaultValue={params.q ?? ""} placeholder="Cargo, area ou empresa" className="min-w-0 flex-1 bg-transparent text-sm outline-none" />
+                <input name="q" defaultValue={params.q ?? ""} placeholder="Cargo, área ou empresa" className="min-w-0 flex-1 bg-transparent text-sm outline-none" />
               </span>
             </label>
             <label className="text-sm font-semibold text-slate-700">
@@ -138,7 +138,7 @@ export default async function PublicJobsPage({ searchParams }: { searchParams: P
           <section className="border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center gap-2">
               <Sparkles aria-hidden="true" size={18} className="text-blue-700" />
-              <h2 className="text-base font-semibold">Areas com oportunidades</h2>
+              <h2 className="text-base font-semibold">Áreas com oportunidades</h2>
             </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {buckets.map((bucket) => (
@@ -175,14 +175,14 @@ export default async function PublicJobsPage({ searchParams }: { searchParams: P
                 </div>
                 <div className="mt-5 flex flex-wrap gap-2">
                   <Link href="/register" className="inline-flex rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Cadastrar perfil</Link>
-                  <Link href="/login" className="inline-flex rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700">Ja tenho cadastro</Link>
+                  <Link href="/login" className="inline-flex rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700">Já tenho cadastro</Link>
                 </div>
               </article>
             );
           })}
           {filtered.length === 0 ? (
             <div className="rounded-lg border border-slate-200 bg-white p-5 text-sm text-slate-600">
-              Nenhuma vaga encontrada com esses filtros. Cadastre seu perfil para receber oportunidades compativeis quando novas demandas forem abertas.
+              Nenhuma vaga encontrada com esses filtros. Cadastre seu perfil para receber oportunidades compatíveis quando novas demandas forem abertas.
               <Link href="/register" className="mt-4 inline-flex rounded-md bg-blue-700 px-4 py-2 font-semibold text-white">Criar cadastro</Link>
             </div>
           ) : null}
@@ -195,8 +195,8 @@ export default async function PublicJobsPage({ searchParams }: { searchParams: P
                 <BriefcaseBusiness aria-hidden="true" size={20} />
               </span>
               <div>
-                <h2 className="font-semibold text-slate-950">Seu curriculo aumenta a qualidade da triagem</h2>
-                <p className="mt-1 text-sm leading-6 text-slate-600">Com cadastro completo, o portal cruza perfil, cidade, experiencias e cursos antes do encaminhamento.</p>
+                <h2 className="font-semibold text-slate-950">Seu currículo aumenta a qualidade da triagem</h2>
+                <p className="mt-1 text-sm leading-6 text-slate-600">Com cadastro completo, o portal cruza perfil, cidade, experiências e cursos antes do encaminhamento.</p>
               </div>
             </div>
             <Link href="/register" className="rounded-md bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white">Comecar agora</Link>

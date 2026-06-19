@@ -44,24 +44,24 @@ const languages = [
 
 const localizedLabels = {
   "pt-BR": {
-    notificationsTitle: "Notificacoes",
+    notificationsTitle: "Notificações",
     notificationsDescription: "Emails da plataforma e alertas de vagas.",
     emailPlatformTitle: "Emails da plataforma",
     emailPlatformDescription: "Receber avisos importantes sobre processos, triagens e mensagens.",
     alertsTitle: "Alertas de vagas",
-    alertsDescription: "Receber oportunidades de acordo com cidades, perfil e curriculo.",
+    alertsDescription: "Receber oportunidades de acordo com cidades, perfil e currículo.",
     privacyTitle: "Privacidade do perfil",
-    privacyDescription: "Visibilidade do curriculo e contato por recrutadores.",
-    profileVisibleTitle: "Perfil visivel para triagem",
-    profileVisibleDescription: "Permitir que recrutadores internos encontrem seu curriculo.",
+    privacyDescription: "Visibilidade do currículo e contato por recrutadores.",
+    profileVisibleTitle: "Perfil visível para triagem",
+    profileVisibleDescription: "Permitir que recrutadores internos encontrem seu currículo.",
     recruiterContactTitle: "Contato por recrutadores",
-    recruiterContactDescription: "Permitir contato em processos compativeis.",
-    salaryTitle: "Mostrar pretensao salarial",
-    salaryDescription: "Exibir essa informacao quando ela existir no perfil.",
+    recruiterContactDescription: "Permitir contato em processos compatíveis.",
+    salaryTitle: "Mostrar pretensão salarial",
+    salaryDescription: "Exibir essa informação quando ela existir no perfil.",
     languageTitle: "Idioma",
-    languageDescription: "Preferencia de idioma da sua experiencia.",
+    languageDescription: "Preferência de idioma da sua experiência.",
     primaryLanguageLabel: "Idioma principal",
-    languageHelp: "A selecao fica salva no seu perfil e prepara a plataforma para exibir sua experiencia no idioma escolhido."
+    languageHelp: "A seleção fica salva no seu perfil e prepara a plataforma para exibir sua experiência no idioma escolhido."
   },
   "en-US": {
     notificationsTitle: "Notifications",
@@ -97,11 +97,11 @@ const localizedLabels = {
     recruiterContactTitle: "Contacto de reclutadores",
     recruiterContactDescription: "Permitir contacto en procesos compatibles.",
     salaryTitle: "Mostrar aspiracion salarial",
-    salaryDescription: "Mostrar esta informacion cuando exista en tu perfil.",
+    salaryDescription: "Mostrar está informacion cuando exista en tu perfil.",
     languageTitle: "Idioma",
-    languageDescription: "Preferencia de idioma de tu experiencia.",
+    languageDescription: "Preferência de idioma de tu experiência.",
     primaryLanguageLabel: "Idioma principal",
-    languageHelp: "La seleccion se guarda en tu perfil y actualiza la experiencia de la plataforma al idioma elegido."
+    languageHelp: "La seleccion se guarda en tu perfil y actualiza la experiência de la plataforma al idioma elegido."
   }
 } as const;
 

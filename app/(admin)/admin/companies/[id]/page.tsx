@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AppShell } from "@/components/app/shell";
 import { archiveCompanyAction, updateCompanyStatusAction } from "@/lib/actions/workspace";
 import { createServerClient } from "@/lib/supabase/server";
+import { statusLabel } from "@/lib/status-labels";
 
 function one<T>(value: T | T[] | null) {
   return Array.isArray(value) ? value[0] : value;
@@ -19,7 +20,7 @@ export default async function AdminCompanyDetailPage({ params }: { params: Promi
   return (
     <AppShell eyebrow="Administrador" title="Detalhes da empresa">
       {!company ? (
-        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">Empresa nao encontrada.</section>
+        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">Empresa não encontrada.</section>
       ) : (
         <div className="space-y-5">
           <Link href="/admin/companies" className="inline-flex text-sm font-semibold text-blue-700">← Voltar para empresas</Link>
@@ -28,8 +29,8 @@ export default async function AdminCompanyDetailPage({ params }: { params: Promi
               <p className="text-xs font-bold uppercase text-slate-500">Cadastro empresarial</p>
               <h2 className="mt-1 text-2xl font-semibold">{company.trade_name}</h2>
               <p className="mt-2 text-sm text-slate-600">{company.legal_name}</p>
-              <p className="mt-2 text-sm text-slate-600">{company.city}/{company.state} · {company.corporate_email ?? "Email nao informado"} · {company.phone ?? "Telefone nao informado"}</p>
-              <p className="mt-4 text-sm leading-6 text-slate-700">{company.description ?? "Descricao empresarial ainda nao informada."}</p>
+              <p className="mt-2 text-sm text-slate-600">{company.city}/{company.state} · {company.corporate_email ?? "Email não informado"} · {company.phone ?? "Telefone não informado"}</p>
+              <p className="mt-4 text-sm leading-6 text-slate-700">{company.description ?? "Descrição empresarial ainda não informada."}</p>
             </div>
             <div className="grid gap-2 rounded-lg bg-slate-50 p-4">
               <form action={updateCompanyStatusAction} className="grid gap-2">
@@ -57,7 +58,7 @@ export default async function AdminCompanyDetailPage({ params }: { params: Promi
               {(demands ?? []).map((demand) => (
                 <article key={demand.id} className="rounded border border-slate-200 p-3 text-sm">
                   <strong>{demand.title}</strong>
-                  <p className="text-slate-600">{demand.city}/{demand.state} · {demand.openings} vaga(s) · {demand.status}</p>
+                  <p className="text-slate-600">{demand.city}/{demand.state} · {demand.openings} vaga(s) · {statusLabel(demand.status)}</p>
                 </article>
               ))}
               {(demands ?? []).length === 0 ? <p className="text-sm text-slate-500">Nenhuma demanda registrada.</p> : null}
@@ -73,7 +74,7 @@ export default async function AdminCompanyDetailPage({ params }: { params: Promi
                   <article key={presentation.id} className="rounded border border-slate-200 p-3 text-sm">
                     <strong>{professional?.full_name}</strong>
                     <p className="text-slate-600">{professional?.desired_role} · {professional?.city}/{professional?.state}</p>
-                    <p className="text-xs text-slate-500">Apresentado em {new Date(presentation.presented_at).toLocaleString("pt-BR")} · {presentation.status}</p>
+                    <p className="text-xs text-slate-500">Apresentado em {new Date(presentation.presented_at).toLocaleString("pt-BR")} · {statusLabel(presentation.status)}</p>
                   </article>
                 );
               })}

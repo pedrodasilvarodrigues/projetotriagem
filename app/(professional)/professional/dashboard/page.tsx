@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function ProfessionalDashboardRedirectPage() {
+export default function ProfessionalPainelRedirectPage() {
   redirect("/professional");
 }

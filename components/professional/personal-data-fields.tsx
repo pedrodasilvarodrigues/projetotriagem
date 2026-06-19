@@ -59,7 +59,7 @@ export function PersonalDataFields({ initial, identityRequired = false }: { init
   async function lookupCep(value: string) {
     const rawCep = digits(value);
     if (rawCep.length !== 8) {
-      setCepStatus(rawCep ? "Informe os 8 digitos do CEP." : "");
+      setCepStatus(rawCep ? "Informe os 8 dígitos do CEP." : "");
       return;
     }
 
@@ -69,16 +69,16 @@ export function PersonalDataFields({ initial, identityRequired = false }: { init
       if (!response.ok) throw new Error("cep-request-failed");
       const data = (await response.json()) as ViaCepResponse;
       if (data.erro) {
-        setCepStatus("CEP nao encontrado. Preencha o endereco manualmente.");
+        setCepStatus("CEP não encontrado. Preencha o endereço manualmente.");
         return;
       }
       setStreet(data.logradouro ?? "");
       setNeighborhood(data.bairro ?? "");
       setCity(data.localidade ?? "");
       setState((data.uf ?? "").toUpperCase().slice(0, 2));
-      setCepStatus("Endereco preenchido automaticamente.");
+      setCepStatus("Endereço preenchido automaticamente.");
     } catch {
-      setCepStatus("Nao foi possivel consultar o CEP. Preencha manualmente.");
+      setCepStatus("Não foi possível consultar o CEP. Preencha manualmente.");
     }
   }
 
@@ -102,11 +102,11 @@ export function PersonalDataFields({ initial, identityRequired = false }: { init
       </label>
       {cepStatus ? <p className="text-sm text-slate-600 md:col-span-2" aria-live="polite">{cepStatus}</p> : null}
       <label className="text-sm font-semibold md:col-span-2">
-        Endereco
+        Endereço
         <input name="street" value={street} onChange={(event) => setStreet(event.target.value)} autoComplete="address-line1" className="field-input mt-2" />
       </label>
       <label className="text-sm font-semibold">
-        Numero
+        Número
         <input name="addressNumber" value={addressNumber} onChange={(event) => setAddressNumber(event.target.value)} autoComplete="address-line2" className="field-input mt-2" />
       </label>
       <label className="text-sm font-semibold">

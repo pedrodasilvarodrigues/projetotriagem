@@ -84,11 +84,11 @@ export default async function ProfessionalSearchDemandsPage({
               <p className="text-sm font-semibold text-blue-700">Buscar demandas</p>
               <h2 className="mt-2 text-2xl font-semibold text-slate-950">Todas as vagas abertas das empresas cadastradas</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Aqui voce consegue visualizar empresas, nome da demanda, cargo, local e modalidade em uma lista unica.
+                Aqui você consegue visualizar empresas, nome da demanda, cargo, local e modalidade em uma lista unica.
               </p>
             </div>
             <Link href="/professional" className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700">
-              Voltar para minha area
+              Voltar para minha área
             </Link>
           </div>
 

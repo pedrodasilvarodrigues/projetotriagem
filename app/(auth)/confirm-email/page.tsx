@@ -3,15 +3,15 @@ import { ArrowLeft, BriefcaseBusiness, Mail, ShieldCheck } from "lucide-react";
 import { resendSignupConfirmationAction } from "@/lib/actions/auth";
 
 const messageMap: Record<string, string> = {
-  "email-enviado": "Se esse email estiver cadastrado e ainda nao confirmado, enviaremos um novo link de confirmacao."
+  "email-enviado": "Se esse email estiver cadastrado e ainda não confirmado, enviaremos um novo link de confirmacao."
 };
 
 const errorMap: Record<string, string> = {
-  "email-invalido": "Informe um email valido.",
+  "email-invalido": "Informe um email válido.",
   "aguarde-um-minuto": "Aguarde cerca de 1 minuto antes de solicitar outro email. Essa protecao evita envios repetidos.",
-  "email-ja-confirmado": "Esse email ja foi confirmado. Volte para o login e entre normalmente.",
-  "configuracao-supabase-incompleta": "Configuracao do Supabase pendente. Verifique as variaveis de ambiente.",
-  "erro-autenticacao": "Nao foi possivel reenviar a confirmacao agora. Tente novamente em instantes."
+  "email-ja-confirmado": "Esse e-mail já foi confirmado. Volte para a página de acesso e entre normalmente.",
+  "configuracao-supabase-incompleta": "Configuração do Supabase pendente. Verifique as variáveis de ambiente.",
+  "erro-autenticacao": "Não foi possível reenviar a confirmacao agora. Tente novamente em instantes."
 };
 
 export default async function ConfirmEmailPage({ searchParams }: { searchParams: Promise<{ error?: string; message?: string }> }) {
@@ -47,7 +47,7 @@ export default async function ConfirmEmailPage({ searchParams }: { searchParams:
               <div>
                 <h1 className="text-3xl font-semibold tracking-normal">Liberar acesso</h1>
                 <p className="mt-3 text-sm leading-6 text-slate-600">
-                  Informe o email cadastrado para confirmar o acesso. Quando possivel, a liberacao acontece automaticamente.
+                  Informe o e-mail cadastrado para confirmar o acesso. Quando possível, a liberação acontece automaticamente.
                 </p>
               </div>
             </div>

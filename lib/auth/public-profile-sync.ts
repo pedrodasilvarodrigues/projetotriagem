@@ -16,7 +16,7 @@ function fallbackName(user: User, role: AppRole) {
   return (
     textFromMetadata(user, ["full_name", "name", "display_name"]) ||
     user.email?.split("@")[0]?.trim() ||
-    (role === "company" ? "Empresa em configuracao" : "Profissional em configuracao")
+    (role === "company" ? "Empresa em configuração" : "Profissional em configuração")
   );
 }
 

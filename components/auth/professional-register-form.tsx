@@ -31,12 +31,12 @@ function maskCep(value: string) {
 }
 
 const errorMessages: Record<string, string> = {
-  "dados-invalidos": "Revise os campos obrigatorios e confira CPF, telefone, CEP e data de nascimento.",
-  "email-ja-cadastrado": "Esse email ja possui cadastro. Volte para login ou use outro email.",
-  "cpf-ja-cadastrado": "Esse CPF ja possui cadastro no portal.",
+  "dados-invalidos": "Revise os campos obrigatórios e confira CPF, telefone, CEP e data de nascimento.",
+  "email-ja-cadastrado": "Esse e-mail já possui cadastro. Volte para o acesso ou use outro e-mail.",
+  "cpf-ja-cadastrado": "Esse CPF já possui cadastro no portal.",
   "senha-invalida": "A senha precisa ter pelo menos 6 caracteres.",
-  "configuracao-supabase-incompleta": "Configuracao do Supabase pendente. Adicione as variaveis de ambiente seguras na Vercel.",
-  "nao-foi-possivel-criar-conta": "Nao foi possivel criar a conta agora. Tente novamente em instantes."
+  "configuracao-supabase-incompleta": "Configuração do Supabase pendente. Adicione as variáveis de ambiente seguras na Vercel.",
+  "nao-foi-possivel-criar-conta": "Não foi possível criar a conta agora. Tente novamente em instantes."
 };
 
 export function ProfessionalRegisterForm({ error }: { error?: string }) {
@@ -59,16 +59,16 @@ export function ProfessionalRegisterForm({ error }: { error?: string }) {
       const response = await fetch(`https://viacep.com.br/ws/${rawCep}/json/`);
       const data = (await response.json()) as ViaCepResponse;
       if (data.erro) {
-        setCepStatus("CEP nao encontrado. Preencha o endereco manualmente.");
+        setCepStatus("CEP não encontrado. Preencha o endereço manualmente.");
         return;
       }
       setStreet(data.logradouro ?? "");
       setNeighborhood(data.bairro ?? "");
       setCity(data.localidade ?? "");
       setState(data.uf ?? "");
-      setCepStatus("Endereco preenchido automaticamente.");
+      setCepStatus("Endereço preenchido automaticamente.");
     } catch {
-      setCepStatus("Nao foi possivel consultar o CEP. Preencha manualmente.");
+      setCepStatus("Não foi possível consultar o CEP. Preencha manualmente.");
     }
   }
 
@@ -76,7 +76,7 @@ export function ProfessionalRegisterForm({ error }: { error?: string }) {
     <form action={registerProfessionalWithEmailAction} onSubmit={() => setSubmitting(true)} className="space-y-5">
       {error ? (
         <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
-          {errorMessages[error] ?? `Verifique os dados informados. Codigo: ${error}`}
+          {errorMessages[error] ?? `Verifique os dados informados. Código: ${error}`}
         </div>
       ) : null}
 
@@ -120,18 +120,18 @@ export function ProfessionalRegisterForm({ error }: { error?: string }) {
       <fieldset className="grid gap-4 md:grid-cols-2">
         <legend className="mb-1 flex items-center gap-2 text-sm font-semibold text-slate-950 md:col-span-2">
           <MapPin aria-hidden="true" size={16} />
-          Endereco
+          Endereço
         </legend>
         <label className="block text-sm font-medium text-slate-800">
           CEP
           <input name="cep" required inputMode="numeric" value={cep} onBlur={(event) => lookupCep(event.target.value)} onChange={(event) => setCep(maskCep(event.target.value))} className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-950 transition focus:border-blue-700" />
         </label>
         <label className="block text-sm font-medium text-slate-800">
-          Numero
+          Número
           <input name="addressNumber" required autoComplete="address-line2" className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-950 transition focus:border-blue-700" />
         </label>
         <label className="block text-sm font-medium text-slate-800 md:col-span-2">
-          Endereco
+          Endereço
           <input name="street" required value={street} onChange={(event) => setStreet(event.target.value)} autoComplete="address-line1" className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-950 transition focus:border-blue-700" />
         </label>
         <label className="block text-sm font-medium text-slate-800">

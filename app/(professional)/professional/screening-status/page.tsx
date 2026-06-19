@@ -1,5 +1,6 @@
 import { AppShell } from "@/components/app/shell";
 import { createServerClient } from "@/lib/supabase/server";
+import { statusLabel } from "@/lib/status-labels";
 
 type ProcessRow = {
   id: string;
@@ -21,15 +22,15 @@ export default async function ProfessionalScreeningStatusPage() {
     : { data: [] };
 
   return (
-    <AppShell eyebrow="Profissional" title="Status de Triagem">
+    <AppShell eyebrow="Profissional" title="Situação da Triagem">
       <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
         <div className="overflow-x-auto">
           <table className="data-table">
-            <thead><tr><th>Demanda</th><th>Local</th><th>Status</th><th>Atualizacao</th></tr></thead>
+            <thead><tr><th>Demanda</th><th>Local</th><th>Situação</th><th>Atualização</th></tr></thead>
             <tbody>
               {((processes ?? []) as unknown as ProcessRow[]).map((process) => {
                 const demand = one(process.demand);
-                return <tr key={process.id}><td>{demand?.title ?? "Demanda"}</td><td>{demand?.city}/{demand?.state}</td><td>{process.status}</td><td>{new Date(process.updated_at).toLocaleDateString("pt-BR")}</td></tr>;
+                return <tr key={process.id}><td>{demand?.title ?? "Demanda"}</td><td>{demand?.city}/{demand?.state}</td><td>{statusLabel(process.status)}</td><td>{new Date(process.updated_at).toLocaleDateString("pt-BR")}</td></tr>;
               })}
               {(processes ?? []).length === 0 ? <tr><td colSpan={4}>Nenhuma triagem em andamento.</td></tr> : null}
             </tbody>

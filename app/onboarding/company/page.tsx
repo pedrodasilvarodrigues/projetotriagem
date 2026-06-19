@@ -8,7 +8,7 @@ export default async function CompanyOnboardingPage({ searchParams }: { searchPa
   const { data } = await supabase.auth.getUser();
 
   return (
-    <OnboardingLayout title="Cadastro empresarial" description="Cadastre os dados da empresa e do responsavel para liberar o acompanhamento e a criacao de demandas privadas.">
+    <OnboardingLayout title="Cadastro empresarial" description="Cadastre os dados da empresa e do responsável para liberar o acompanhamento e a criacao de demandas privadas.">
       <CompanyOnboardingForm email={data.user?.email ?? ""} error={params.error} />
     </OnboardingLayout>
   );

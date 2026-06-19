@@ -1,5 +1,6 @@
 import { AppShell } from "@/components/app/shell";
 import { createServerClient } from "@/lib/supabase/server";
+import { statusLabel } from "@/lib/status-labels";
 
 type ReferralRow = {
   id: string;
@@ -24,12 +25,12 @@ export default async function ProfessionalReferralsPage() {
     <AppShell eyebrow="Profissional" title="Encaminhamentos">
       <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
         <table className="data-table">
-          <thead><tr><th>Empresa</th><th>Oportunidade</th><th>Status</th><th>Resultado</th></tr></thead>
+          <thead><tr><th>Empresa</th><th>Oportunidade</th><th>Situação</th><th>Resultado</th></tr></thead>
           <tbody>
             {((referrals ?? []) as unknown as ReferralRow[]).map((referral) => {
               const demand = one(referral.demand);
               const company = one(demand?.company ?? null);
-              return <tr key={referral.id}><td>{company?.trade_name ?? "Empresa em validacao"}</td><td>{demand?.title ?? "Oportunidade"}</td><td>{referral.status}</td><td>{referral.company_result ?? "Em andamento"}</td></tr>;
+              return <tr key={referral.id}><td>{company?.trade_name ?? "Empresa em validação"}</td><td>{demand?.title ?? "Oportunidade"}</td><td>{statusLabel(referral.status)}</td><td>{referral.company_result ?? "Em andamento"}</td></tr>;
             })}
             {(referrals ?? []).length === 0 ? <tr><td colSpan={4}>Nenhum encaminhamento liberado ainda.</td></tr> : null}
           </tbody>

@@ -14,28 +14,28 @@ export async function GET(request: NextRequest) {
   try {
     supabase = await createServerClient();
   } catch {
-    console.error("[auth] Callback sem configuracao publica do Supabase");
+    console.error("[auth] Callback sem configuração pública do Supabase");
     return NextResponse.redirect(new URL("/login?error=configuracao-supabase-incompleta", request.url));
   }
 
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (error) {
-      console.error("[auth] Falha ao trocar code por sessao", { error: error.message });
+      console.error("[auth] Falha ao trocar code por sessão", { error: error.message });
       return NextResponse.redirect(new URL("/login?error=link-invalido", request.url));
     }
   }
 
   const { data, error: userError } = await supabase.auth.getUser();
   if (userError) {
-    console.error("[auth] Falha ao recuperar usuario no callback", { error: userError.message });
+    console.error("[auth] Falha ao recuperar usuário no callback", { error: userError.message });
   }
 
   if (!data.user) {
     return NextResponse.redirect(new URL("/login?error=sessao-expirada", request.url));
   }
 
-  console.log("[auth] Usuario autenticado no callback", { userId: data.user.id });
+  console.log("[auth] Usuário autenticado no callback", { userId: data.user.id });
 
   if (safeNext?.startsWith("/update-password")) {
     return NextResponse.redirect(new URL(safeNext, request.url));
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 
   const entryPath = await resolveAuthenticatedEntryPath(supabase, data.user.id, data.user.user_metadata, signupRole).catch(() => null);
   if (!entryPath) {
-    console.error("[auth] Usuario sem perfil/role resolvivel no callback", { userId: data.user.id });
+    console.error("[auth] Usuário sem perfil/role resolúvel no callback", { userId: data.user.id });
     return NextResponse.redirect(new URL("/onboarding", request.url));
   }
 

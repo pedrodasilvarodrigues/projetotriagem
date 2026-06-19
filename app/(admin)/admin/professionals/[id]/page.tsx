@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AppShell } from "@/components/app/shell";
 import { archiveProfessionalAction, updateProfessionalStatusAction } from "@/lib/actions/workspace";
 import { createServerClient } from "@/lib/supabase/server";
+import { statusLabel } from "@/lib/status-labels";
 
 function one<T>(value: T | T[] | null) {
   return Array.isArray(value) ? value[0] : value;
@@ -34,7 +35,7 @@ export default async function AdminProfessionalDetailPage({ params }: { params: 
     <AppShell eyebrow="Administrador" title="Perfil do profissional">
       {!professional ? (
         <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          <p>Profissional nao encontrado.</p>
+          <p>Profissional não encontrado.</p>
           <Link href="/admin/professionals" className="mt-4 inline-flex rounded bg-slate-950 px-4 py-2 text-sm font-semibold text-white">Voltar</Link>
         </section>
       ) : (
@@ -46,12 +47,12 @@ export default async function AdminProfessionalDetailPage({ params }: { params: 
               <p className="text-xs font-bold uppercase text-slate-500">Cadastro completo</p>
               <h2 className="mt-1 text-2xl font-semibold">{professional.full_name}</h2>
               <p className="mt-2 text-sm text-slate-600">{professional.desired_role} · {professional.city}/{professional.state}</p>
-              <p className="mt-2 text-sm text-slate-600">{professional.email ?? "Email nao informado"} · {professional.phone ?? "Telefone nao informado"}</p>
-              <p className="mt-4 text-sm leading-6 text-slate-700">{professional.summary ?? "Resumo profissional ainda nao informado."}</p>
+              <p className="mt-2 text-sm text-slate-600">{professional.email ?? "Email não informado"} · {professional.phone ?? "Telefone não informado"}</p>
+              <p className="mt-4 text-sm leading-6 text-slate-700">{professional.summary ?? "Resumo profissional ainda não informado."}</p>
             </div>
             <div className="grid gap-2 rounded-lg bg-slate-50 p-4">
               <p className="rounded border border-blue-100 bg-blue-50 p-3 text-sm text-blue-900">
-                Para apresentar este profissional, acesse a aba Demandas e escolha a demanda desejada. A lista sera ordenada por compatibilidade.
+                Para apresentar este profissional, acesse a aba Demandas e escolha a demanda desejada. A lista será ordenada por compatibilidade.
               </p>
               <form action={updateProfessionalStatusAction} className="grid gap-2">
                 <input type="hidden" name="professionalId" value={professional.id} />
@@ -73,25 +74,25 @@ export default async function AdminProfessionalDetailPage({ params }: { params: 
           </section>
 
           <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold">Curriculo estruturado</h2>
+            <h2 className="text-lg font-semibold">Currículo estruturado</h2>
             <div className="mt-4 grid gap-4 lg:grid-cols-2">
-              <div><h3 className="font-semibold">Formacao</h3>{(educations ?? []).map((item) => <p key={`${item.institution}-${item.course_name}`} className="mt-2 text-sm text-slate-600">{item.course_name} · {item.institution}</p>)}</div>
-              <div><h3 className="font-semibold">Experiencias</h3>{(experiences ?? []).map((item) => <p key={`${item.company_name}-${item.role_title}`} className="mt-2 text-sm text-slate-600">{item.role_title} · {item.company_name}</p>)}</div>
-              <div><h3 className="font-semibold">Cursos</h3>{(courses ?? []).map((item) => <p key={item.name} className="mt-2 text-sm text-slate-600">{item.name} · {item.institution ?? "Instituicao nao informada"}</p>)}</div>
+              <div><h3 className="font-semibold">Formação</h3>{(educations ?? []).map((item) => <p key={`${item.institution}-${item.course_name}`} className="mt-2 text-sm text-slate-600">{item.course_name} · {item.institution}</p>)}</div>
+              <div><h3 className="font-semibold">Experiências</h3>{(experiences ?? []).map((item) => <p key={`${item.company_name}-${item.role_title}`} className="mt-2 text-sm text-slate-600">{item.role_title} · {item.company_name}</p>)}</div>
+              <div><h3 className="font-semibold">Cursos</h3>{(courses ?? []).map((item) => <p key={item.name} className="mt-2 text-sm text-slate-600">{item.name} · {item.institution ?? "Instituição não informada"}</p>)}</div>
               <div><h3 className="font-semibold">Idiomas e habilidades</h3>{(languages ?? []).map((item) => <p key={item.language_name} className="mt-2 text-sm text-slate-600">{item.language_name} · {item.proficiency}</p>)}{(skills ?? []).map((item) => <p key={item.name} className="mt-2 text-sm text-slate-600">{item.name} · {item.skill_type} · {item.proficiency ?? 1}/5</p>)}</div>
             </div>
           </section>
 
           <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold">Historico de processos e apresentacoes</h2>
+            <h2 className="text-lg font-semibold">Histórico de processos e apresentacoes</h2>
             <div className="mt-4 grid gap-3">
-              {(presentations ?? []).map((item) => <p key={item.id} className="rounded border border-slate-200 p-3 text-sm">Apresentado para <strong>{one(item.company)?.trade_name}</strong> em {new Date(item.presented_at).toLocaleString("pt-BR")} · {item.status}</p>)}
+              {(presentations ?? []).map((item) => <p key={item.id} className="rounded border border-slate-200 p-3 text-sm">Apresentado para <strong>{one(item.company)?.trade_name}</strong> em {new Date(item.presented_at).toLocaleString("pt-BR")} · {statusLabel(item.status)}</p>)}
               {(processes ?? []).map((process) => {
                 const demand = one(process.demand);
                 const company = one(demand?.company ?? null);
-                return <p key={process.id} className="rounded border border-slate-200 p-3 text-sm">{demand?.title} · {company?.trade_name} · status: {process.status}</p>;
+                return <p key={process.id} className="rounded border border-slate-200 p-3 text-sm">{demand?.title} · {company?.trade_name} · situação: {statusLabel(process.status)}</p>;
               })}
-              {(presentations ?? []).length === 0 && (processes ?? []).length === 0 ? <p className="text-sm text-slate-500">Nenhum historico registrado.</p> : null}
+              {(presentations ?? []).length === 0 && (processes ?? []).length === 0 ? <p className="text-sm text-slate-500">Nenhum histórico registrado.</p> : null}
             </div>
           </section>
         </div>

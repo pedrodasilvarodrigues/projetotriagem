@@ -18,7 +18,7 @@ export default async function CompanyProfilePage({ searchParams }: { searchParam
     : { data: null };
   const authEmail = userData.user?.email ?? "";
   const metadataName = String(userData.user?.user_metadata?.full_name ?? userData.user?.user_metadata?.name ?? "").trim();
-  const fallbackName = profile?.full_name || metadataName || authEmail.split("@")[0] || "Empresa em configuracao";
+  const fallbackName = profile?.full_name || metadataName || authEmail.split("@")[0] || "Empresa em configuração";
   const fallbackEmail = company?.corporate_email || profile?.email || authEmail;
   const companyView = {
     ...company,

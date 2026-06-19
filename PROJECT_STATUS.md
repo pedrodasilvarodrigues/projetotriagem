@@ -42,6 +42,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Menus das areas profissional e empresarial voltaram a usar navegacao horizontal rolante em todas as larguras de tela.
 - Area empresarial agora mostra somente candidatos efetivamente apresentados pelo administrador, vinculados a cada demanda, com contato, perfil e situacao do processo; a fila reserva permanece oculta.
 - Empresas podem encerrar uma demanda diretamente na listagem ou na edicao quando a vaga for preenchida, removendo-a das oportunidades abertas.
+- Revisão ortográfica completa aplicada à interface, mensagens, e-mails e PDFs, com correção de acentuação, cedilha, concordância e tradução de termos técnicos visíveis para português.
 - Area de curriculo com painel de qualidade, checklist de preenchimento e proximos ajustes recomendados.
 - Navegacao superior por subgrupos na area de curriculo.
 - Painel de personalizacao para baixar CV com 3 modelos, 7 cores e opcao de pretensao salarial.

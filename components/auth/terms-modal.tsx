@@ -22,16 +22,16 @@ export function TermsModal({ label = "Ver Termos" }: { label?: string }) {
             </div>
             <div className="max-h-[62vh] overflow-y-auto px-5 py-4 text-sm leading-7 text-slate-700">
               <h3 className="font-semibold text-slate-950">Termos de Uso</h3>
-              <p>O Portal de Triagem Profissional oferece ambiente privado para cadastro, triagem e encaminhamento administrado de profissionais e empresas. O usuario deve fornecer informacoes verdadeiras, manter seus dados atualizados e utilizar a plataforma somente para fins profissionais legitimos.</p>
-              <p>A plataforma nao garante contratacao, publicacao de vaga ou selecao automatica. A triagem e o encaminhamento seguem criterios operacionais, requisitos informados pelas empresas e validacao administrativa.</p>
+              <p>O Portal de Triagem Profissional oferece ambiente privado para cadastro, triagem e encaminhamento administrado de profissionais e empresas. O usuário deve fornecer informações verdadeiras, manter seus dados atualizados e utilizar a plataforma somente para fins profissionais legítimos.</p>
+              <p>A plataforma não garante contratação, publicação de vaga ou seleção automática. A triagem e o encaminhamento seguem critérios operacionais, requisitos informados pelas empresas e validação administrativa.</p>
 
-              <h3 className="mt-5 font-semibold text-slate-950">Politica de Privacidade</h3>
-              <p>Coletamos dados cadastrais, profissionais, empresariais, documentos, curriculos, registros de consentimento e historico de processos para operar a triagem profissional. Os dados sao utilizados para identificacao, compatibilidade, suporte, comunicacoes transacionais e cumprimento de obrigacoes legais.</p>
-              <p>Empresas visualizam apenas profissionais encaminhados pela administracao. Dados sensiveis e documentos sao protegidos por regras de acesso, armazenamento controlado e politicas de seguranca.</p>
+              <h3 className="mt-5 font-semibold text-slate-950">Política de Privacidade</h3>
+              <p>Coletamos dados cadastrais, profissionais, empresariais, documentos, currículos, registros de consentimento e histórico de processos para operar a triagem profissional. Os dados são utilizados para identificação, compatibilidade, suporte, comunicações transacionais e cumprimento de obrigações legais.</p>
+              <p>Empresas visualizam apenas profissionais encaminhados pela administração. Dados sensíveis e documentos são protegidos por regras de acesso, armazenamento controlado e políticas de segurança.</p>
 
               <h3 className="mt-5 font-semibold text-slate-950">LGPD</h3>
-              <p>O tratamento de dados observa principios de finalidade, necessidade, transparencia, seguranca e prevencao. O usuario pode solicitar acesso, correcao, portabilidade, anonimização ou exclusao de dados, observados registros que precisem ser mantidos por obrigacao legal ou auditoria.</p>
-              <p>Ao aceitar, registramos usuario, data, hora, IP, agente do navegador, versao dos termos e versao da politica de privacidade.</p>
+              <p>O tratamento de dados observa princípios de finalidade, necessidade, transparência, segurança e prevenção. O usuário pode solicitar acesso, correção, portabilidade, anonimização ou exclusão de dados, observados registros que precisem ser mantidos por obrigação legal ou auditoria.</p>
+              <p>Ao aceitar, registramos usuário, data, hora, IP, agente do navegador, versão dos termos e versão da política de privacidade.</p>
             </div>
           </div>
         </div>

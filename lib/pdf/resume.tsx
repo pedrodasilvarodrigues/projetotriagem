@@ -44,14 +44,14 @@ function ResumeDocument({ input }: { input: ResumeInput }) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.title}>Formacao</Text>
+          <Text style={styles.title}>Formação</Text>
           <Text style={styles.itemTitle}>{input.education}</Text>
           <Text style={styles.text}>{input.courseName} - {input.institution} {input.completionYear ? `(${input.completionYear})` : ""}</Text>
         </View>
 
         {input.experienceCompany || input.experienceRole ? (
           <View style={styles.section}>
-            <Text style={styles.title}>Experiencia</Text>
+            <Text style={styles.title}>Experiência</Text>
             <Text style={styles.itemTitle}>{input.experienceRole} - {input.experienceCompany}</Text>
             <Text style={styles.text}>{input.experiencePeriod}</Text>
             <Text style={styles.text}>{input.experienceDescription}</Text>
@@ -148,8 +148,8 @@ function ContactBlock({ input }: { input: ProfessionalResumePdfInput }) {
   return (
     <View>
       <Text style={exportStyles.name}>{input.fullName}</Text>
-      <Text style={exportStyles.role}>{input.desiredRole || "Objetivo profissional nao informado"}</Text>
-      <Text style={exportStyles.meta}>{input.email} | {input.phone || "Telefone nao informado"} | {input.city}/{input.state}</Text>
+      <Text style={exportStyles.role}>{input.desiredRole || "Objetivo profissional não informado"}</Text>
+      <Text style={exportStyles.meta}>{input.email} | {input.phone || "Telefone não informado"} | {input.city}/{input.state}</Text>
     </View>
   );
 }
@@ -168,20 +168,20 @@ function ResumeSections({ input, accentColor, timeline = false }: { input: Profe
   return (
     <>
       <ExportSection title="Resumo" accentColor={accentColor}>
-        <EmptyText>{input.summary || "Resumo profissional nao informado."}</EmptyText>
+        <EmptyText>{input.summary || "Resumo profissional não informado."}</EmptyText>
       </ExportSection>
 
-      <ExportSection title="Historico academico" accentColor={accentColor}>
+      <ExportSection title="Histórico acadêmico" accentColor={accentColor}>
         {input.educations.length > 0 ? input.educations.map((education, index) => wrapTimeline(
           <>
             <Text style={exportStyles.itemTitle}>{education.courseName}</Text>
             <Text style={exportStyles.itemMeta}>{education.institution} | {education.level}{education.completedAt ? ` | ${education.completedAt}` : ""}</Text>
           </>,
           `education-${index}`
-        )) : <EmptyText>Nenhum historico academico informado.</EmptyText>}
+        )) : <EmptyText>Nenhum histórico academico informado.</EmptyText>}
       </ExportSection>
 
-      <ExportSection title="Experiencias" accentColor={accentColor}>
+      <ExportSection title="Experiências" accentColor={accentColor}>
         {input.experiences.length > 0 ? input.experiences.map((experience, index) => wrapTimeline(
           <>
             <Text style={exportStyles.itemTitle}>{experience.roleTitle} - {experience.companyName}</Text>
@@ -189,7 +189,7 @@ function ResumeSections({ input, accentColor, timeline = false }: { input: Profe
             <Text style={exportStyles.text}>{experience.description}</Text>
           </>,
           `experience-${index}`
-        )) : <EmptyText>Nenhuma experiencia informada.</EmptyText>}
+        )) : <EmptyText>Nenhuma experiência informada.</EmptyText>}
       </ExportSection>
 
       <ExportSection title="Cursos" accentColor={accentColor}>
@@ -223,11 +223,11 @@ function ResumeSections({ input, accentColor, timeline = false }: { input: Profe
 
 function ProfessionalResumeDocument({ input }: { input: ProfessionalResumePdfInput }) {
   const accentColor = input.accentColor;
-  const availability = input.availableInDays === 0 ? "Disponivel imediatamente" : `Disponivel em ${input.availableInDays} dias`;
+  const availability = input.availableInDays === 0 ? "Disponível imediatamente" : `Disponível em ${input.availableInDays} dias`;
 
   if (input.template === "classico") {
     return (
-      <Document title={`Curriculo - ${input.fullName}`}>
+      <Document title={`Currículo - ${input.fullName}`}>
         <Page size="A4" style={exportStyles.page}>
           <View style={exportStyles.row}>
             <View style={[exportStyles.sidebar, { backgroundColor: accentColor }]}>
@@ -235,10 +235,10 @@ function ProfessionalResumeDocument({ input }: { input: ProfessionalResumePdfInp
               <Text style={exportStyles.sidebarText}>{input.desiredRole}</Text>
               <Text style={exportStyles.sidebarText}>{input.city}/{input.state}</Text>
               <Text style={exportStyles.sidebarText}>{input.email}</Text>
-              <Text style={exportStyles.sidebarText}>{input.phone || "Telefone nao informado"}</Text>
+              <Text style={exportStyles.sidebarText}>{input.phone || "Telefone não informado"}</Text>
               <Text style={exportStyles.sidebarText}>{availability}</Text>
               <Text style={exportStyles.sidebarText}>Grau: {input.educationLevel}</Text>
-              {input.showSalaryExpectation ? <Text style={exportStyles.sidebarText}>Pretensao salarial: a combinar</Text> : null}
+              {input.showSalaryExpectation ? <Text style={exportStyles.sidebarText}>Pretensão salarial: a combinar</Text> : null}
             </View>
             <View style={exportStyles.main}>
               <ResumeSections input={input} accentColor={accentColor} />
@@ -251,11 +251,11 @@ function ProfessionalResumeDocument({ input }: { input: ProfessionalResumePdfInp
 
   if (input.template === "linha") {
     return (
-      <Document title={`Curriculo - ${input.fullName}`}>
+      <Document title={`Currículo - ${input.fullName}`}>
         <Page size="A4" style={[exportStyles.page, exportStyles.pageInner]}>
           <View style={exportStyles.header}>
             <ContactBlock input={input} />
-            <Text style={exportStyles.meta}>{availability} | Grau de instrucao: {input.educationLevel}{input.showSalaryExpectation ? " | Pretensao salarial: a combinar" : ""}</Text>
+            <Text style={exportStyles.meta}>{availability} | Grau de instrucao: {input.educationLevel}{input.showSalaryExpectation ? " | Pretensão salarial: a combinar" : ""}</Text>
           </View>
           <ResumeSections input={input} accentColor={accentColor} timeline />
         </Page>
@@ -264,11 +264,11 @@ function ProfessionalResumeDocument({ input }: { input: ProfessionalResumePdfInp
   }
 
   return (
-    <Document title={`Curriculo - ${input.fullName}`}>
+    <Document title={`Currículo - ${input.fullName}`}>
       <Page size="A4" style={exportStyles.page}>
         <View style={[exportStyles.editorialBand, { backgroundColor: accentColor }]}>
           <ContactBlock input={input} />
-          <Text style={exportStyles.meta}>{availability} | Grau de instrucao: {input.educationLevel}{input.showSalaryExpectation ? " | Pretensao salarial: a combinar" : ""}</Text>
+          <Text style={exportStyles.meta}>{availability} | Grau de instrucao: {input.educationLevel}{input.showSalaryExpectation ? " | Pretensão salarial: a combinar" : ""}</Text>
         </View>
         <View style={{ padding: "0 36 36" }}>
           <ResumeSections input={input} accentColor={accentColor} />

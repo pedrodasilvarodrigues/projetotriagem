@@ -31,29 +31,29 @@ const personalErrorMessages: Record<string, string> = {
   "lastName-invalido": "Informe o sobrenome.",
   "nationality-invalido": "Informe a nacionalidade.",
   "cpf-invalido": "Confira o CPF informado.",
-  "cpf-ja-cadastrado": "Este CPF ja pertence a outro cadastro.",
+  "cpf-ja-cadastrado": "Este CPF já pertence a outro cadastro.",
   "data-invalida": "Informe uma data valida no formato dd/mm/aaaa.",
-  "idade-minima": "O cadastro profissional exige idade minima de 14 anos.",
+  "idade-minima": "O cadastro profissional exige idade mínima de 14 anos.",
   "telefone-invalido": "Informe um telefone com DDD.",
   "email-invalido": "Confira o email informado.",
   "cep-invalido": "Informe um CEP com 8 digitos.",
   "city-invalido": "Informe a cidade.",
   "state-invalido": "Informe o estado com duas letras.",
   "estado-invalido": "Informe o estado com duas letras.",
-  "erro-ao-salvar-perfil": "Nao foi possivel salvar os dados gerais. Tente novamente.",
-  "erro-ao-salvar-profissional": "Nao foi possivel salvar os dados profissionais. Tente novamente.",
-  "erro-ao-salvar-formacao": "Nao foi possivel salvar a formacao. Tente novamente.",
-  "erro-ao-salvar-curso": "Nao foi possivel salvar o curso. Tente novamente.",
-  "erro-ao-salvar-idioma": "Nao foi possivel salvar o idioma. Tente novamente.",
-  "erro-ao-salvar-habilidade": "Nao foi possivel salvar a habilidade. Tente novamente.",
-  "erro-ao-salvar-experiencia": "Nao foi possivel salvar a experiencia. Tente novamente.",
-  "perfil-profissional-indisponivel": "Nao foi possivel carregar seu perfil para salvar. Atualize a pagina e tente novamente."
+  "erro-ao-salvar-perfil": "Não foi possível salvar os dados gerais. Tente novamente.",
+  "erro-ao-salvar-profissional": "Não foi possível salvar os dados profissionais. Tente novamente.",
+  "erro-ao-salvar-formacao": "Não foi possível salvar a formação. Tente novamente.",
+  "erro-ao-salvar-curso": "Não foi possível salvar o curso. Tente novamente.",
+  "erro-ao-salvar-idioma": "Não foi possível salvar o idioma. Tente novamente.",
+  "erro-ao-salvar-habilidade": "Não foi possível salvar a habilidade. Tente novamente.",
+  "erro-ao-salvar-experiencia": "Não foi possível salvar a experiência. Tente novamente.",
+  "perfil-profissional-indisponivel": "Não foi possível carregar seu perfil para salvar. Atualize a página e tente novamente."
 };
 
 const educationOptions = [
   ["fundamental", "Fundamental"],
   ["medio", "Medio"],
-  ["tecnico", "Tecnico"],
+  ["tecnico", "Técnico"],
   ["superior", "Superior"],
   ["pos", "Pos-graduacao"],
   ["mba", "MBA"],
@@ -63,10 +63,10 @@ const educationOptions = [
 
 const sections: Array<[string, string]> = [
   ["dados-pessoais", "Dados pessoais"],
-  ["confidencialidade", "Seguranca"],
+  ["confidencialidade", "Segurança"],
   ["objetivo", "Objetivo"],
-  ["formacao", "Historico academico"],
-  ["experiencias", "Experiencias"],
+  ["formacao", "Histórico acadêmico"],
+  ["experiencias", "Experiências"],
   ["cursos", "Cursos"],
   ["idiomas", "Idiomas"],
   ["habilidades", "Habilidades"],
@@ -123,8 +123,8 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
   const resumeChecklist = [
     { label: "Dados pessoais", done: Boolean(professional?.full_name && professional?.email && professional?.phone && professional?.city && professional?.state), href: "#dados-pessoais" },
     { label: "Objetivo e resumo", done: Boolean(professional?.desired_role && professional?.summary), href: "#objetivo" },
-    { label: "Historico academico", done: (educations ?? []).length > 0, href: "#formacao" },
-    { label: "Experiencias", done: (experiences ?? []).length > 0, href: "#experiencias" },
+    { label: "Histórico acadêmico", done: (educations ?? []).length > 0, href: "#formacao" },
+    { label: "Experiências", done: (experiences ?? []).length > 0, href: "#experiencias" },
     { label: "Cursos", done: (courses ?? []).length > 0, href: "#cursos" },
     { label: "Idiomas", done: (languages ?? []).length > 0, href: "#idiomas" },
     { label: "Habilidades", done: (skills ?? []).length > 0, href: "#habilidades" },
@@ -134,19 +134,19 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
   const nextResumeActions = resumeChecklist.filter((item) => !item.done).slice(0, 3);
 
   return (
-    <AppShell eyebrow="Profissional" title="Curriculo">
+    <AppShell eyebrow="Profissional" title="Currículo">
       <div className="space-y-5">
         <ResumeSectionNav sections={sections} />
 
         <div className="space-y-5">
-          {params.error ? <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{personalErrorMessages[params.error] ?? `Verifique os dados informados. Codigo: ${params.error}`}</p> : null}
-          {params.message ? <p className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">Atualizacao salva.</p> : null}
+          {params.error ? <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{personalErrorMessages[params.error] ?? `Verifique os dados informados. Código: ${params.error}`}</p> : null}
+          {params.message ? <p className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">Atualização salva.</p> : null}
 
           <section className="grid gap-4 border border-slate-200 bg-white p-5 shadow-sm lg:grid-cols-[280px_minmax(0,1fr)]">
             <div className="border border-blue-100 bg-blue-50 p-4">
               <p className="inline-flex items-center gap-2 text-xs font-bold uppercase text-blue-700">
                 <Target aria-hidden="true" size={15} />
-                Qualidade do curriculo
+                Qualidade do currículo
               </p>
               <div className="mt-3 flex items-end gap-2">
                 <strong className="text-4xl leading-none text-slate-950">{resumeCompletion}%</strong>
@@ -175,7 +175,7 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
               </div>
               {nextResumeActions.length > 0 ? (
                 <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-                  <strong className="block">Proximos ajustes recomendados</strong>
+                  <strong className="block">Próximos ajustes recomendados</strong>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {nextResumeActions.map((item) => (
                       <Link key={item.label} href={item.href} className="rounded-md bg-white px-3 py-1.5 font-semibold text-amber-900">
@@ -216,15 +216,15 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
           <section id="confidencialidade" className="scroll-mt-72 border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center gap-2">
               <ShieldCheck aria-hidden="true" size={18} className="text-blue-700" />
-              <h2 className="text-lg font-semibold">Seguranca e Confidencialidade</h2>
+              <h2 className="text-lg font-semibold">Segurança e Confidencialidade</h2>
             </div>
             <form action={updateUserSettingsAction} className="mt-5 grid gap-3 md:grid-cols-2">
               <input type="hidden" name="redirectTo" value="/professional/resume" />
-              <label className="flex items-start gap-3 border border-slate-200 bg-slate-50 p-3 text-sm font-medium"><input name="profileVisible" type="checkbox" defaultChecked={prefs.profile_visible} className="mt-1 size-4" /><span><strong className="block">Curriculo visivel</strong><span className="text-slate-600">Permitir que recrutadores internos vejam seu perfil.</span></span></label>
+              <label className="flex items-start gap-3 border border-slate-200 bg-slate-50 p-3 text-sm font-medium"><input name="profileVisible" type="checkbox" defaultChecked={prefs.profile_visible} className="mt-1 size-4" /><span><strong className="block">Currículo visível</strong><span className="text-slate-600">Permitir que recrutadores internos vejam seu perfil.</span></span></label>
               <label className="flex items-start gap-3 border border-slate-200 bg-slate-50 p-3 text-sm font-medium"><input name="allowRecruiterContact" type="checkbox" defaultChecked={prefs.allow_recruiter_contact} className="mt-1 size-4" /><span><strong className="block">Permitir contato</strong><span className="text-slate-600">Receber contato quando houver compatibilidade.</span></span></label>
-              <label className="flex items-start gap-3 border border-slate-200 bg-slate-50 p-3 text-sm font-medium"><input name="opportunityAlerts" type="checkbox" defaultChecked={prefs.opportunity_alerts} className="mt-1 size-4" /><span><strong className="block">Alertas de vagas</strong><span className="text-slate-600">Usar seu curriculo para recomendar vagas.</span></span></label>
-              <label className="flex items-start gap-3 border border-slate-200 bg-slate-50 p-3 text-sm font-medium"><input name="emailNotifications" type="checkbox" defaultChecked={prefs.email_notifications} className="mt-1 size-4" /><span><strong className="block">Notificacoes por email</strong><span className="text-slate-600">Receber avisos importantes do processo.</span></span></label>
-              <label className="flex items-start gap-3 border border-slate-200 bg-slate-50 p-3 text-sm font-medium md:col-span-2"><input name="showSalaryExpectation" type="checkbox" defaultChecked={prefs.show_salary_expectation} className="mt-1 size-4" /><span><strong className="block">Exibir pretensao salarial</strong><span className="text-slate-600">Mostrar essa informacao quando estiver cadastrada.</span></span></label>
+              <label className="flex items-start gap-3 border border-slate-200 bg-slate-50 p-3 text-sm font-medium"><input name="opportunityAlerts" type="checkbox" defaultChecked={prefs.opportunity_alerts} className="mt-1 size-4" /><span><strong className="block">Alertas de vagas</strong><span className="text-slate-600">Usar seu currículo para recomendar vagas.</span></span></label>
+              <label className="flex items-start gap-3 border border-slate-200 bg-slate-50 p-3 text-sm font-medium"><input name="emailNotifications" type="checkbox" defaultChecked={prefs.email_notifications} className="mt-1 size-4" /><span><strong className="block">Notificações por email</strong><span className="text-slate-600">Receber avisos importantes do processo.</span></span></label>
+              <label className="flex items-start gap-3 border border-slate-200 bg-slate-50 p-3 text-sm font-medium md:col-span-2"><input name="showSalaryExpectation" type="checkbox" defaultChecked={prefs.show_salary_expectation} className="mt-1 size-4" /><span><strong className="block">Exibir pretensão salarial</strong><span className="text-slate-600">Mostrar essa informação quando estiver cadastrada.</span></span></label>
               <div className="md:col-span-2"><button className="rounded-md bg-blue-700 px-5 py-3 text-sm font-semibold text-white" type="submit">Salvar confidencialidade</button></div>
             </form>
           </section>
@@ -242,8 +242,8 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
                 </select>
               </label>
               <label className="text-sm font-semibold">Disponibilidade em dias<input name="availableInDays" type="number" min="0" defaultValue={professional?.available_in_days ?? 0} className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">Localizacao<input readOnly value={`${professional?.city ?? "Cidade"}/${professional?.state ?? "UF"}`} className="field-input mt-2 bg-slate-100" /></label>
-              <label className="text-sm font-semibold md:col-span-2">Resumo do curriculo<textarea name="summary" rows={5} defaultValue={professional?.summary ?? ""} className="field-input mt-2" /></label>
+              <label className="text-sm font-semibold">Localização<input readOnly value={`${professional?.city ?? "Cidade"}/${professional?.state ?? "UF"}`} className="field-input mt-2 bg-slate-100" /></label>
+              <label className="text-sm font-semibold md:col-span-2">Resumo do currículo<textarea name="summary" rows={5} defaultValue={professional?.summary ?? ""} className="field-input mt-2" /></label>
               <div className="md:col-span-2"><button className="rounded-md bg-blue-700 px-5 py-3 text-sm font-semibold text-white" type="submit">Salvar objetivo</button></div>
             </form>
           </section>
@@ -251,9 +251,9 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
           <section id="formacao" className="scroll-mt-72 border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center gap-2">
               <GraduationCap aria-hidden="true" size={18} className="text-blue-700" />
-              <h2 className="text-lg font-semibold">Historico academico</h2>
+              <h2 className="text-lg font-semibold">Histórico acadêmico</h2>
             </div>
-            <p className="mt-2 text-sm leading-6 text-slate-600">Adicione instituicoes, cursos tecnicos, graduacoes e pos-graduacoes. O grau de instrucao atual fica separado no objetivo profissional.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">Adicione instituições, cursos tecnicos, graduacoes e pos-graduacoes. O grau de instrucao atual fica separado no objetivo profissional.</p>
             <div className="mt-5 grid gap-3 md:grid-cols-2">
               {((educations ?? []) as EducationRow[]).map((education) => (
                 <article key={education.id} className="border border-slate-200 bg-slate-50 p-4">
@@ -262,31 +262,31 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
                   <p className="mt-2 text-xs font-semibold text-slate-500">{education.level} · {education.completed_at ? new Date(education.completed_at).getFullYear() : "Em andamento"}</p>
                 </article>
               ))}
-              {(educations ?? []).length === 0 ? <p className="text-sm text-slate-500">Nenhuma formacao adicionada.</p> : null}
+              {(educations ?? []).length === 0 ? <p className="text-sm text-slate-500">Nenhuma formação adicionada.</p> : null}
             </div>
             <form action={addProfessionalEducationAction} className="mt-6 grid gap-4 border-t border-slate-200 pt-5 md:grid-cols-2">
-              <label className="text-sm font-semibold">Tipo de formacao<select name="level" className="field-input mt-2">{educationOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+              <label className="text-sm font-semibold">Tipo de formação<select name="level" className="field-input mt-2">{educationOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
               <InstitutionAutocomplete required />
-              <label className="text-sm font-semibold">Nome do curso ou area<input name="courseName" required className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">Conclusao<DateTextInput name="completedAt" className="field-input mt-2" /></label>
-              <div className="md:col-span-2"><button className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white" type="submit"><Plus aria-hidden="true" size={16} />Adicionar historico academico</button></div>
+              <label className="text-sm font-semibold">Nome do curso ou área<input name="courseName" required className="field-input mt-2" /></label>
+              <label className="text-sm font-semibold">Conclusão<DateTextInput name="completedAt" className="field-input mt-2" /></label>
+              <div className="md:col-span-2"><button className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white" type="submit"><Plus aria-hidden="true" size={16} />Adicionar histórico academico</button></div>
             </form>
           </section>
 
           <section id="experiencias" className="scroll-mt-72 border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center gap-2">
               <BriefcaseBusiness aria-hidden="true" size={18} className="text-blue-700" />
-              <h2 className="text-lg font-semibold">Experiencia profissional</h2>
+              <h2 className="text-lg font-semibold">Experiência profissional</h2>
             </div>
             <div className="mt-5 space-y-3">
               {((experiences ?? []) as ExperienceRow[]).map((experience) => (
                 <article key={experience.id} className="border border-slate-200 bg-slate-50 p-4">
                   <h3 className="font-semibold">{experience.role_title}</h3>
-                  <p className="mt-1 text-sm text-slate-600">{experience.company_name} · {dateLabel(experience.started_at)} ate {experience.is_current ? "Atual" : dateLabel(experience.ended_at)}</p>
+                  <p className="mt-1 text-sm text-slate-600">{experience.company_name} · {dateLabel(experience.started_at)} até {experience.is_current ? "Atual" : dateLabel(experience.ended_at)}</p>
                   <p className="mt-3 text-sm leading-6 text-slate-600">{experience.description}</p>
                 </article>
               ))}
-              {(experiences ?? []).length === 0 ? <p className="text-sm text-slate-500">Nenhuma experiencia adicionada.</p> : null}
+              {(experiences ?? []).length === 0 ? <p className="text-sm text-slate-500">Nenhuma experiência adicionada.</p> : null}
             </div>
             <form action={addProfessionalExperienceAction} className="mt-6 grid gap-4 border-t border-slate-200 pt-5 md:grid-cols-2">
               <label className="text-sm font-semibold">Empresa<input name="companyName" required className="field-input mt-2" /></label>
@@ -295,18 +295,18 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
               <label className="text-sm font-semibold">Fim<DateTextInput name="endedAt" className="field-input mt-2" /></label>
               <label className="flex items-center gap-2 text-sm font-semibold md:col-span-2"><input name="isCurrent" type="checkbox" /> Trabalho atualmente aqui</label>
               <label className="text-sm font-semibold md:col-span-2">Atividades e resultados<textarea name="description" required rows={4} className="field-input mt-2" /></label>
-              <div className="md:col-span-2"><button className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white" type="submit"><Plus aria-hidden="true" size={16} />Adicionar experiencia</button></div>
+              <div className="md:col-span-2"><button className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white" type="submit"><Plus aria-hidden="true" size={16} />Adicionar experiência</button></div>
             </form>
           </section>
 
           <section id="cursos" className="scroll-mt-72 border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold">Cursos e qualificacoes</h2>
+            <h2 className="text-lg font-semibold">Cursos e qualificações</h2>
             <div className="mt-5 grid gap-3 md:grid-cols-2">
               {((courses ?? []) as CourseRow[]).map((course) => (
                 <article key={course.id} className="border border-slate-200 bg-slate-50 p-4">
                   <h3 className="font-semibold">{course.name}</h3>
-                  <p className="mt-1 text-sm text-slate-600">{course.institution ?? "Instituicao nao informada"}</p>
-                  <p className="mt-2 text-xs font-semibold text-slate-500">{course.workload_hours ? `${course.workload_hours}h` : "Carga nao informada"} · {course.completed_at ? new Date(course.completed_at).getFullYear() : "Em andamento"}</p>
+                  <p className="mt-1 text-sm text-slate-600">{course.institution ?? "Instituição não informada"}</p>
+                  <p className="mt-2 text-xs font-semibold text-slate-500">{course.workload_hours ? `${course.workload_hours}h` : "Carga não informada"} · {course.completed_at ? new Date(course.completed_at).getFullYear() : "Em andamento"}</p>
                 </article>
               ))}
               {(courses ?? []).length === 0 ? <p className="text-sm text-slate-500">Nenhum curso adicionado.</p> : null}
@@ -314,8 +314,8 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             <form action={addProfessionalCourseAction} className="mt-6 grid gap-4 border-t border-slate-200 pt-5 md:grid-cols-2">
               <label className="text-sm font-semibold">Curso<input name="name" required className="field-input mt-2" /></label>
               <InstitutionAutocomplete required={false} />
-              <label className="text-sm font-semibold">Carga horaria<input name="workloadHours" type="number" min="0" className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">Conclusao<DateTextInput name="completedAt" className="field-input mt-2" /></label>
+              <label className="text-sm font-semibold">Carga horária<input name="workloadHours" type="number" min="0" className="field-input mt-2" /></label>
+              <label className="text-sm font-semibold">Conclusão<DateTextInput name="completedAt" className="field-input mt-2" /></label>
               <div className="md:col-span-2"><button className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white" type="submit"><Plus aria-hidden="true" size={16} />Adicionar curso</button></div>
             </form>
           </section>
@@ -336,13 +336,13 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             </div>
             <form action={addProfessionalLanguageAction} className="mt-6 grid gap-4 border-t border-slate-200 pt-5 md:grid-cols-2">
               <label className="text-sm font-semibold">Idioma<input name="languageName" required className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">Nivel<select name="proficiency" className="field-input mt-2"><option>Basico</option><option>Intermediario</option><option>Avancado</option><option>Fluente</option></select></label>
+              <label className="text-sm font-semibold">Nível<select name="proficiency" className="field-input mt-2"><option>Básico</option><option>Intermediário</option><option>Avancado</option><option>Fluente</option></select></label>
               <div className="md:col-span-2"><button className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white" type="submit"><Plus aria-hidden="true" size={16} />Adicionar idioma</button></div>
             </form>
           </section>
 
           <section id="habilidades" className="scroll-mt-72 border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold">Habilidades e competencias</h2>
+            <h2 className="text-lg font-semibold">Habilidades e competências</h2>
             <div className="mt-5 flex flex-wrap gap-2">
               {((skills ?? []) as SkillRow[]).map((skill) => (
                 <span key={skill.id} className="border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold">{skill.name} · {skill.skill_type} · {skill.proficiency ?? 1}/5</span>
@@ -351,8 +351,8 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             </div>
             <form action={addProfessionalSkillAction} className="mt-6 grid gap-4 border-t border-slate-200 pt-5 md:grid-cols-3">
               <label className="text-sm font-semibold">Habilidade<input name="name" required className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">Tipo<select name="skillType" className="field-input mt-2"><option value="technical">Tecnica</option><option value="behavioral">Comportamental</option></select></label>
-              <label className="text-sm font-semibold">Nivel<select name="proficiency" className="field-input mt-2"><option value="1">1 - iniciante</option><option value="2">2</option><option value="3">3 - bom</option><option value="4">4</option><option value="5">5 - excelente</option></select></label>
+              <label className="text-sm font-semibold">Tipo<select name="skillType" className="field-input mt-2"><option value="technical">Técnica</option><option value="behavioral">Comportamental</option></select></label>
+              <label className="text-sm font-semibold">Nível<select name="proficiency" className="field-input mt-2"><option value="1">1 - iniciante</option><option value="2">2</option><option value="3">3 - bom</option><option value="4">4</option><option value="5">5 - excelente</option></select></label>
               <div className="md:col-span-3"><button className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white" type="submit"><Plus aria-hidden="true" size={16} />Adicionar habilidade</button></div>
             </form>
           </section>
@@ -367,15 +367,15 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             </div>
             {activeVersion ? (
               <div className="mt-4 space-y-3 text-sm">
-                <p className="rounded bg-slate-50 p-3">Versao {activeVersion.version} · {new Date(activeVersion.generated_at).toLocaleDateString("pt-BR")}</p>
+                <p className="rounded bg-slate-50 p-3">Versão {activeVersion.version} · {new Date(activeVersion.generated_at).toLocaleDateString("pt-BR")}</p>
                 {documentUrl?.signedUrl ? <a href={documentUrl.signedUrl} target="_blank" rel="noreferrer" className="inline-flex rounded-md bg-slate-950 px-4 py-2.5 font-semibold text-white">Visualizar documento</a> : null}
               </div>
             ) : <p className="mt-4 text-sm leading-6 text-slate-600">Nenhum documento enviado ainda.</p>}
             <form action={uploadProfessionalResumeAction} className="mt-5 border-t border-slate-200 pt-5">
               <label className="text-sm font-semibold">Substituir arquivo<input name="resume" type="file" required accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="mt-2 w-full border border-dashed border-slate-300 bg-slate-50 p-3 text-sm" /></label>
-              <button className="mt-4 inline-flex items-center gap-2 rounded-md bg-blue-700 px-4 py-3 text-sm font-semibold text-white" type="submit"><Upload aria-hidden="true" size={16} />Enviar novo curriculo</button>
+              <button className="mt-4 inline-flex items-center gap-2 rounded-md bg-blue-700 px-4 py-3 text-sm font-semibold text-white" type="submit"><Upload aria-hidden="true" size={16} />Enviar novo currículo</button>
             </form>
-            {isPdf && documentUrl?.signedUrl ? <iframe title="Previa do curriculo" src={documentUrl.signedUrl} className="mt-5 h-[520px] w-full border border-slate-200" /> : null}
+            {isPdf && documentUrl?.signedUrl ? <iframe title="Previa do currículo" src={documentUrl.signedUrl} className="mt-5 h-[520px] w-full border border-slate-200" /> : null}
           </section>
         </div>
       </div>

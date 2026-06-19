@@ -11,8 +11,8 @@ export default async function NewDemandPage({ searchParams }: { searchParams: Pr
 
   return (
     <AppShell eyebrow="Empresa" title="Criar Demanda">
-      {params.error ? <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">Nao foi possivel criar a demanda: {params.error}</p> : null}
-      <CompanyDemandForm action={createDemandAction} companyCity={company?.city} companyState={company?.state} submitLabel="Publicar demanda interna" />
+      {params.error ? <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">Não foi possível criar a demanda: {params.error}</p> : null}
+      <CompanyDemandForm action={createDemandAction} companyCity={company?.city} companyState={company?.state} submitLabel="Públicar demanda interna" />
     </AppShell>
   );
 }

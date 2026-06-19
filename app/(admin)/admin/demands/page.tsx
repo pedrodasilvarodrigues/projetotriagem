@@ -76,7 +76,11 @@ function statusLabel(status?: string) {
     analysis: "analise",
     received: "recebido",
     pre_approved: "pre-aprovado",
-    training: "treinamento"
+    training: "treinamento",
+    active: "aberta",
+    draft: "rascunho",
+    closed: "encerrada",
+    cancelled: "arquivada"
   };
   return status ? labels[status] ?? status : null;
 }
@@ -115,15 +119,15 @@ export default async function AdminDemandsPage({ searchParams }: { searchParams:
   return (
     <AppShell eyebrow="Administrador" title="Demandas">
       <div className="space-y-5">
-        {params.error ? <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">Nao foi possivel concluir: {params.error}</p> : null}
-        {params.message ? <p className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">Operacao realizada.</p> : null}
+        {params.error ? <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">Não foi possível concluir: {params.error}</p> : null}
+        {params.message ? <p className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">Operação realizada.</p> : null}
 
         <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(280px,420px)] lg:items-end">
             <div>
               <h2 className="text-lg font-semibold">Demandas cadastradas pelas empresas</h2>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                O administrador nao cria demandas. Aqui ele acompanha demandas existentes, controla status e apresenta profissionais por ordem de compatibilidade.
+                O administrador não cria demandas. Aqui ele acompanha demandas existentes, controla status e apresenta profissionais por ordem de compatibilidade.
               </p>
             </div>
             <form className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_160px_auto]" action="/admin/demands">
@@ -170,14 +174,14 @@ export default async function AdminDemandsPage({ searchParams }: { searchParams:
               <article key={demand.id} className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
                 <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-wide text-[#38506f]">{one(demand.company)?.trade_name ?? "Empresa nao informada"}</p>
+                    <p className="text-xs font-bold uppercase tracking-wide text-[#38506f]">{one(demand.company)?.trade_name ?? "Empresa não informada"}</p>
                     <h2 className="mt-1 text-xl font-semibold text-slate-950">{demand.title}</h2>
-                    <p className="mt-2 text-sm text-slate-600">{demand.city}/{demand.state} · {demand.openings} vaga(s) · status: {demand.status}</p>
-                    <p className="mt-2 text-sm text-slate-600">Salario: {demand.salary_min ?? "-"} a {demand.salary_max ?? "-"}</p>
+                    <p className="mt-2 text-sm text-slate-600">{demand.city}/{demand.state} · {demand.openings} vaga(s) · situação: {statusLabel(demand.status)}</p>
+                    <p className="mt-2 text-sm text-slate-600">Salário: {demand.salary_min ?? "-"} a {demand.salary_max ?? "-"}</p>
                     <p className="mt-3 text-sm leading-6 text-slate-700">{demand.description}</p>
                     <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-600">
                       <span className="rounded bg-slate-100 px-2 py-1">Escolaridade: {demand.education_minimum}</span>
-                      <span className="rounded bg-slate-100 px-2 py-1">Experiencia: {demand.minimum_experience_months} meses</span>
+                      <span className="rounded bg-slate-100 px-2 py-1">Experiência: {demand.minimum_experience_months} meses</span>
                       <span className="rounded bg-slate-100 px-2 py-1">{(demand.technical_skills ?? []).join(", ") || "Sem requisitos listados"}</span>
                     </div>
                   </div>
@@ -217,17 +221,17 @@ export default async function AdminDemandsPage({ searchParams }: { searchParams:
                           return (
                             <div key={`${demand.id}-${professional.id}`} className="grid gap-3 rounded border border-slate-200 bg-white p-3 md:grid-cols-[minmax(0,1fr)_120px_220px] md:items-center">
                               <div>
-                                <p className="text-xs font-bold uppercase tracking-wide text-slate-500">#{index + 1} mais compativel</p>
+                                <p className="text-xs font-bold uppercase tracking-wide text-slate-500">#{index + 1} mais compatível</p>
                                 <h3 className="font-semibold text-slate-950">{professional.full_name}</h3>
-                                <p className="text-xs text-slate-500">{professional.desired_role ?? "Cargo nao informado"} · {professional.city ?? "-"}/{professional.state ?? "-"}</p>
-                                <p className="text-xs text-slate-500">{professional.email ?? "Email nao informado"} · {professional.phone ?? "Telefone nao informado"}</p>
-                                {currentStatus ? <p className="mt-2 text-xs font-semibold text-blue-700">Ja esta {currentStatus} nesta demanda.</p> : null}
+                                <p className="text-xs text-slate-500">{professional.desired_role ?? "Cargo não informado"} · {professional.city ?? "-"}/{professional.state ?? "-"}</p>
+                                <p className="text-xs text-slate-500">{professional.email ?? "Email não informado"} · {professional.phone ?? "Telefone não informado"}</p>
+                                {currentStatus ? <p className="mt-2 text-xs font-semibold text-blue-700">Já está {currentStatus} nesta demanda.</p> : null}
                               </div>
                               <div>
                                 <strong className="block text-2xl text-[#18212f]">{hasScore ? `${Number(score.total_score).toFixed(0)}%` : "Pendente"}</strong>
                                 <p className="text-xs text-slate-500">compatibilidade</p>
                                 <p className="mt-1 text-[0.7rem] text-slate-500">
-                                  {hasScore ? `Tec. ${Number(score.technical_score).toFixed(0)} · Exp. ${Number(score.experience_score).toFixed(0)} · Local ${Number(score.location_score).toFixed(0)}` : "Sem score calculado ainda"}
+                                  {hasScore ? `Téc. ${Number(score.technical_score).toFixed(0)} · Exp. ${Number(score.experience_score).toFixed(0)} · Local ${Number(score.location_score).toFixed(0)}` : "Sem pontuação calculada ainda"}
                                 </p>
                               </div>
                               <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-1">
@@ -252,7 +256,7 @@ export default async function AdminDemandsPage({ searchParams }: { searchParams:
                       </div>
                     ) : (
                       <p className="rounded border border-slate-200 bg-white p-3 text-sm text-slate-600">
-                        Nenhum profissional compativel calculado para esta demanda ainda. Quando o motor de compatibilidade gerar pontuacoes, eles aparecerao aqui em ordem.
+                        Nenhum profissional compatível calculado para está demanda ainda. Quando o motor de compatibilidade gerar pontuacoes, eles aparecerao aqui em ordem.
                       </p>
                     )}
                   </div>

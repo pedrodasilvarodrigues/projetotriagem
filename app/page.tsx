@@ -38,7 +38,7 @@ async function getPublicHomeData(): Promise<{ stats: PublicStats; companies: Pub
         companyRows.data?.map((company) => ({
           name: company.trade_name || company.legal_name || "Empresa cadastrada",
           city: [company.city, company.state].filter(Boolean).join(", ") || "Brasil",
-          sector: "Recrutamento e operacao"
+          sector: "Recrutamento e operação"
         })) ?? []
     };
   } catch {

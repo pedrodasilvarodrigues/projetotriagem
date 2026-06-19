@@ -34,14 +34,14 @@ function one<T>(value: T | T[] | null) {
 function processStatusLabel(status: string) {
   const labels: Record<string, string> = {
     received: "Recebido",
-    analysis: "Em analise",
+    analysis: "Em análise",
     screening: "Triagem",
     pre_approved: "Pre-aprovado",
     training: "Treinamento",
     interview: "Entrevista",
     forwarded: "Apresentado",
     hired: "Contratado",
-    rejected: "Nao selecionado"
+    rejected: "Não selecionado"
   };
   return labels[status] ?? status;
 }
@@ -65,12 +65,12 @@ export default async function CompanyCandidatesPage() {
     <AppShell eyebrow="Empresa" title="Candidatos apresentados">
       <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         <p className="mb-4 text-sm leading-6 text-slate-600">
-          Aqui aparecem somente os profissionais que o administrador apresentou para demandas da sua empresa. Candidatos mantidos na fila reserva nao ficam visiveis.
+          Aqui aparecem somente os profissionais que o administrador apresentou para demandas da sua empresa. Candidatos mantidos na fila reserva não ficam visiveis.
         </p>
         <div className="overflow-x-auto">
           <table className="data-table">
             <thead>
-              <tr><th>Candidato</th><th>Contato</th><th>Demanda</th><th>Perfil</th><th>Situacao</th><th>Atualizado em</th></tr>
+              <tr><th>Candidato</th><th>Contato</th><th>Demanda</th><th>Perfil</th><th>Situação</th><th>Atualizado em</th></tr>
             </thead>
             <tbody>
               {processes.map((process) => {
@@ -80,9 +80,9 @@ export default async function CompanyCandidatesPage() {
                 return (
                   <tr key={process.id}>
                     <td><strong>{candidate.full_name}</strong><br /><span className="text-xs text-slate-500">{candidate.city ?? "-"}/{candidate.state ?? "-"}</span></td>
-                    <td>{candidate.email ?? "Email nao informado"}<br /><span className="text-xs text-slate-500">{candidate.phone ?? "Telefone nao informado"}</span></td>
+                    <td>{candidate.email ?? "Email não informado"}<br /><span className="text-xs text-slate-500">{candidate.phone ?? "Telefone não informado"}</span></td>
                     <td><strong>{demand.name ?? demand.title}</strong><br /><span className="text-xs text-slate-500">{demand.title}</span></td>
-                    <td>{candidate.desired_role ?? "Objetivo nao informado"}<br /><span className="text-xs text-slate-500">Escolaridade: {candidate.education_level ?? "-"}</span></td>
+                    <td>{candidate.desired_role ?? "Objetivo não informado"}<br /><span className="text-xs text-slate-500">Escolaridade: {candidate.education_level ?? "-"}</span></td>
                     <td><span className="inline-flex rounded bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-800">{processStatusLabel(process.status)}</span></td>
                     <td>{new Date(process.updated_at).toLocaleDateString("pt-BR")}</td>
                   </tr>

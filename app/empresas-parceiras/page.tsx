@@ -21,11 +21,11 @@ export default async function PartnerCompaniesPage() {
         {companies.map((company) => (
           <article key={company.id} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="font-semibold">{company.trade_name}</h2>
-            <p className="mt-2 text-sm text-slate-600">{company.city}/{company.state} · {company.segment ?? "Segmento em validacao"}</p>
+            <p className="mt-2 text-sm text-slate-600">{company.city}/{company.state} · {company.segment ?? "Segmento em validação"}</p>
             <p className="mt-3 text-sm leading-6 text-slate-600">{company.description ?? "Empresa parceira da plataforma."}</p>
           </article>
         ))}
-        {companies.length === 0 ? <p className="rounded-lg border border-slate-200 bg-white p-5 text-sm text-slate-600">Nenhuma empresa parceira publica no momento.</p> : null}
+        {companies.length === 0 ? <p className="rounded-lg border border-slate-200 bg-white p-5 text-sm text-slate-600">Nenhuma empresa parceira pública no momento.</p> : null}
       </div>
     </PublicPageShell>
   );

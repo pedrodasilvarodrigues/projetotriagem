@@ -199,7 +199,7 @@ export async function generateResumeAction(formData: FormData) {
       professional_id: professional.id,
       company_name: experienceCompany,
       role_title: experienceRole,
-      description: experienceDescription || "Experiencia informada no primeiro acesso.",
+      description: experienceDescription || "Experiência informada no primeiro acesso.",
       started_at: experienceStart,
       ended_at: experienceEnd || null
     });

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AppShell } from "@/components/app/shell";
 import { archiveCompanyAction, updateCompanyStatusAction } from "@/lib/actions/workspace";
 import { createServerClient } from "@/lib/supabase/server";
+import { statusLabel } from "@/lib/status-labels";
 
 export default async function AdminCompaniesPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string; error?: string; message?: string }> }) {
   const params = await searchParams;
@@ -24,14 +25,14 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
   return (
     <AppShell eyebrow="Administrador" title="Empresas">
       <div className="space-y-5">
-        {params.error ? <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">Nao foi possivel concluir: {params.error}</p> : null}
-        {params.message ? <p className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">Operacao realizada.</p> : null}
+        {params.error ? <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">Não foi possível concluir: {params.error}</p> : null}
+        {params.message ? <p className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">Operação realizada.</p> : null}
         <section id="buscar" className="scroll-mt-24 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
           <h2 className="text-lg font-semibold">Buscar empresas</h2>
           <form className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_auto]" action="/admin/companies">
-            <input name="q" defaultValue={params.q ?? ""} className="field-input" placeholder="Nome, razao social ou email" />
+            <input name="q" defaultValue={params.q ?? ""} className="field-input" placeholder="Nome, razão social ou email" />
             <select name="status" defaultValue={params.status ?? ""} className="field-input">
-              <option value="">Todos os status</option>
+              <option value="">Todas as situações</option>
               <option value="pending">Pendente</option>
               <option value="approved">Aprovada</option>
               <option value="suspended">Bloqueada</option>
@@ -42,7 +43,7 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
         </section>
         <section id="status" className="scroll-mt-24 rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
           <table className="data-table">
-            <thead><tr><th>Empresa</th><th>Demandas</th><th>Apresentados</th><th>Status</th><th>Acoes</th></tr></thead>
+            <thead><tr><th>Empresa</th><th>Demandas</th><th>Apresentados</th><th>Situação</th><th>Ações</th></tr></thead>
             <tbody>
               {(companies ?? []).map((company) => {
                 const companyDemands = (demands ?? []).filter((item) => item.company_id === company.id);
@@ -52,11 +53,11 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
                     <td>
                       <strong>{company.trade_name}</strong>
                       <p className="text-xs text-slate-500">{company.legal_name}</p>
-                      <p className="text-xs text-slate-500">{company.city}/{company.state} · {company.corporate_email ?? "Email nao informado"}</p>
+                      <p className="text-xs text-slate-500">{company.city}/{company.state} · {company.corporate_email ?? "Email não informado"}</p>
                     </td>
                     <td>{companyDemands.length}<p className="text-xs text-slate-500">{companyDemands.slice(0, 2).map((item) => item.title).join(", ")}</p></td>
                     <td>{companyPresentations.length}<p className="text-xs text-slate-500">Profissionais apresentados</p></td>
-                    <td>{company.deleted_at ? "arquivada" : company.status}</td>
+                    <td>{company.deleted_at ? "Arquivada" : statusLabel(company.status)}</td>
                     <td>
                       <div className="grid gap-2">
                         <Link href={`/admin/companies/${company.id}`} className="rounded border border-slate-300 px-3 py-2 text-center text-xs font-semibold text-slate-700">Ver detalhes</Link>

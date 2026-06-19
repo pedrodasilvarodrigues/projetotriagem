@@ -38,31 +38,31 @@ export type PublicStats = {
 const heroImage = "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1800&q=86";
 
 const steps: Array<{ title: string; text: string; icon: LucideIcon }> = [
-  { title: "Cadastro", text: "Voce informa seus dados, curriculo e preferencia de atuacao.", icon: UserRoundCheck },
+  { title: "Cadastro", text: "Você informa seus dados, currículo e preferência de atuacao.", icon: UserRoundCheck },
   { title: "Compatibilidade", text: "A plataforma cruza perfil, habilidades, localidade e requisitos.", icon: SearchCheck },
-  { title: "Triagem", text: "A equipe avalia informacoes, documentos e aderencia ao processo.", icon: ClipboardCheck },
-  { title: "Encaminhamento", text: "Profissionais compativeis seguem para oportunidades administradas.", icon: BriefcaseBusiness }
+  { title: "Triagem", text: "A equipe avalia informações, documentos e aderência ao processo.", icon: ClipboardCheck },
+  { title: "Encaminhamento", text: "Profissionais compatíveis seguem para oportunidades administradas.", icon: BriefcaseBusiness }
 ];
 
 const professionalBenefits: Array<{ title: string; text: string; icon: LucideIcon }> = [
-  { title: "Perfil Profissional", text: "Dados, habilidades e experiencias reunidos em uma jornada clara.", icon: UserRoundCheck },
-  { title: "Curriculo Digital", text: "Envie seu arquivo ou gere um curriculo profissional em PDF.", icon: FileText },
+  { title: "Perfil Profissional", text: "Dados, habilidades e experiências reunidos em uma jornada clara.", icon: UserRoundCheck },
+  { title: "Currículo Digital", text: "Envie seu arquivo ou gere um currículo profissional em PDF.", icon: FileText },
   { title: "Acompanhamento de Processos", text: "Veja cada etapa de triagem e encaminhamento no portal.", icon: History },
-  { title: "Notificacoes em Tempo Real", text: "Receba avisos sobre atualizacoes importantes da sua jornada.", icon: Bell }
+  { title: "Notificações em Tempo Real", text: "Receba avisos sobre atualizacoes importantes da sua jornada.", icon: Bell }
 ];
 
 const companyBenefits: Array<{ title: string; text: string; icon: LucideIcon }> = [
-  { title: "Demandas Privadas", text: "Cadastre necessidades internas sem transformar tudo em vaga publica.", icon: BriefcaseBusiness },
-  { title: "Compatibilidade Inteligente", text: "Visualize profissionais alinhados aos criterios informados.", icon: CheckCircle2 },
-  { title: "Triagem Especializada", text: "Conte com analise administrada antes do encaminhamento.", icon: ShieldCheck },
-  { title: "Historico Completo", text: "Acompanhe registros, resultados e etapas anteriores.", icon: History }
+  { title: "Demandas Privadas", text: "Cadastre necessidades internas sem transformar tudo em vaga pública.", icon: BriefcaseBusiness },
+  { title: "Compatibilidade Inteligente", text: "Visualize profissionais alinhados aos critérios informados.", icon: CheckCircle2 },
+  { title: "Triagem Especializada", text: "Conte com análise administrada antes do encaminhamento.", icon: ShieldCheck },
+  { title: "Histórico Completo", text: "Acompanhe registros, resultados e etapas anteriores.", icon: History }
 ];
 
 const testimonials = [
   {
     quote: "Consegui uma oportunidade depois de ser encaminhado pela plataforma.",
     name: "Pedro Silva",
-    role: "Tecnico em TI"
+    role: "Técnico em TI"
   },
   {
     quote: "O acompanhamento deixou o processo mais claro e menos ansioso.",
@@ -70,31 +70,31 @@ const testimonials = [
     role: "Assistente Administrativo"
   },
   {
-    quote: "Recebemos candidatos com perfil mais proximo da nossa demanda.",
+    quote: "Recebemos candidatos com perfil mais próximo da nossa demanda.",
     name: "Atlas Industria",
     role: "Empresa parceira"
   }
 ];
 
 const differentials: Array<{ title: string; text: string; icon: LucideIcon }> = [
-  { title: "Compatibilidade Profissional", text: "Criterios objetivos ajudam a aproximar perfil e demanda.", icon: SearchCheck },
-  { title: "Triagem Especializada", text: "Avaliacao humana antes de qualquer encaminhamento.", icon: ClipboardCheck },
-  { title: "Historico de Processos", text: "Rastreabilidade para profissionais, empresas e administradores.", icon: History },
-  { title: "Protecao de Dados", text: "Consentimentos, politicas e regras de acesso alinhados a LGPD.", icon: LockKeyhole }
+  { title: "Compatibilidade Profissional", text: "Critérios objetivos ajudam a aproximar perfil e demanda.", icon: SearchCheck },
+  { title: "Triagem Especializada", text: "Avaliação humana antes de qualquer encaminhamento.", icon: ClipboardCheck },
+  { title: "Histórico de Processos", text: "Rastreabilidade para profissionais, empresas e administradores.", icon: History },
+  { title: "Proteção de Dados", text: "Consentimentos, políticas e regras de acesso alinhados à LGPD.", icon: LockKeyhole }
 ];
 
 const faq = [
-  ["Como funciona a plataforma?", "Profissionais cadastram seu perfil, empresas registram demandas privadas e a administracao conduz compatibilidade, triagem e encaminhamento."],
-  ["Preciso pagar?", "O cadastro profissional e gratuito. Condicoes comerciais para empresas podem ser definidas conforme operacao da plataforma."],
-  ["Como acompanho meu processo?", "Depois do login, o profissional acompanha etapas, notificacoes e historico diretamente na area autenticada."],
-  ["Como uma empresa participa?", "A empresa cria conta, informa seus dados cadastrais e passa a registrar demandas privadas depois da validacao."],
-  ["Como meus dados sao protegidos?", "O tratamento segue principios de LGPD, com consentimento, controle de acesso e separacao entre dados publicos, internos e encaminhados."]
+  ["Como funciona a plataforma?", "Profissionais cadastram seu perfil, empresas registram demandas privadas e a administração conduz compatibilidade, triagem e encaminhamento."],
+  ["Preciso pagar?", "O cadastro profissional e gratuito. Condicoes comerciais para empresas podem ser definidas conforme operação da plataforma."],
+  ["Como acompanho meu processo?", "Depois do login, o profissional acompanha etapas, notificações e histórico diretamente na área autenticada."],
+  ["Como uma empresa participa?", "A empresa cria conta, informa seus dados cadastrais e passa a registrar demandas privadas depois da validação."],
+  ["Como meus dados são protegidos?", "O tratamento segue princípios de LGPD, com consentimento, controle de acesso e separação entre dados públicos, internos e encaminhados."]
 ];
 
 const fallbackCompanies: PublicCompany[] = [
   { name: "Norte Sul Servicos", city: "Campinas, SP", sector: "Servicos" },
   { name: "Atlas Industria", city: "Sao Paulo, SP", sector: "Industria" },
-  { name: "Vetor Logistica", city: "Guarulhos, SP", sector: "Logistica" },
+  { name: "Vetor Logística", city: "Guarulhos, SP", sector: "Logística" },
   { name: "Prime Care", city: "Rio de Janeiro, RJ", sector: "Saude" },
   { name: "Delta Office", city: "Curitiba, PR", sector: "Administrativo" }
 ];
@@ -178,7 +178,7 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
             <a className="transition hover:text-slate-950" href="#inicio">Inicio</a>
             <Link className="transition hover:text-slate-950" href="/sobre">Sobre</Link>
             <Link className="transition hover:text-slate-950" href="/como-funciona">Como Funciona</Link>
-            <Link className="transition hover:text-slate-950" href="/vagas-publicas">Vagas Publicas</Link>
+            <Link className="transition hover:text-slate-950" href="/vagas-publicas">Vagas Públicas</Link>
             <Link className="transition hover:text-slate-950" href="/empresas-parceiras">Empresas Parceiras</Link>
             <a className="transition hover:text-slate-950" href="#contato">Contato</a>
           </nav>
@@ -203,10 +203,10 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
               Existem oportunidades aqui
             </p>
             <h1 className="mt-5 text-4xl font-semibold leading-tight tracking-normal md:text-6xl">
-              O proximo passo da sua carreira pode comecar hoje.
+              O próximo passo da sua carreira pode comecar hoje.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-blue-50">
-              Cadastre seu perfil, participe de processos de triagem e seja encaminhado para oportunidades compativeis com suas habilidades e experiencias.
+              Cadastre seu perfil, participe de processos de triagem e seja encaminhado para oportunidades compatíveis com suas habilidades e experiências.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/register" className="inline-flex items-center gap-2 rounded-md bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:-translate-y-0.5 hover:bg-blue-50">
@@ -263,7 +263,7 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
         <div className="mx-auto max-w-7xl px-6">
           <div className="max-w-3xl">
             <p className="text-sm font-medium text-blue-700">Como funciona</p>
-            <h2 className="mt-2 text-3xl font-semibold tracking-normal">Uma jornada clara entre cadastro, analise e oportunidade.</h2>
+            <h2 className="mt-2 text-3xl font-semibold tracking-normal">Uma jornada clara entre cadastro, análise e oportunidade.</h2>
           </div>
           <div className="mt-12 grid gap-5 lg:grid-cols-4">
             {steps.map((step, index) => (
@@ -342,7 +342,7 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
           <div>
             <p className="text-sm font-medium text-blue-700">Diferenciais</p>
             <h2 className="mt-2 text-3xl font-semibold tracking-normal">O que torna a triagem mais confiavel.</h2>
-            <p className="mt-4 leading-7 text-slate-600">A plataforma combina cadastro estruturado, criterios de compatibilidade e acompanhamento administrado sem expor candidatos em vitrines publicas.</p>
+            <p className="mt-4 leading-7 text-slate-600">A plataforma combina cadastro estruturado, critérios de compatibilidade e acompanhamento administrado sem expor candidatos em vitrines públicas.</p>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {differentials.map((item) => (
@@ -360,11 +360,11 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
             </div>
             <h2 className="text-3xl font-semibold tracking-normal">Seus dados protegidos</h2>
             <p className="mt-5 max-w-2xl leading-8 text-blue-100">
-              Tratamento de dados em conformidade com a LGPD, garantindo seguranca, transparencia e controle para usuarios e empresas.
+              Tratamento de dados em conformidade com a LGPD, garantindo segurança, transparência e controle para usuários e empresas.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            {["Consentimento registrado", "Acesso por perfil", "Historico rastreavel", "Solicitacoes LGPD"].map((item) => (
+            {["Consentimento registrado", "Acesso por perfil", "Histórico rastreavel", "Solicitacoes LGPD"].map((item) => (
               <div key={item} className="rounded-lg border border-white/15 bg-white/10 p-4 text-sm font-medium">
                 {item}
               </div>
@@ -394,7 +394,7 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
       <section className="bg-slate-950 py-14 text-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-2xl font-semibold tracking-normal">Pronto para dar o proximo passo?</h2>
+            <h2 className="text-2xl font-semibold tracking-normal">Pronto para dar o próximo passo?</h2>
             <p className="mt-2 text-sm text-slate-300">Crie seu cadastro e comece sua jornada profissional.</p>
           </div>
           <Link href="/register" className="inline-flex w-fit items-center gap-2 rounded-md bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-blue-50">
@@ -413,14 +413,14 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
               </span>
               Portal de Triagem Profissional
             </div>
-            <p className="mt-2 text-sm text-slate-500">Oportunidade, criterio e acompanhamento em uma experiencia profissional.</p>
+            <p className="mt-2 text-sm text-slate-500">Oportunidade, critério e acompanhamento em uma experiência profissional.</p>
           </div>
           <nav aria-label="Links do rodape" className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-slate-600">
             <a href="#">Sobre</a>
             <a href="#contato">Contato</a>
             <a href="/login">Suporte</a>
             <a href="#">Termos de Uso</a>
-            <a href="#">Politica de Privacidade</a>
+            <a href="#">Política de Privacidade</a>
             <a href="#">LGPD</a>
           </nav>
         </div>

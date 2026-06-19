@@ -13,7 +13,7 @@ export default async function ProfessionalOnboardingPage({ searchParams }: { sea
         <ProfessionalOnboardingForm email={data.user?.email ?? ""} error={params.error} />
         <aside className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="font-semibold">Depois do cadastro</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">Voce entrara direto na sua area. O curriculo pode ser enviado depois pelo menu Curriculo.</p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">Você entrará direto na sua área. O currículo pode ser enviado depois pelo menu Currículo.</p>
         </aside>
       </div>
     </OnboardingLayout>

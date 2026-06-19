@@ -75,7 +75,7 @@ export function CompanyDemandForm({ action, companyCity, companyState, submitLab
           <input name="name" required defaultValue={demand?.name ?? ""} className="field-input mt-2" placeholder="Ex.: Expansao comercial Muriae 2026" />
         </label>
         <label className="text-sm font-semibold md:col-span-2">
-          Cargo / titulo
+          Cargo / título
           <input
             name="title"
             required
@@ -86,7 +86,7 @@ export function CompanyDemandForm({ action, companyCity, companyState, submitLab
           />
         </label>
         <label className="text-sm font-semibold md:col-span-2">
-          Descricao
+          Descrição
           <textarea name="description" required defaultValue={demand?.description ?? ""} className="field-input mt-2 min-h-28" />
         </label>
         <label className="text-sm font-semibold">
@@ -94,7 +94,7 @@ export function CompanyDemandForm({ action, companyCity, companyState, submitLab
           <input name="openings" type="number" min="1" defaultValue={demand?.openings ?? 1} className="field-input mt-2" />
         </label>
         <label className="text-sm font-semibold">
-          Escolaridade minima
+          Escolaridade mínima
           <select
             name="educationMinimum"
             value={educationMinimum}
@@ -106,7 +106,7 @@ export function CompanyDemandForm({ action, companyCity, companyState, submitLab
           >
             <option value="fundamental">Fundamental</option>
             <option value="medio">Medio</option>
-            <option value="tecnico">Tecnico</option>
+            <option value="tecnico">Técnico</option>
             <option value="superior">Superior</option>
             <option value="pos">Pos-graduacao</option>
             <option value="mba">MBA</option>
@@ -141,7 +141,7 @@ export function CompanyDemandForm({ action, companyCity, companyState, submitLab
           </select>
         </label>
         <label className="text-sm font-semibold">
-          Experiencia minima em meses
+          Experiência mínima em meses
           <input name="minimumExperienceMonths" type="number" min="0" defaultValue={demand?.minimumExperienceMonths ?? 0} className="field-input mt-2" />
         </label>
         {demand?.id ? (
@@ -157,12 +157,12 @@ export function CompanyDemandForm({ action, companyCity, companyState, submitLab
           </label>
         ) : null}
         <label className="text-sm font-semibold">
-          Habilidades tecnicas
+          Habilidades técnicas
           <input name="technicalSkills" defaultValue={technicalSkillsValue} placeholder="Excel, atendimento, logistica" className="field-input mt-2" />
         </label>
         <label className="text-sm font-semibold md:col-span-2">
-          Cursos obrigatorios
-          <input name="requiredCourses" defaultValue={requiredCoursesValue} placeholder="NR-10, Excel intermediario" className="field-input mt-2" />
+          Cursos obrigatórios
+          <input name="requiredCourses" defaultValue={requiredCoursesValue} placeholder="NR-10, Excel intermediário" className="field-input mt-2" />
         </label>
       </div>
       <button className="mt-5 rounded-md bg-blue-700 px-5 py-3 text-sm font-semibold text-white" type="submit">

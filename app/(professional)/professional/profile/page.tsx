@@ -3,6 +3,7 @@ import { PersonalDataFields } from "@/components/professional/personal-data-fiel
 import { ensureProfessionalPublicProfile } from "@/lib/auth/public-profile-sync";
 import { updateProfessionalProfileAction } from "@/lib/actions/workspace";
 import { createServerClient } from "@/lib/supabase/server";
+import { statusLabel } from "@/lib/status-labels";
 
 type CityOption = { city: string; state: string };
 
@@ -10,18 +11,18 @@ const profileErrorMessages: Record<string, string> = {
   "nome-invalido": "Informe o nome completo.",
   "email-invalido": "Confira o email informado.",
   "cpf-invalido": "Confira o CPF informado.",
-  "cpf-ja-cadastrado": "Este CPF ja pertence a outro cadastro.",
-  "data-invalida": "Informe uma data valida no formato dd/mm/aaaa e idade minima de 14 anos.",
+  "cpf-ja-cadastrado": "Este CPF já pertence a outro cadastro.",
+  "data-invalida": "Informe uma data valida no formato dd/mm/aaaa e idade mínima de 14 anos.",
   "nacionalidade-invalida": "Informe a nacionalidade.",
   "cargo-invalido": "Informe o cargo desejado.",
   "telefone-invalido": "Informe um telefone com DDD.",
   "cep-invalido": "Informe um CEP com 8 digitos.",
-  "endereco-invalido": "Confira os dados do endereco.",
+  "endereco-invalido": "Confira os dados do endereço.",
   "localizacao-invalida": "Informe cidade e estado.",
-  "erro-ao-salvar-perfil": "Nao foi possivel salvar os dados gerais. Tente novamente.",
-  "erro-ao-salvar-profissional": "Nao foi possivel salvar os dados profissionais. Tente novamente.",
-  "perfil-nao-criado": "Nao foi possivel preparar o perfil profissional. Tente novamente.",
-  "perfil-profissional-indisponivel": "O perfil profissional ficou temporariamente indisponivel. Atualize a pagina e tente novamente."
+  "erro-ao-salvar-perfil": "Não foi possível salvar os dados gerais. Tente novamente.",
+  "erro-ao-salvar-profissional": "Não foi possível salvar os dados profissionais. Tente novamente.",
+  "perfil-nao-criado": "Não foi possível preparar o perfil profissional. Tente novamente.",
+  "perfil-profissional-indisponivel": "O perfil profissional ficou temporariamente indisponível. Atualize a página e tente novamente."
 };
 
 export default async function ProfessionalProfilePage({ searchParams }: { searchParams: Promise<{ error?: string; message?: string }> }) {
@@ -87,7 +88,7 @@ export default async function ProfessionalProfilePage({ searchParams }: { search
               <label className="text-sm font-semibold">
                 Alterar foto
                 <input name="avatar" type="file" accept="image/png,image/jpeg,image/webp" className="mt-2 block w-full rounded-md border border-dashed border-slate-300 bg-slate-50 p-3 text-sm" />
-                <span className="mt-2 block text-xs font-normal text-slate-500">PNG, JPG ou WEBP ate 2 MB.</span>
+                <span className="mt-2 block text-xs font-normal text-slate-500">PNG, JPG ou WEBP até 2 MB.</span>
               </label>
             </div>
           </section>
@@ -101,7 +102,7 @@ export default async function ProfessionalProfilePage({ searchParams }: { search
           </div>
           <section className="mt-6">
             <h2 className="font-semibold">Cidades para receber vagas</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">Selecione as cidades onde voce quer receber oportunidades. A lista usa as cidades com vagas abertas pelas empresas cadastradas.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">Selecione as cidades onde você quer receber oportunidades. A lista usa as cidades com vagas abertas pelas empresas cadastradas.</p>
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               {cityOptions.map((option) => {
                 const value = `${option.city}|${option.state}`;
@@ -118,8 +119,8 @@ export default async function ProfessionalProfilePage({ searchParams }: { search
           <button className="mt-5 rounded-md bg-blue-700 px-5 py-3 text-sm font-semibold text-white" type="submit">Salvar perfil</button>
         </form>
         <aside className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="font-semibold">Status cadastral</h2>
-          <p className="mt-3 rounded-md bg-slate-50 p-3 text-sm">{profileData.status}</p>
+          <h2 className="font-semibold">Situação cadastral</h2>
+          <p className="mt-3 rounded-md bg-slate-50 p-3 text-sm">{statusLabel(profileData.status)}</p>
           <p className="mt-3 text-sm leading-6 text-slate-600">Esses dados alimentam o motor de compatibilidade, a triagem e os encaminhamentos.</p>
         </aside>
       </div>

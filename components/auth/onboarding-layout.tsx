@@ -55,9 +55,9 @@ export function ConsentFields() {
       </label>
       <label className="flex gap-3 text-sm text-slate-700">
         <input name="privacy" required type="checkbox" className="mt-1" />
-        <span>Li e aceito a Politica de Privacidade. <TermsModal label="Ver Politica" /></span>
+        <span>Li e aceito a Política de Privacidade. <TermsModal label="Ver Política" /></span>
       </label>
-      <p className="text-xs leading-5 text-slate-500">Registramos data, hora, IP, versao dos termos e versao da politica de privacidade para conformidade LGPD.</p>
+      <p className="text-xs leading-5 text-slate-500">Registramos data, hora, IP, versão dos termos e versão da política de privacidade para conformidade LGPD.</p>
     </div>
   );
 }
@@ -66,7 +66,7 @@ export function ErrorBanner({ error }: { error?: string }) {
   if (!error) return null;
   return (
     <div className="mb-5 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
-      Verifique os dados informados. Codigo: {error}
+      Verifique os dados informados. Código: {error}
     </div>
   );
 }

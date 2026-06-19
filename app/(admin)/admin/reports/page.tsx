@@ -35,10 +35,10 @@ export default async function AdminReportsPage() {
   ] as const;
 
   return (
-    <AppShell eyebrow="Administrador" title="Relatorios">
+    <AppShell eyebrow="Administrador" title="Relatórios">
       <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="text-lg font-semibold">Resumo operacional simples</h2>
-        <p className="mt-2 text-sm text-slate-600">Indicadores de controle da operacao, sem graficos ou painel complexo.</p>
+        <p className="mt-2 text-sm text-slate-600">Indicadores de controle da operação, sem graficos ou painel complexo.</p>
         <div className="mt-5 grid gap-3 md:grid-cols-2">
           {rows.map(([label, value]) => (
             <div key={label} className="flex items-center justify-between rounded border border-slate-200 bg-slate-50 p-4">

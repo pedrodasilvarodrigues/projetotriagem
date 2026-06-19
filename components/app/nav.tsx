@@ -33,48 +33,48 @@ import { type AppLanguage, translateUi } from "@/lib/i18n/ui";
 
 const navItems = {
   admin: {
-    title: "Administracao",
-    subtitle: "Operacao, triagem e acompanhamento",
+    title: "Administração",
+    subtitle: "Operação, triagem e acompanhamento",
     items: [
-      { href: "/admin", label: "Dashboard", icon: LayoutGrid },
+      { href: "/admin", label: "Painel", icon: LayoutGrid },
       { href: "/admin/professionals", label: "Profissionais", icon: UserRoundSearch },
       { href: "/admin/companies", label: "Empresas", icon: Building2 },
       { href: "/admin/demands", label: "Demandas", icon: BriefcaseBusiness },
       { href: "/admin/processes", label: "Processos", icon: ClipboardCheck },
       { href: "/admin/courses", label: "Cursos", icon: GraduationCap },
-      { href: "/admin/reports", label: "Relatorios", icon: FileText },
-      { href: "/admin/settings", label: "Configuracoes", icon: Settings },
+      { href: "/admin/reports", label: "Relatórios", icon: FileText },
+      { href: "/admin/settings", label: "Configurações", icon: Settings },
       { href: "/admin/trainings", label: "Treinamentos", icon: ShieldCheck },
-      { href: "/admin/institutions", label: "Instituicoes", icon: Landmark },
-      { href: "/admin/integrations", label: "Integracoes", icon: Plug }
+      { href: "/admin/institutions", label: "Instituições", icon: Landmark },
+      { href: "/admin/integrations", label: "Integrações", icon: Plug }
     ]
   },
   company: {
     title: "Empresa",
-    subtitle: "Demandas, candidatos e historico",
+    subtitle: "Demandas, candidatos e histórico",
     items: [
       { href: "/company", label: "Minha Empresa", icon: Building2 },
       { href: "/company/profile", label: "Perfil da Empresa", icon: UserRoundCog },
       { href: "/company/demands/new", label: "Criar Demanda", icon: BriefcaseBusiness },
       { href: "/company/demands", label: "Demandas Ativas", icon: ClipboardCheck },
-      { href: "/company/candidates", label: "Analise de Candidatos", icon: UserRoundSearch },
-      { href: "/company/history", label: "Historico", icon: History },
-      { href: "/company/notifications", label: "Notificacoes", icon: Bell },
-      { href: "/company/settings", label: "Configuracoes", icon: Settings }
+      { href: "/company/candidates", label: "Análise de Candidatos", icon: UserRoundSearch },
+      { href: "/company/history", label: "Histórico", icon: History },
+      { href: "/company/notifications", label: "Notificações", icon: Bell },
+      { href: "/company/settings", label: "Configurações", icon: Settings }
     ]
   },
   professional: {
     title: "Profissional",
     subtitle: "Perfil, triagem e encaminhamentos",
     items: [
-      { href: "/professional", label: "Minha Area", icon: LayoutGrid },
+      { href: "/professional", label: "Minha Área", icon: LayoutGrid },
       { href: "/professional/search-demands", label: "Buscar demandas", icon: Search },
       { href: "/professional/profile", label: "Perfil", icon: UserRoundCog },
-      { href: "/professional/resume", label: "Curriculo", icon: FileText },
-      { href: "/professional/screening-status", label: "Status de Triagem", icon: ClipboardCheck },
+      { href: "/professional/resume", label: "Currículo", icon: FileText },
+      { href: "/professional/screening-status", label: "Situação da Triagem", icon: ClipboardCheck },
       { href: "/professional/referrals", label: "Encaminhamentos", icon: BriefcaseBusiness },
-      { href: "/professional/notifications", label: "Notificacoes", icon: Bell },
-      { href: "/professional/settings", label: "Configuracoes", icon: Settings }
+      { href: "/professional/notifications", label: "Notificações", icon: Bell },
+      { href: "/professional/settings", label: "Configurações", icon: Settings }
     ]
   }
 } satisfies Record<AppRole, { title: string; subtitle: string; items: Array<{ href: string; label: string; icon: LucideIcon }> }>;

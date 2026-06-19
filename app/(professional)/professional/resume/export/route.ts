@@ -24,7 +24,7 @@ const colorMap = {
 const educationLabels: Record<string, string> = {
   fundamental: "Fundamental",
   medio: "Medio",
-  tecnico: "Tecnico",
+  tecnico: "Técnico",
   superior: "Superior",
   pos: "Pos-graduacao",
   mba: "MBA",
@@ -54,7 +54,7 @@ function dateLabel(value?: string | null) {
 export async function GET(request: NextRequest) {
   const supabase = await createServerClient();
   const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) return new Response("Nao autenticado", { status: 401 });
+  if (!userData.user) return new Response("Não autenticado", { status: 401 });
 
   const selectedTemplate = request.nextUrl.searchParams.get("template");
   const template: ResumeTemplateId = templateIds.includes(selectedTemplate as ResumeTemplateId) ? selectedTemplate as ResumeTemplateId : "classico";
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     .eq("user_id", userData.user.id)
     .maybeSingle();
 
-  if (!professional?.id) return new Response("Perfil profissional nao encontrado", { status: 404 });
+  if (!professional?.id) return new Response("Perfil profissional não encontrado", { status: 404 });
 
   const [{ data: educations }, { data: experiences }, { data: courses }, { data: languages }, { data: skills }] = await Promise.all([
     supabase.from("professional_educations").select("level,institution,course_name,completed_at").eq("professional_id", professional.id).order("created_at", { ascending: false }),
@@ -83,13 +83,13 @@ export async function GET(request: NextRequest) {
     accentColor,
     showSalaryExpectation,
     fullName: professional.full_name ?? "Profissional",
-    email: professional.email ?? userData.user.email ?? "Email nao informado",
+    email: professional.email ?? userData.user.email ?? "Email não informado",
     phone: professional.phone ?? "",
     city: professional.city ?? "Cidade",
     state: professional.state ?? "UF",
     desiredRole: professional.desired_role ?? "",
     summary: professional.summary ?? "",
-    educationLevel: educationLabels[professional.education_level ?? ""] ?? professional.education_level ?? "Nao informado",
+    educationLevel: educationLabels[professional.education_level ?? ""] ?? professional.education_level ?? "Não informado",
     availableInDays: professional.available_in_days ?? 0,
     educations: ((educations ?? []) as EducationRow[]).map((education) => ({
       level: educationLabels[education.level] ?? education.level,
@@ -100,12 +100,12 @@ export async function GET(request: NextRequest) {
     experiences: ((experiences ?? []) as ExperienceRow[]).map((experience) => ({
       companyName: experience.company_name,
       roleTitle: experience.role_title,
-      period: `${dateLabel(experience.started_at)} ate ${experience.is_current ? "Atual" : dateLabel(experience.ended_at)}`.trim(),
+      period: `${dateLabel(experience.started_at)} até ${experience.is_current ? "Atual" : dateLabel(experience.ended_at)}`.trim(),
       description: experience.description
     })),
     courses: ((courses ?? []) as CourseRow[]).map((course) => ({
       name: course.name,
-      institution: course.institution ?? "Instituicao nao informada",
+      institution: course.institution ?? "Instituição não informada",
       details: [course.workload_hours ? `${course.workload_hours}h` : "", yearLabel(course.completed_at)].filter(Boolean).join(" | ")
     })),
     languages: ((languages ?? []) as LanguageRow[]).map((language) => ({
@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
     })),
     skills: ((skills ?? []) as SkillRow[]).map((skill) => ({
       name: skill.name,
-      type: skill.skill_type === "behavioral" ? "Comportamental" : "Tecnica",
+      type: skill.skill_type === "behavioral" ? "Comportamental" : "Técnica",
       proficiency: `${skill.proficiency ?? 1}/5`
     }))
   });

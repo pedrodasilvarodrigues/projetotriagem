@@ -6,15 +6,15 @@ import { resolveAuthenticatedEntryPath } from "@/lib/auth/entry";
 import { createServerClient, hasSupabasePublicEnv } from "@/lib/supabase/server";
 
 const errorMessages: Record<string, string> = {
-  "sessao-expirada": "Sua sessao expirou. Entre novamente para continuar.",
-  "nao-foi-possivel-iniciar-google": "Nao foi possivel iniciar o login com Google.",
-  "credenciais-invalidas": "Email ou senha invalidos.",
-  "email-nao-confirmado": "Seu email ainda nao foi confirmado.",
-  "conta-nao-cadastrada": "Essa conta ainda nao possui cadastro no portal. Crie uma conta escolhendo Profissional ou Empresa.",
-  "link-invalido": "Link invalido ou expirado. Solicite um novo acesso.",
-  "configuracao-supabase-incompleta": "Configuracao do Supabase pendente. Adicione as variaveis de ambiente na Vercel para ativar o login.",
-  "erro-servidor-login": "Nao foi possivel concluir o login agora. A equipe tecnica ja tem logs para investigar.",
-  "erro-autenticacao": "Nao foi possivel entrar agora. Tente novamente em instantes."
+  "sessao-expirada": "Sua sessão expirou. Entre novamente para continuar.",
+  "nao-foi-possivel-iniciar-google": "Não foi possível iniciar o login com Google.",
+  "credenciais-invalidas": "Email ou senha inválidos.",
+  "email-nao-confirmado": "Seu e-mail ainda não foi confirmado.",
+  "conta-nao-cadastrada": "Essa conta ainda não possui cadastro no portal. Crie uma conta escolhendo Profissional ou Empresa.",
+  "link-invalido": "Link inválido ou expirado. Solicite um novo acesso.",
+  "configuracao-supabase-incompleta": "Configuração do Supabase pendente. Adicione as variáveis de ambiente na Vercel para ativar o acesso.",
+  "erro-servidor-login": "Não foi possível concluir o login agora. A equipe técnica já tem registros para investigar.",
+  "erro-autenticacao": "Não foi possível entrar agora. Tente novamente em instantes."
 };
 
 const messageMap: Record<string, string> = {
@@ -22,7 +22,7 @@ const messageMap: Record<string, string> = {
   "email-confirmado": "Email confirmado. Entre com seu email e senha para acessar.",
   "confirme-email": "Cadastro criado. Confirme seu email e entre para continuar.",
   "senha-atualizada": "Senha atualizada com sucesso. Entre novamente.",
-  saiu: "Voce saiu da sua conta."
+  saiu: "Você saiu da sua conta."
 };
 
 export const dynamic = "force-dynamic";
@@ -58,7 +58,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         authenticatedRedirect = entryPath ?? "/onboarding";
       }
     } catch (error) {
-      console.error("[auth] Falha ao recuperar sessao na pagina de login", { error: error instanceof Error ? error.message : String(error) });
+      console.error("[auth] Falha ao recuperar sessão na página de login", { error: error instanceof Error ? error.message : String(error) });
     }
 
     if (authenticatedRedirect) redirect(authenticatedRedirect);
@@ -97,7 +97,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
                 Entre para acompanhar processos com clareza.
               </h1>
               <p className="mt-5 max-w-xl text-base leading-7 text-blue-50">
-                Acesse sua area para visualizar oportunidades, status de triagem, documentos e proximos passos em uma jornada organizada.
+                Acesse sua área para visualizar oportunidades, situação da triagem, documentos e próximos passos em uma jornada organizada.
               </p>
 
               <div className="mt-7 grid max-w-2xl gap-3 sm:grid-cols-3">
@@ -227,7 +227,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
                     <CheckCircle2 aria-hidden="true" size={17} />
                   </span>
                   <div>
-                    <p className="text-sm font-semibold text-slate-950">Ainda nao faz parte da comunidade?</p>
+                    <p className="text-sm font-semibold text-slate-950">Ainda não faz parte da comunidade?</p>
                     <p className="mt-1 text-sm leading-6 text-slate-600">Cadastre-se gratuitamente e entre em uma rede de profissionais e empresas em busca de novas oportunidades.</p>
                     <Link href="/register" className="mt-4 inline-flex items-center gap-2 rounded-md bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800">
                       Criar Cadastro
@@ -239,7 +239,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             </div>
 
             <p className="mt-5 text-center text-xs leading-5 text-slate-500">
-              Acesso protegido por Supabase Auth, consentimento LGPD e regras de permissao por perfil.
+              Acesso protegido por Supabase Auth, consentimento LGPD e regras de permissão por perfil.
             </p>
           </div>
         </section>

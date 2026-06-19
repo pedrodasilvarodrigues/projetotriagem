@@ -30,14 +30,14 @@ export default async function CompanyDemandEditPage({
   if (!demand) {
     return (
       <AppShell eyebrow="Empresa" title="Editar Demanda">
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700">Demanda nao encontrada para esta empresa.</p>
+        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700">Demanda não encontrada para está empresa.</p>
       </AppShell>
     );
   }
 
   return (
     <AppShell eyebrow="Empresa" title="Editar Demanda">
-      {query.error ? <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">Nao foi possivel salvar: {query.error}</p> : null}
+      {query.error ? <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">Não foi possível salvar: {query.error}</p> : null}
       {query.message ? <p className="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-700">Demanda atualizada.</p> : null}
       <div className="space-y-5">
         <CompanyDemandForm
@@ -70,7 +70,7 @@ export default async function CompanyDemandEditPage({
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-lg font-semibold text-slate-900">Encerrar demanda</h2>
-                <p className="mt-1 text-sm text-slate-600">Use esta opcao quando a vaga ja tiver sido preenchida. A demanda deixa de receber novos candidatos.</p>
+                <p className="mt-1 text-sm text-slate-600">Use está opção quando a vaga já tiver sido preenchida. A demanda deixa de receber novos candidatos.</p>
               </div>
               <button className="rounded-md bg-slate-800 px-4 py-2 text-sm font-semibold text-white" type="submit">Encerrar demanda</button>
             </div>
@@ -82,7 +82,7 @@ export default async function CompanyDemandEditPage({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold text-red-900">Excluir demanda</h2>
-              <p className="mt-1 text-sm text-red-800">A demanda sera marcada como cancelada e deixara de aparecer como ativa.</p>
+              <p className="mt-1 text-sm text-red-800">A demanda será marcada como cancelada e deixara de aparecer como ativa.</p>
             </div>
             <button className="rounded-md bg-red-700 px-4 py-2 text-sm font-semibold text-white" type="submit">Excluir demanda</button>
           </div>

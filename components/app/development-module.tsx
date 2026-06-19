@@ -9,11 +9,11 @@ export function DevelopmentModule({ moduleName, description }: { moduleName: str
         </div>
         <div>
           <p className="text-xs font-bold uppercase tracking-wide text-amber-700">{moduleName}</p>
-          <h2 className="mt-2 text-2xl font-semibold text-slate-950">Modulo em Desenvolvimento</h2>
+          <h2 className="mt-2 text-2xl font-semibold text-slate-950">Módulo em Desenvolvimento</h2>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
-            {description ?? "Estamos trabalhando nesta funcionalidade. Em breve sera possivel gerenciar cursos, categorias e instituicoes diretamente pela plataforma."}
+            {description ?? "Estamos trabalhando nesta funcionalidade. Em breve será possível gerenciar cursos, categorias e instituições diretamente pela plataforma."}
           </p>
-          <p className="mt-4 inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">Previsao interna: proxima etapa do produto</p>
+          <p className="mt-4 inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">Previsao interna: próxima etapa do produto</p>
         </div>
       </div>
     </section>

@@ -4,15 +4,15 @@ import { requestPasswordResetAction } from "@/lib/actions/auth";
 
 const messageMap: Record<string, string> = {
   "email-enviado": "Enviamos as instrucoes para o email informado.",
-  "email-solicitado-supabase": "Solicitamos o envio pelo Supabase. Se o email nao chegar, configure um SMTP/Resend para entrega confiavel.",
-  "email-recente": "Ja existe uma solicitacao recente para esse email. Confira sua caixa de entrada e tente novamente em cerca de 1 minuto se precisar de outro link."
+  "email-solicitado-supabase": "Solicitamos o envio pelo Supabase. Se o email não chegar, configure um SMTP/Resend para entrega confiável.",
+  "email-recente": "Já existe uma solicitacao recente para esse email. Confira sua caixa de entrada e tente novamente em cerca de 1 minuto se precisar de outro link."
 };
 
 const errorMap: Record<string, string> = {
-  "email-invalido": "Informe um email valido.",
+  "email-invalido": "Informe um email válido.",
   "aguarde-um-minuto": "Aguarde cerca de 1 minuto antes de solicitar outro email. Essa protecao vem do Supabase para evitar abuso.",
-  "configuracao-supabase-incompleta": "Configuracao do Supabase pendente. Verifique as variaveis de ambiente.",
-  "erro-autenticacao": "Nao foi possivel enviar o email agora. Tente novamente em instantes."
+  "configuracao-supabase-incompleta": "Configuração do Supabase pendente. Verifique as variáveis de ambiente.",
+  "erro-autenticacao": "Não foi possível enviar o email agora. Tente novamente em instantes."
 };
 
 export default async function ForgotPasswordPage({ searchParams }: { searchParams: Promise<{ error?: string; message?: string }> }) {
@@ -65,7 +65,7 @@ export default async function ForgotPasswordPage({ searchParams }: { searchParam
                 </span>
               </label>
               <button className="w-full rounded-md bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-800" type="submit">
-                Enviar link de recuperacao
+                Enviar link de recuperação
               </button>
             </form>
 

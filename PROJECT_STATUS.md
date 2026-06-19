@@ -21,6 +21,16 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Corrigida em producao a funcao `invalidate_resume_cache`, que quebrava updates em `professionals` e inserts em partes do curriculo por tentar ler `new.professional_id` onde o campo nao existia.
 - Usuario `flaviooliveirarodri44@gmail.com` promovido para `admin` em `user_roles`.
 - Responsividade mobile da area admin ajustada: topo/menu em grade no celular, conteudo com padding menor, titulos compactos, cards do dashboard adaptaveis e tabelas convertidas em cards empilhados em telas pequenas.
+- Area administrativa reorganizada para operacao sem dashboard complexo: menus Profissionais, Empresas, Demandas, Processos, Cursos, Relatorios e Configuracoes.
+- Profissionais administrativos agora possuem listagem com busca/filtros, detalhe com perfil/curriculo/historico, controle de status, arquivamento e apresentacao para empresas.
+- Criada tabela `professional_presentations` com RLS admin-only para registrar apresentacoes profissional-empresa com data, hora, admin responsavel, empresa, profissional, status e observacoes.
+- Empresas administrativas agora exibem demandas vinculadas, profissionais apresentados, controle de status, arquivamento e pagina de detalhe.
+- Demandas administrativas agora permitem criacao, filtro, encerramento, reabertura, arquivamento, visualizacao de requisitos, salario, experiencia e candidatos vinculados.
+- Processos administrativos agora acompanham o fluxo operacional de triagem com alteracao de status, observacoes, entrevistas/resultados e encerramento.
+- Modulos Cursos, Treinamentos, Instituicoes e Integracoes foram adicionados como paginas institucionais bloqueadas em desenvolvimento.
+- Relatorios administrativos simples adicionados sem graficos complexos, com totais de profissionais, empresas, demandas, processos, apresentacoes e contratacoes.
+- Configuracoes administrativas globais estruturadas para Termos, Privacidade, LGPD, emails automaticos, categorias, areas de atuacao e parametros do sistema.
+- Alias `/administrador` criado apontando para `/admin`; acesso segue protegido por `requireRole("admin")`.
 - Area de curriculo com painel de qualidade, checklist de preenchimento e proximos ajustes recomendados.
 - Navegacao superior por subgrupos na area de curriculo.
 - Painel de personalizacao para baixar CV com 3 modelos, 7 cores e opcao de pretensao salarial.

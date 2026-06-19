@@ -24,6 +24,13 @@ const demandSchema = z.object({
   minimumExperienceMonths: z.coerce.number().int().min(0).optional()
 });
 
+const adminDemandSchema = demandSchema.extend({
+  companyId: z.string().uuid(),
+  salaryMin: z.coerce.number().min(0).optional(),
+  salaryMax: z.coerce.number().min(0).optional(),
+  internalNotes: z.string().optional()
+});
+
 const resumeProfileSchema = z.object({
   desiredRole: z.string().min(2),
   summary: z.string().max(1200).optional(),
@@ -961,36 +968,165 @@ export async function updateCompanyStatusAction(formData: FormData) {
   await requireRole("admin");
   const companyId = String(formData.get("companyId") ?? "");
   const status = String(formData.get("status") ?? "");
-  if (!companyId || !["pending", "approved", "rejected", "suspended"].includes(status)) redirect("/admin/companies?error=dados-invalidos");
+  const redirectTo = String(formData.get("redirectTo") ?? "/admin/companies");
+  if (!companyId || !["pending", "approved", "rejected", "suspended"].includes(status)) redirect(`${redirectTo}?error=dados-invalidos`);
 
   const supabase = await createServerClient();
-  await supabase.from("companies").update({ status }).eq("id", companyId);
+  await supabase.from("companies").update({ status, deleted_at: null }).eq("id", companyId);
   revalidatePath("/admin/companies");
+  revalidatePath(`/admin/companies/${companyId}`);
+  redirect(`${redirectTo}?message=empresa-atualizada`);
 }
 
 export async function updateProfessionalStatusAction(formData: FormData) {
   await requireRole("admin");
   const professionalId = String(formData.get("professionalId") ?? "");
   const status = String(formData.get("status") ?? "");
-  if (!professionalId || !["pending", "approved", "rejected", "suspended"].includes(status)) redirect("/admin/candidates?error=dados-invalidos");
+  const redirectTo = String(formData.get("redirectTo") ?? "/admin/professionals");
+  if (!professionalId || !["pending", "approved", "rejected", "suspended"].includes(status)) redirect(`${redirectTo}?error=dados-invalidos`);
 
   const supabase = await createServerClient();
-  await supabase.from("professionals").update({ status }).eq("id", professionalId);
+  await supabase.from("professionals").update({ status, deleted_at: null }).eq("id", professionalId);
+  revalidatePath("/admin/professionals");
   revalidatePath("/admin/new-candidates");
   revalidatePath("/admin/candidates");
   revalidatePath("/admin/talent-bank");
+  revalidatePath(`/admin/professionals/${professionalId}`);
+  redirect(`${redirectTo}?message=profissional-atualizado`);
+}
+
+export async function archiveProfessionalAction(formData: FormData) {
+  await requireRole("admin");
+  const professionalId = String(formData.get("professionalId") ?? "");
+  const redirectTo = String(formData.get("redirectTo") ?? "/admin/professionals");
+  if (!professionalId) redirect(`${redirectTo}?error=dados-invalidos`);
+  const supabase = await createServerClient();
+  await supabase.from("professionals").update({ deleted_at: new Date().toISOString(), status: "suspended" }).eq("id", professionalId);
+  revalidatePath("/admin/professionals");
+  revalidatePath(`/admin/professionals/${professionalId}`);
+  redirect(`${redirectTo}?message=profissional-arquivado`);
+}
+
+export async function archiveCompanyAction(formData: FormData) {
+  await requireRole("admin");
+  const companyId = String(formData.get("companyId") ?? "");
+  const redirectTo = String(formData.get("redirectTo") ?? "/admin/companies");
+  if (!companyId) redirect(`${redirectTo}?error=dados-invalidos`);
+  const supabase = await createServerClient();
+  await supabase.from("companies").update({ deleted_at: new Date().toISOString(), status: "suspended" }).eq("id", companyId);
+  revalidatePath("/admin/companies");
+  revalidatePath(`/admin/companies/${companyId}`);
+  redirect(`${redirectTo}?message=empresa-arquivada`);
+}
+
+export async function presentProfessionalToCompanyAction(formData: FormData) {
+  await requireRole("admin");
+  const professionalId = String(formData.get("professionalId") ?? "");
+  const companyId = String(formData.get("companyId") ?? "");
+  const notes = String(formData.get("notes") ?? "").trim();
+  const redirectTo = String(formData.get("redirectTo") ?? "/admin/professionals");
+  if (!professionalId || !companyId) redirect(`${redirectTo}?error=dados-invalidos`);
+
+  const supabase = await createServerClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) redirect("/login");
+
+  const { error } = await supabase.from("professional_presentations").upsert({
+    professional_id: professionalId,
+    company_id: companyId,
+    admin_id: userData.user.id,
+    status: "presented",
+    notes: notes || null,
+    presented_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  }, { onConflict: "professional_id,company_id" });
+
+  if (error) redirect(`${redirectTo}?error=${encodeURIComponent(error.message)}`);
+  revalidatePath("/admin/professionals");
+  revalidatePath("/admin/companies");
+  revalidatePath(`/admin/professionals/${professionalId}`);
+  revalidatePath(`/admin/companies/${companyId}`);
+  redirect(`${redirectTo}?message=profissional-apresentado`);
+}
+
+export async function createAdminDemandAction(formData: FormData) {
+  await requireRole("admin");
+  const parsed = adminDemandSchema.safeParse({
+    companyId: formData.get("companyId"),
+    name: formData.get("name"),
+    title: formData.get("title"),
+    description: formData.get("description"),
+    openings: formData.get("openings"),
+    educationMinimum: formData.get("educationMinimum"),
+    city: formData.get("city"),
+    state: formData.get("state"),
+    modality: formData.get("modality"),
+    contractType: formData.get("contractType"),
+    technicalSkills: formData.get("technicalSkills"),
+    requiredCourses: formData.get("requiredCourses"),
+    minimumExperienceMonths: formData.get("minimumExperienceMonths"),
+    salaryMin: formData.get("salaryMin"),
+    salaryMax: formData.get("salaryMax"),
+    internalNotes: formData.get("internalNotes")
+  });
+  if (!parsed.success) redirect("/admin/demands?error=dados-invalidos");
+
+  const data = parsed.data;
+  const supabase = await createServerClient();
+  const { error } = await supabase.from("demands").insert({
+    company_id: data.companyId,
+    name: data.name,
+    title: data.title,
+    description: data.description,
+    openings: data.openings,
+    education_minimum: data.educationMinimum,
+    city: data.city,
+    state: data.state.toUpperCase(),
+    modality: data.modality,
+    contract_type: data.contractType,
+    technical_skills: splitList(data.technicalSkills),
+    required_courses: splitList(data.requiredCourses),
+    minimum_experience_months: data.minimumExperienceMonths ?? 0,
+    salary_min: data.salaryMin ?? null,
+    salary_max: data.salaryMax ?? null,
+    internal_notes: data.internalNotes || null,
+    status: "active"
+  });
+  if (error) redirect(`/admin/demands?error=${encodeURIComponent(error.message)}`);
+  revalidatePath("/admin/demands");
+  revalidatePath("/professional");
+  revalidatePath("/professional/search-demands");
+  redirect("/admin/demands?message=demanda-criada");
+}
+
+export async function updateAdminDemandStatusAction(formData: FormData) {
+  await requireRole("admin");
+  const demandId = String(formData.get("demandId") ?? "");
+  const status = String(formData.get("status") ?? "");
+  const redirectTo = String(formData.get("redirectTo") ?? "/admin/demands");
+  if (!demandId || !["draft", "active", "screening", "closed", "cancelled"].includes(status)) redirect(`${redirectTo}?error=dados-invalidos`);
+  const supabase = await createServerClient();
+  await supabase.from("demands").update({ status, deleted_at: status === "cancelled" ? new Date().toISOString() : null }).eq("id", demandId);
+  revalidatePath("/admin/demands");
+  revalidatePath("/professional");
+  revalidatePath("/professional/search-demands");
+  redirect(`${redirectTo}?message=demanda-atualizada`);
 }
 
 export async function updateProcessStatusAction(formData: FormData) {
   await requireRole("admin");
   const processId = String(formData.get("processId") ?? "");
   const status = String(formData.get("status") ?? "");
+  const companyResult = String(formData.get("companyResult") ?? "").trim();
+  const redirectTo = String(formData.get("redirectTo") ?? "/admin/processes");
   if (!processId || !["received", "analysis", "screening", "pre_approved", "training", "interview", "forwarded", "hired", "rejected", "waiting"].includes(status)) {
-    redirect("/admin/referrals?error=dados-invalidos");
+    redirect(`${redirectTo}?error=dados-invalidos`);
   }
 
   const supabase = await createServerClient();
-  await supabase.from("screening_processes").update({ status }).eq("id", processId);
+  await supabase.from("screening_processes").update({ status, company_result: companyResult || null }).eq("id", processId);
+  revalidatePath("/admin/processes");
   revalidatePath("/admin/referrals");
   revalidatePath("/admin/hirings");
+  redirect(`${redirectTo}?message=processo-atualizado`);
 }

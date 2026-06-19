@@ -11,9 +11,12 @@ import {
   ChevronUp,
   ClipboardCheck,
   FileText,
+  GraduationCap,
   History,
+  Landmark,
   LayoutGrid,
   LogOut,
+  Plug,
   Search,
   Settings,
   ShieldCheck,
@@ -28,17 +31,19 @@ import { type AppLanguage, translateUi } from "@/lib/i18n/ui";
 
 const navItems = {
   admin: {
-    title: "Recrutador",
-    subtitle: "Triagem, banco de talentos e encaminhamento",
+    title: "Administracao",
+    subtitle: "Operacao, triagem e acompanhamento",
     items: [
-      { href: "/admin", label: "Dashboard", icon: LayoutGrid },
-      { href: "/admin/new-candidates", label: "Novos candidatos", icon: UserRoundCheck },
-      { href: "/admin/companies", label: "Empresas cadastradas", icon: Building2 },
-      { href: "/admin/demands", label: "Demandas abertas", icon: BriefcaseBusiness },
-      { href: "/admin/referrals", label: "Encaminhamentos", icon: ClipboardCheck },
-      { href: "/admin/hirings", label: "Contratacoes", icon: ShieldCheck },
-      { href: "/admin/talent-bank", label: "Banco de Talentos", icon: UserRoundSearch },
-      { href: "/admin/candidates", label: "Gestao de Candidatos", icon: UserRoundCog }
+      { href: "/admin/professionals", label: "Profissionais", icon: UserRoundSearch },
+      { href: "/admin/companies", label: "Empresas", icon: Building2 },
+      { href: "/admin/demands", label: "Demandas", icon: BriefcaseBusiness },
+      { href: "/admin/processes", label: "Processos", icon: ClipboardCheck },
+      { href: "/admin/courses", label: "Cursos", icon: GraduationCap },
+      { href: "/admin/reports", label: "Relatorios", icon: FileText },
+      { href: "/admin/settings", label: "Configuracoes", icon: Settings },
+      { href: "/admin/trainings", label: "Treinamentos", icon: ShieldCheck },
+      { href: "/admin/institutions", label: "Instituicoes", icon: Landmark },
+      { href: "/admin/integrations", label: "Integracoes", icon: Plug }
     ]
   },
   company: {

@@ -15,6 +15,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Salvamento de perfil e dados pessoais do curriculo normaliza os valores, detecta CPF duplicado, verifica erros do Supabase e informa exatamente qual campo precisa de correcao.
 - Acoes do curriculo nao redirecionam mais para o perfil quando a leitura do profissional falha; o contexto ressincroniza a linha, permanece na aba de origem e usa fallback seguro de persistencia para o proprio usuario.
 - Criada migration `20260619012252_fix_professionals_rls_recursion.sql` para remover a recursao RLS entre `professionals` e `screening_processes`, causa raiz do loop perfil/curriculo em contas profissionais.
+- Aplicada no Supabase de producao a correcao RLS de `professionals`; leitura do proprio registro profissional validada sem erro `42P17`.
 - Area de curriculo com painel de qualidade, checklist de preenchimento e proximos ajustes recomendados.
 - Navegacao superior por subgrupos na area de curriculo.
 - Painel de personalizacao para baixar CV com 3 modelos, 7 cores e opcao de pretensao salarial.
@@ -60,7 +61,6 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Fallback no proxy para redirecionar `/?code=...` para `/auth/callback` quando o Supabase retornar o codigo na raiz do dominio correto.
 
 # Pendente
-- Aplicar a migration `20260619012252_fix_professionals_rls_recursion.sql` no Supabase de producao; nesta retomada o Supabase CLI/painel nao expôs autenticacao utilizavel para executar o SQL remoto.
 - Aplicar a migration `20260618012733_harden_auth_role_metadata.sql` no Supabase de producao junto com o proximo deploy.
 - Persistir as escolhas de modelo/cor do CV no banco, caso a personalizacao precise ser reutilizada em downloads futuros.
 - Configurar SMTP personalizado e credenciais Google OAuth no painel Supabase/Google usando AUTH_SETUP.md.
@@ -80,7 +80,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 # Observacoes
 - As chaves sensiveis do Supabase devem continuar fora do GitHub e ser configuradas em ambiente local/Vercel.
 - As correcoes de perfil/curriculo passaram em `npm run lint` e no build de producao do Next.js 16.2.7.
-- A falha atual de salvar perfil/curriculo foi rastreada para `ERROR 42P17: infinite recursion detected in policy for relation "professionals"`; o SQL corretivo esta versionado e precisa ser aplicado no banco remoto.
+- A falha de salvar perfil/curriculo foi rastreada para `ERROR 42P17: infinite recursion detected in policy for relation "professionals"`; o SQL corretivo foi versionado, aplicado no banco remoto e validado simulando o usuario profissional afetado.
 - A confirmacao por email nao e mais exigida para novos cadastros por email/senha; recuperacao de senha ainda depende de Supabase Auth ou Resend configurado.
 - O limite de reenvio de recuperacao do Supabase continua existindo na API externa; a interface agora comunica como pedido recente e nao como quebra.
 - A auditoria local encontrou `SUPABASE_SERVICE_ROLE_KEY` invalida para Admin API; o login por email/senha com anon key foi validado contra o Supabase e retorna erros controlados.

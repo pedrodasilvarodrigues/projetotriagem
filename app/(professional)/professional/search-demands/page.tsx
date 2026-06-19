@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Building2, MapPin, Search, SlidersHorizontal } from "lucide-react";
 import { AppShell } from "@/components/app/shell";
-import { createServerClient } from "@/lib/supabase/server";
+import { listProfessionalDemands } from "@/lib/demands/catalog";
 
 type DemandRow = {
   id: string;
@@ -56,15 +56,9 @@ export default async function ProfessionalSearchDemandsPage({
   const query = normalize(params.q);
   const local = normalize(params.local);
   const modality = params.modalidade && ["presencial", "hibrido", "remoto"].includes(params.modalidade) ? params.modalidade : "";
-  const supabase = await createServerClient();
-  const { data: demands } = await supabase
-    .from("demands")
-    .select("id,name,title,description,city,state,modality,contract_type,openings,created_at,company:companies(trade_name,segment)")
-    .in("status", ["active", "screening"])
-    .order("created_at", { ascending: false })
-    .limit(120);
+  const demands = await listProfessionalDemands(120);
 
-  const filteredDemands = ((demands ?? []) as unknown as DemandRow[]).filter((demand) => {
+  const filteredDemands = (demands as DemandRow[]).filter((demand) => {
     const company = one(demand.company);
     const matchesQuery =
       containsText(demand.name, query) ||

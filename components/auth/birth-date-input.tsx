@@ -22,14 +22,28 @@ function toIsoBirthDate(value: string) {
   return `${yearText}-${monthText}-${dayText}`;
 }
 
-export function BirthDateInput({ className }: { className: string }) {
-  const [displayValue, setDisplayValue] = useState("");
+function toDisplayBirthDate(value?: string | null) {
+  if (!value) return "";
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+  return match ? `${match[3]}/${match[2]}/${match[1]}` : maskBirthDate(value);
+}
+
+export function BirthDateInput({
+  className,
+  initialValue,
+  required = true
+}: {
+  className: string;
+  initialValue?: string | null;
+  required?: boolean;
+}) {
+  const [displayValue, setDisplayValue] = useState(() => toDisplayBirthDate(initialValue));
   const isoValue = toIsoBirthDate(displayValue);
 
   return (
     <>
       <input
-        required
+        required={required}
         type="text"
         inputMode="numeric"
         autoComplete="bday"
@@ -39,7 +53,7 @@ export function BirthDateInput({ className }: { className: string }) {
         value={displayValue}
         onChange={(event) => setDisplayValue(maskBirthDate(event.target.value))}
         onBlur={(event) => {
-          if (displayValue.length === 10 && !isoValue) event.currentTarget.setCustomValidity("Informe uma data valida no formato dd/mm/aaaa.");
+          if (displayValue && (displayValue.length !== 10 || !isoValue)) event.currentTarget.setCustomValidity("Informe uma data valida no formato dd/mm/aaaa.");
         }}
         onInvalid={(event) => event.currentTarget.setCustomValidity("Informe uma data valida no formato dd/mm/aaaa.")}
         onInput={(event) => event.currentTarget.setCustomValidity("")}

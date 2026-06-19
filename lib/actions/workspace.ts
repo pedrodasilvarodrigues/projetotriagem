@@ -30,19 +30,19 @@ const resumeProfileSchema = z.object({
 });
 
 const resumePersonalSchema = z.object({
-  firstName: z.string().min(2),
-  lastName: z.string().min(2),
-  nationality: z.string().min(2),
-  cpf: z.string().refine(isValidCpf, "cpf-invalido"),
-  birthDate: z.string().refine((value) => ageFromBirthDate(value) >= 14, "idade-minima"),
-  phone: z.string().refine(isValidBrazilianPhone, "telefone-invalido"),
-  email: z.string().email(),
-  cep: z.string().optional(),
-  street: z.string().optional(),
-  addressNumber: z.string().optional(),
-  neighborhood: z.string().optional(),
-  city: z.string().min(2),
-  state: z.string().min(2).max(2)
+  firstName: z.string().trim().min(2),
+  lastName: z.string().trim().min(1),
+  nationality: z.string().trim().min(2),
+  cpf: z.string().trim().refine(isValidCpf, "cpf-invalido"),
+  birthDate: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, "data-invalida").refine((value) => ageFromBirthDate(value) >= 14, "idade-minima"),
+  phone: z.string().trim().refine(isValidBrazilianPhone, "telefone-invalido"),
+  email: z.string().trim().toLowerCase().email(),
+  cep: z.string().trim().refine((value) => value === "" || onlyDigits(value).length === 8, "cep-invalido"),
+  street: z.string().trim().optional(),
+  addressNumber: z.string().trim().optional(),
+  neighborhood: z.string().trim().optional(),
+  city: z.string().trim().min(2),
+  state: z.string().trim().toUpperCase().length(2).regex(/^[A-Z]{2}$/, "estado-invalido")
 });
 
 const educationSchema = z.object({
@@ -167,22 +167,16 @@ export async function updateProfessionalProfileAction(formData: FormData) {
   const normalizedCpf = hasCpf ? onlyDigits(cpf) : null;
   const hasCep = onlyDigits(cep).length > 0;
 
-  if (
-    fullName.length < 3 ||
-    (email.length > 0 && !z.string().email().safeParse(email).success) ||
-    (hasCpf && !isValidCpf(cpf)) ||
-    (birthDate.length > 0 && ageFromBirthDate(birthDate) < 14) ||
-    nationality.length < 2 ||
-    desiredRole.length < 2 ||
-    city.length < 2 ||
-    state.length !== 2 ||
-    !isValidBrazilianPhone(phone) ||
-    (hasCep && onlyDigits(cep).length !== 8) ||
-    (street.length > 0 && street.length < 2) ||
-    (neighborhood.length > 0 && neighborhood.length < 2)
-  ) {
-    redirect("/professional/profile?error=dados-invalidos");
-  }
+  if (fullName.length < 3) redirect("/professional/profile?error=nome-invalido");
+  if (email.length > 0 && !z.string().email().safeParse(email).success) redirect("/professional/profile?error=email-invalido");
+  if (hasCpf && !isValidCpf(cpf)) redirect("/professional/profile?error=cpf-invalido");
+  if (birthDate.length > 0 && (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate) || ageFromBirthDate(birthDate) < 14)) redirect("/professional/profile?error=data-invalida");
+  if (nationality.length < 2) redirect("/professional/profile?error=nacionalidade-invalida");
+  if (desiredRole.length < 2) redirect("/professional/profile?error=cargo-invalido");
+  if (city.length < 2 || !/^[A-Z]{2}$/.test(state)) redirect("/professional/profile?error=localizacao-invalida");
+  if (!isValidBrazilianPhone(phone)) redirect("/professional/profile?error=telefone-invalido");
+  if (hasCep && onlyDigits(cep).length !== 8) redirect("/professional/profile?error=cep-invalido");
+  if ((street.length > 0 && street.length < 2) || (neighborhood.length > 0 && neighborhood.length < 2)) redirect("/professional/profile?error=endereco-invalido");
 
   let { data: professional } = await supabase
     .from("professionals")
@@ -231,7 +225,8 @@ export async function updateProfessionalProfileAction(formData: FormData) {
   if (normalizedCpf || professional?.cpf) professionalPayload.cpf = normalizedCpf ?? professional?.cpf ?? null;
   if (birthDate || professional?.birth_date) professionalPayload.birth_date = birthDate || (professional?.birth_date ?? null);
 
-  await supabase.from("profiles").upsert(profilePayload, { onConflict: "id" });
+  const { error: profileError } = await supabase.from("profiles").upsert(profilePayload, { onConflict: "id" });
+  if (profileError) redirect("/professional/profile?error=erro-ao-salvar-perfil");
   if (!professional?.id) {
     const { data: createdProfessional, error: createError } = await supabase.from("professionals").insert(professionalPayload).select("id").single();
     if (createError || !createdProfessional?.id) {
@@ -240,7 +235,8 @@ export async function updateProfessionalProfileAction(formData: FormData) {
     professional = { ...professionalPayload, id: createdProfessional.id } as typeof professional;
   } else {
     const { education_level: _educationLevel, status: _status, user_id: _userId, ...updatePayload } = professionalPayload;
-    await supabase.from("professionals").update(updatePayload).eq("user_id", data.user.id);
+    const { error: updateError } = await supabase.from("professionals").update(updatePayload).eq("user_id", data.user.id);
+    if (updateError) redirect("/professional/profile?error=erro-ao-salvar-profissional");
   }
   const professionalId = professional?.id;
   if (!professionalId) redirect("/professional/profile?error=perfil-nao-criado");
@@ -307,14 +303,32 @@ export async function updateResumePersonalAction(formData: FormData) {
     state: formData.get("state")
   });
 
-  if (!parsed.success) redirect("/professional/resume?error=dados-pessoais-invalidos");
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    const field = String(issue?.path[0] ?? "dados");
+    const knownCodes = new Set(["cpf-invalido", "data-invalida", "idade-minima", "telefone-invalido", "cep-invalido", "estado-invalido"]);
+    const code = issue?.message && knownCodes.has(issue.message) ? issue.message : `${field}-invalido`;
+    redirect(`/professional/resume?error=${encodeURIComponent(code)}`);
+  }
 
   const { supabase, user } = await getProfessionalContext();
   const data = parsed.data;
   const fullName = `${data.firstName} ${data.lastName}`.trim();
 
-  await supabase.from("profiles").update({ full_name: fullName, email: data.email, phone: onlyDigits(data.phone) }).eq("id", user.id);
-  await supabase
+  const { data: duplicatedCpf } = await supabase
+    .from("professionals")
+    .select("id,user_id")
+    .eq("cpf", onlyDigits(data.cpf))
+    .neq("user_id", user.id)
+    .maybeSingle();
+  if (duplicatedCpf) redirect("/professional/resume?error=cpf-ja-cadastrado");
+
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .upsert({ id: user.id, full_name: fullName, email: data.email, phone: onlyDigits(data.phone) }, { onConflict: "id" });
+  if (profileError) redirect("/professional/resume?error=erro-ao-salvar-perfil");
+
+  const { error: professionalError } = await supabase
     .from("professionals")
     .update({
       full_name: fullName,
@@ -328,9 +342,10 @@ export async function updateResumePersonalAction(formData: FormData) {
       address_number: data.addressNumber || null,
       neighborhood: data.neighborhood || null,
       city: data.city,
-      state: data.state.toUpperCase()
+      state: data.state
     })
     .eq("user_id", user.id);
+  if (professionalError) redirect("/professional/resume?error=erro-ao-salvar-profissional");
 
   revalidatePath("/professional/resume");
   revalidatePath("/professional/profile");
@@ -724,6 +739,9 @@ export async function createDemandAction(formData: FormData) {
   if (error) redirect(`/company/demands/new?error=${encodeURIComponent(error.message)}`);
   revalidatePath("/company/demands");
   revalidatePath("/company");
+  revalidatePath("/professional");
+  revalidatePath("/professional/search-demands");
+  revalidatePath("/vagas-publicas");
   redirect("/company/demands?message=demanda-criada");
 }
 
@@ -790,6 +808,9 @@ export async function updateDemandAction(formData: FormData) {
   revalidatePath("/company");
   revalidatePath("/company/demands");
   revalidatePath(`/company/demands/${demand.id}`);
+  revalidatePath("/professional");
+  revalidatePath("/professional/search-demands");
+  revalidatePath("/vagas-publicas");
   redirect(encodeRouteMessage(`/company/demands/${demand.id}`, "message", "demanda-atualizada"));
 }
 
@@ -819,6 +840,9 @@ export async function deleteDemandAction(formData: FormData) {
 
   revalidatePath("/company");
   revalidatePath("/company/demands");
+  revalidatePath("/professional");
+  revalidatePath("/professional/search-demands");
+  revalidatePath("/vagas-publicas");
   redirect("/company/demands?message=demanda-excluida");
 }
 

@@ -23,7 +23,7 @@ export default async function CompanyDemandsPage({ searchParams }: { searchParam
           <div>
             {params.message ? <p className="mb-2 rounded-md bg-green-50 p-2 text-sm text-green-700">Operacao realizada com sucesso.</p> : null}
             {params.error ? <p className="mb-2 rounded-md bg-red-50 p-2 text-sm text-red-700">Nao foi possivel concluir a acao: {params.error}</p> : null}
-            <p className="text-sm text-slate-600">Demandas privadas visiveis apenas para sua empresa e recrutadores da plataforma.</p>
+            <p className="text-sm text-slate-600">Demandas ativas ficam disponiveis para profissionais; rascunhos e encerradas permanecem internos.</p>
           </div>
         </div>
         <div className="overflow-x-auto">

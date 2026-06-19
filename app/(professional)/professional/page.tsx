@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Bell, BriefcaseBusiness, Building2, CheckCircle2, Clock3, FileText, MapPin, Search, SlidersHorizontal, Sparkles, Target } from "lucide-react";
 import { AppShell } from "@/components/app/shell";
+import { listProfessionalDemands } from "@/lib/demands/catalog";
 import { createServerClient } from "@/lib/supabase/server";
 
 type ProcessRow = {
@@ -97,10 +98,10 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
   const modality = params.modalidade && ["presencial", "hibrido", "remoto"].includes(params.modalidade) ? params.modalidade : "";
   const supabase = await createServerClient();
   const { data: userData } = await supabase.auth.getUser();
-  const [{ data: professional }, { data: notifications }, { data: demands }] = await Promise.all([
+  const [{ data: professional }, { data: notifications }, demands] = await Promise.all([
     supabase.from("professionals").select("id,full_name,desired_role,summary,education_level,city,state,phone,status").eq("user_id", userData.user?.id).maybeSingle(),
     supabase.from("notifications").select("id,title,created_at,read_at").eq("user_id", userData.user?.id).order("created_at", { ascending: false }).limit(4),
-    supabase.from("demands").select("id,name,title,description,city,state,modality,contract_type,openings,created_at,company:companies(trade_name,segment)").in("status", ["active", "screening"]).order("created_at", { ascending: false }).limit(80)
+    listProfessionalDemands(80)
   ]);
 
   const [
@@ -124,7 +125,7 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
     : [{ data: [] }, { data: [] }, { data: null }, { count: 0 }, { count: 0 }, { count: 0 }, { count: 0 }];
 
   const preferredSet = new Set(((preferredCities ?? []) as PreferredCityRow[]).map((item) => `${normalize(item.city)}|${item.state.toUpperCase()}`));
-  const allDemands = ((demands ?? []) as unknown as DemandRow[])
+  const allDemands = (demands as DemandRow[])
     .filter((demand) => {
       const company = one(demand.company);
       const matchesQuery =

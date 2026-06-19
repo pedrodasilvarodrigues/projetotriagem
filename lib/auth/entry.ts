@@ -4,7 +4,7 @@ type SupabaseLike = {
   from: (table: string) => any;
 };
 
-type AppRole = "admin" | "company" | "professional";
+type AppRole = "company" | "professional";
 
 function onboardingRouteForRole(role: "company" | "professional") {
   return role === "company" ? "/onboarding/company" : "/onboarding/professional";
@@ -19,7 +19,9 @@ function metadataRole(userMetadata?: Record<string, unknown>, preferredRole?: "c
   if (preferredRole) return preferredRole;
 
   const rawRole = userMetadata?.role;
-  if (rawRole === "admin" || rawRole === "company" || rawRole === "professional") {
+  // user_metadata is controlled by the user. It may guide onboarding, but it
+  // must never grant an administrative role.
+  if (rawRole === "company" || rawRole === "professional") {
     return rawRole;
   }
 
@@ -58,10 +60,6 @@ export async function resolveAuthenticatedEntryPath(
   }
 
   const inferredRole = metadataRole(userMetadata, preferredRole);
-  if (inferredRole === "admin") {
-    return defaultRouteForRole("admin");
-  }
-
   if (inferredRole === "company" || inferredRole === "professional") {
     return persistRole(supabase, userId, inferredRole, defaultRouteForRole(inferredRole));
   }

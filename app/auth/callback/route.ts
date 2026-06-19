@@ -44,17 +44,12 @@ export async function GET(request: NextRequest) {
   const entryPath = await resolveAuthenticatedEntryPath(supabase, data.user.id, data.user.user_metadata, signupRole).catch(() => null);
   if (!entryPath) {
     console.error("[auth] Usuario sem perfil/role resolvivel no callback", { userId: data.user.id });
-    if (!signupRole) {
-      await supabase.auth.signOut({ scope: "local" });
-      return NextResponse.redirect(new URL("/login?error=conta-nao-cadastrada", request.url));
-    }
     return NextResponse.redirect(new URL("/onboarding", request.url));
   }
 
   if (!signupRole && entryPath.startsWith("/onboarding")) {
-    console.warn("[auth] Login Google sem cadastro completo, retornando para login", { userId: data.user.id });
-    await supabase.auth.signOut({ scope: "local" });
-    return NextResponse.redirect(new URL("/login?error=conta-nao-cadastrada", request.url));
+    console.log("[auth] Login Google sem cadastro completo, seguindo para onboarding", { userId: data.user.id });
+    return NextResponse.redirect(new URL("/onboarding", request.url));
   }
 
   console.log("[auth] Redirecionando callback", { userId: data.user.id, route: entryPath });

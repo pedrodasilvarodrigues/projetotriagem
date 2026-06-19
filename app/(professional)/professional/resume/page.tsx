@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BriefcaseBusiness, CheckCircle2, FileText, GraduationCap, Languages, Plus, ShieldCheck, Sparkles, Target, Upload } from "lucide-react";
 import { AppShell } from "@/components/app/shell";
 import { ResumeDownloadCustomizer } from "@/components/professional/resume-download-customizer";
+import { PersonalDataFields } from "@/components/professional/personal-data-fields";
 import { ResumeSectionNav } from "@/components/professional/resume-section-nav";
 import {
   addProfessionalCourseAction,
@@ -22,6 +23,24 @@ type ExperienceRow = { id: string; company_name: string; role_title: string; des
 type EducationRow = { id: string; level: string; institution: string; course_name: string; completed_at: string | null };
 type LanguageRow = { id: string; language_name: string; proficiency: string };
 type SkillRow = { id: string; name: string; skill_type: string; proficiency: number | null };
+
+const personalErrorMessages: Record<string, string> = {
+  "firstName-invalido": "Informe o nome.",
+  "lastName-invalido": "Informe o sobrenome.",
+  "nationality-invalido": "Informe a nacionalidade.",
+  "cpf-invalido": "Confira o CPF informado.",
+  "cpf-ja-cadastrado": "Este CPF ja pertence a outro cadastro.",
+  "data-invalida": "Informe uma data valida no formato dd/mm/aaaa.",
+  "idade-minima": "O cadastro profissional exige idade minima de 14 anos.",
+  "telefone-invalido": "Informe um telefone com DDD.",
+  "email-invalido": "Confira o email informado.",
+  "cep-invalido": "Informe um CEP com 8 digitos.",
+  "city-invalido": "Informe a cidade.",
+  "state-invalido": "Informe o estado com duas letras.",
+  "estado-invalido": "Informe o estado com duas letras.",
+  "erro-ao-salvar-perfil": "Nao foi possivel salvar os dados gerais. Tente novamente.",
+  "erro-ao-salvar-profissional": "Nao foi possivel salvar os dados profissionais. Tente novamente."
+};
 
 const educationOptions = [
   ["fundamental", "Fundamental"],
@@ -112,7 +131,7 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
         <ResumeSectionNav sections={sections} />
 
         <div className="space-y-5">
-          {params.error ? <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">Verifique os dados informados. Codigo: {params.error}</p> : null}
+          {params.error ? <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{personalErrorMessages[params.error] ?? `Verifique os dados informados. Codigo: ${params.error}`}</p> : null}
           {params.message ? <p className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">Atualizacao salva.</p> : null}
 
           <section className="grid gap-4 border border-slate-200 bg-white p-5 shadow-sm lg:grid-cols-[280px_minmax(0,1fr)]">
@@ -167,16 +186,21 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
               <label className="text-sm font-semibold">Nome<input name="firstName" required defaultValue={nameParts.firstName} className="field-input mt-2" /></label>
               <label className="text-sm font-semibold">Sobrenome<input name="lastName" required defaultValue={nameParts.lastName} className="field-input mt-2" /></label>
               <label className="text-sm font-semibold">Nacionalidade<input name="nationality" required defaultValue={professional?.nationality ?? "Brasileira"} className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">Digite seu CPF<input name="cpf" required defaultValue={professional?.cpf ?? ""} className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">Data de nascimento<input name="birthDate" required type="date" defaultValue={professional?.birth_date ?? ""} className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">Telefone<input name="phone" required defaultValue={professional?.phone ?? ""} className="field-input mt-2" /></label>
               <label className="text-sm font-semibold">Email<input name="email" required type="email" defaultValue={professional?.email ?? userData.user?.email ?? ""} className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">CEP<input name="cep" defaultValue={professional?.cep ?? ""} className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold md:col-span-2">Endereco<input name="street" defaultValue={professional?.street ?? ""} className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">Numero<input name="addressNumber" defaultValue={professional?.address_number ?? ""} className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">Bairro<input name="neighborhood" defaultValue={professional?.neighborhood ?? ""} className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">Cidade<input name="city" required defaultValue={professional?.city ?? ""} className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">Estado<input name="state" required maxLength={2} defaultValue={professional?.state ?? ""} className="field-input mt-2" /></label>
+              <PersonalDataFields
+                identityRequired
+                initial={{
+                  cpf: professional?.cpf,
+                  birthDate: professional?.birth_date,
+                  phone: professional?.phone,
+                  cep: professional?.cep,
+                  street: professional?.street,
+                  addressNumber: professional?.address_number,
+                  neighborhood: professional?.neighborhood,
+                  city: professional?.city,
+                  state: professional?.state
+                }}
+              />
               <div className="md:col-span-2"><button className="rounded-md bg-blue-700 px-5 py-3 text-sm font-semibold text-white" type="submit">Salvar dados pessoais</button></div>
             </form>
           </section>

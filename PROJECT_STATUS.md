@@ -11,6 +11,8 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Minha Area profissional com busca de vagas por cargo/local/modelo, recomendacoes priorizadas por perfil e indicador de forca do curriculo.
 - Vitrine publica de vagas com busca, filtros, areas com oportunidades e cards detalhados de vaga/empresa.
 - Area de curriculo com dados pessoais, objetivo, historico academico, experiencias, cursos, idiomas, habilidades e documento anexado.
+- Perfil e curriculo profissionais agora compartilham campos com mascara de CPF, telefone e CEP, data digitavel em `dd/mm/aaaa` e preenchimento automatico de endereco pelo ViaCEP.
+- Salvamento de perfil e dados pessoais do curriculo normaliza os valores, detecta CPF duplicado, verifica erros do Supabase e informa exatamente qual campo precisa de correcao.
 - Area de curriculo com painel de qualidade, checklist de preenchimento e proximos ajustes recomendados.
 - Navegacao superior por subgrupos na area de curriculo.
 - Painel de personalizacao para baixar CV com 3 modelos, 7 cores e opcao de pretensao salarial.
@@ -32,12 +34,16 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Auditoria do login corrigiu escrita de cookies em Server Components, validacao de env do Supabase, logs de auth e falhas do proxy.
 - Proxy usa `maybeSingle()` para roles, trata usuario sem role/perfil via onboarding e evita erro 500 em rotas protegidas.
 - Aliases `/profissional` e `/empresa` redirecionam para `/professional` e `/company`.
-- Login com Google pela tela de entrar nao prende mais o usuario no onboarding; contas sem cadastro completo voltam ao login com mensagem controlada.
+- Login com Google pela tela de entrar encaminha contas sem cadastro completo ao onboarding, preservando a sessao.
 - Inicio do Google OAuth redireciona fora do `try/catch`, evitando que a excecao interna do Next.js seja tratada como falha de login.
+- Metadados editaveis do usuario nao podem mais conceder papel administrativo no callback nem no trigger de novo usuario.
 - Perfil da empresa passou a aceitar campos complementares sem obrigatoriedade e preserva os dados ja existentes quando o usuario salva campos em branco.
 - Preferencia de idioma agora atualiza a interface autenticada com persistencia no banco, traducao no menu e tradutor em tempo de execucao para textos principais.
 - Tradutor em tempo de execucao nao reprocessa mais o mesmo texto em ciclo; troca de idioma na area empresarial permanece responsiva.
 - Area profissional ganhou a aba `/professional/search-demands` para listar todas as demandas abertas com empresa, local e modalidade.
+- Catalogo profissional carrega todas as demandas ativas/em triagem por uma leitura server-side autorizada, sem depender de divergencias locais de RLS.
+- Criacao, edicao e cancelamento de demanda agora invalidam imediatamente as telas profissional e publica.
+- Corrigida divergencia do banco de producao que removia todas as demandas da interface ao consultar `companies.segment` e `companies.description` inexistentes.
 - Minha Area profissional agora exibe tambem empresas com vagas abertas, deixando as empresas visiveis para os profissionais.
 - Busca profissional na Minha Area agora tambem considera e exibe o nome da demanda publicada pela empresa.
 - Barra fixa de subgrupos do curriculo ficou compacta, recolhivel por seta e sem textos auxiliares ocupando espaco.
@@ -52,6 +58,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Fallback no proxy para redirecionar `/?code=...` para `/auth/callback` quando o Supabase retornar o codigo na raiz do dominio correto.
 
 # Pendente
+- Aplicar a migration `20260618012733_harden_auth_role_metadata.sql` no Supabase de producao junto com o proximo deploy.
 - Persistir as escolhas de modelo/cor do CV no banco, caso a personalizacao precise ser reutilizada em downloads futuros.
 - Configurar SMTP personalizado e credenciais Google OAuth no painel Supabase/Google usando AUTH_SETUP.md.
 - Trocar o Site URL do Supabase para `https://projetotriagem.vercel.app` e configurar dominio customizado de Auth se quiser remover `.supabase.co` da tela do Google.
@@ -69,6 +76,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 
 # Observacoes
 - As chaves sensiveis do Supabase devem continuar fora do GitHub e ser configuradas em ambiente local/Vercel.
+- As correcoes de perfil/curriculo passaram em `npm run lint` e no build de producao do Next.js 16.2.7.
 - A confirmacao por email nao e mais exigida para novos cadastros por email/senha; recuperacao de senha ainda depende de Supabase Auth ou Resend configurado.
 - O limite de reenvio de recuperacao do Supabase continua existindo na API externa; a interface agora comunica como pedido recente e nao como quebra.
 - A auditoria local encontrou `SUPABASE_SERVICE_ROLE_KEY` invalida para Admin API; o login por email/senha com anon key foi validado contra o Supabase e retorna erros controlados.

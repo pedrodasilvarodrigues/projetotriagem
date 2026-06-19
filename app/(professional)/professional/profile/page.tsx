@@ -1,9 +1,26 @@
 import { AppShell } from "@/components/app/shell";
+import { PersonalDataFields } from "@/components/professional/personal-data-fields";
 import { ensureProfessionalPublicProfile } from "@/lib/auth/public-profile-sync";
 import { updateProfessionalProfileAction } from "@/lib/actions/workspace";
 import { createServerClient } from "@/lib/supabase/server";
 
 type CityOption = { city: string; state: string };
+
+const profileErrorMessages: Record<string, string> = {
+  "nome-invalido": "Informe o nome completo.",
+  "email-invalido": "Confira o email informado.",
+  "cpf-invalido": "Confira o CPF informado.",
+  "cpf-ja-cadastrado": "Este CPF ja pertence a outro cadastro.",
+  "data-invalida": "Informe uma data valida no formato dd/mm/aaaa e idade minima de 14 anos.",
+  "nacionalidade-invalida": "Informe a nacionalidade.",
+  "cargo-invalido": "Informe o cargo desejado.",
+  "telefone-invalido": "Informe um telefone com DDD.",
+  "cep-invalido": "Informe um CEP com 8 digitos.",
+  "endereco-invalido": "Confira os dados do endereco.",
+  "localizacao-invalida": "Informe cidade e estado.",
+  "erro-ao-salvar-perfil": "Nao foi possivel salvar os dados gerais. Tente novamente.",
+  "erro-ao-salvar-profissional": "Nao foi possivel salvar os dados profissionais. Tente novamente."
+};
 
 export default async function ProfessionalProfilePage({ searchParams }: { searchParams: Promise<{ error?: string; message?: string }> }) {
   const params = await searchParams;
@@ -53,7 +70,7 @@ export default async function ProfessionalProfilePage({ searchParams }: { search
     <AppShell eyebrow="Profissional" title="Perfil">
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
         <form action={updateProfessionalProfileAction} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          {params.error ? <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">Verifique os dados informados.</p> : null}
+          {params.error ? <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{profileErrorMessages[params.error] ?? "Verifique os dados informados."}</p> : null}
           {params.message ? <p className="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-700">Perfil atualizado.</p> : null}
           <section className="mb-6 border-b border-slate-200 pb-5">
             <h2 className="font-semibold">Foto do perfil</h2>
@@ -75,18 +92,10 @@ export default async function ProfessionalProfilePage({ searchParams }: { search
           <div className="grid gap-4 md:grid-cols-2">
             <label className="text-sm font-semibold">Nome completo<input name="fullName" required defaultValue={profileData.fullName} className="field-input mt-2" /></label>
             <label className="text-sm font-semibold">Email<input name="email" type="email" defaultValue={profileData.email} className="field-input mt-2" /></label>
-            <label className="text-sm font-semibold">CPF<input name="cpf" defaultValue={profileData.cpf} className="field-input mt-2" /></label>
-            <label className="text-sm font-semibold">Data de nascimento<input name="birthDate" type="date" defaultValue={profileData.birthDate} className="field-input mt-2" /></label>
             <label className="text-sm font-semibold">Nacionalidade<input name="nationality" defaultValue={profileData.nationality} className="field-input mt-2" /></label>
             <label className="text-sm font-semibold">Cargo desejado<input name="desiredRole" required defaultValue={profileData.desiredRole} className="field-input mt-2" /></label>
-            <label className="text-sm font-semibold">Telefone<input name="phone" required defaultValue={profileData.phone} className="field-input mt-2" /></label>
             <label className="text-sm font-semibold">Disponibilidade em dias<input name="availableInDays" type="number" min="0" defaultValue={profileData.availableInDays} className="field-input mt-2" /></label>
-            <label className="text-sm font-semibold">CEP<input name="cep" defaultValue={profileData.cep} className="field-input mt-2" /></label>
-            <label className="text-sm font-semibold">Endereco<input name="street" defaultValue={profileData.street} className="field-input mt-2" /></label>
-            <label className="text-sm font-semibold">Numero<input name="addressNumber" defaultValue={profileData.addressNumber} className="field-input mt-2" /></label>
-            <label className="text-sm font-semibold">Bairro<input name="neighborhood" defaultValue={profileData.neighborhood} className="field-input mt-2" /></label>
-            <label className="text-sm font-semibold">Cidade<input name="city" required defaultValue={profileData.city} className="field-input mt-2" /></label>
-            <label className="text-sm font-semibold">Estado<input name="state" required maxLength={2} defaultValue={profileData.state} className="field-input mt-2" /></label>
+            <PersonalDataFields initial={profileData} />
           </div>
           <section className="mt-6">
             <h2 className="font-semibold">Cidades para receber vagas</h2>

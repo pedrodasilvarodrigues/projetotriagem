@@ -39,7 +39,8 @@ const personalErrorMessages: Record<string, string> = {
   "state-invalido": "Informe o estado com duas letras.",
   "estado-invalido": "Informe o estado com duas letras.",
   "erro-ao-salvar-perfil": "Nao foi possivel salvar os dados gerais. Tente novamente.",
-  "erro-ao-salvar-profissional": "Nao foi possivel salvar os dados profissionais. Tente novamente."
+  "erro-ao-salvar-profissional": "Nao foi possivel salvar os dados profissionais. Tente novamente.",
+  "perfil-profissional-indisponivel": "Nao foi possivel carregar seu perfil para salvar. Atualize a pagina e tente novamente."
 };
 
 const educationOptions = [

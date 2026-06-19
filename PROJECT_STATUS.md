@@ -13,6 +13,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Area de curriculo com dados pessoais, objetivo, historico academico, experiencias, cursos, idiomas, habilidades e documento anexado.
 - Perfil e curriculo profissionais agora compartilham campos com mascara de CPF, telefone e CEP, data digitavel em `dd/mm/aaaa` e preenchimento automatico de endereco pelo ViaCEP.
 - Salvamento de perfil e dados pessoais do curriculo normaliza os valores, detecta CPF duplicado, verifica erros do Supabase e informa exatamente qual campo precisa de correcao.
+- Acoes do curriculo nao redirecionam mais para o perfil quando a leitura do profissional falha; o contexto ressincroniza a linha, permanece na aba de origem e usa fallback seguro de persistencia para o proprio usuario.
 - Area de curriculo com painel de qualidade, checklist de preenchimento e proximos ajustes recomendados.
 - Navegacao superior por subgrupos na area de curriculo.
 - Painel de personalizacao para baixar CV com 3 modelos, 7 cores e opcao de pretensao salarial.

@@ -19,7 +19,9 @@ const profileErrorMessages: Record<string, string> = {
   "endereco-invalido": "Confira os dados do endereco.",
   "localizacao-invalida": "Informe cidade e estado.",
   "erro-ao-salvar-perfil": "Nao foi possivel salvar os dados gerais. Tente novamente.",
-  "erro-ao-salvar-profissional": "Nao foi possivel salvar os dados profissionais. Tente novamente."
+  "erro-ao-salvar-profissional": "Nao foi possivel salvar os dados profissionais. Tente novamente.",
+  "perfil-nao-criado": "Nao foi possivel preparar o perfil profissional. Tente novamente.",
+  "perfil-profissional-indisponivel": "O perfil profissional ficou temporariamente indisponivel. Atualize a pagina e tente novamente."
 };
 
 export default async function ProfessionalProfilePage({ searchParams }: { searchParams: Promise<{ error?: string; message?: string }> }) {

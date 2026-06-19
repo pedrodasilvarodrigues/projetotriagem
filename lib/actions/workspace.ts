@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth/access";
+import { ensureProfessionalPublicProfile } from "@/lib/auth/public-profile-sync";
+import { createAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
 import { createServerClient } from "@/lib/supabase/server";
 import { ageFromBirthDate, isValidBrazilianPhone, isValidCnpj, isValidCpf, onlyDigits } from "@/lib/validations/br";
 
@@ -130,14 +132,47 @@ function encodeRouteMessage(route: string, key: "error" | "message", value: stri
   return `${route}${separator}${key}=${encodeURIComponent(value)}`;
 }
 
-async function getProfessionalContext() {
+function professionalFormError(route: "/professional/profile" | "/professional/resume", code: string, details?: Record<string, unknown>): never {
+  console.warn("[professional-form] Operacao interrompida", { route, code, ...details });
+  redirect(`${route}?error=${encodeURIComponent(code)}`);
+}
+
+async function getProfessionalContext(errorRoute: "/professional/profile" | "/professional/resume" = "/professional/resume") {
   await requireRole("professional");
   const supabase = await createServerClient();
   const { data } = await supabase.auth.getUser();
   if (!data.user) redirect("/login");
 
-  const { data: professional } = await supabase.from("professionals").select("id").eq("user_id", data.user.id).maybeSingle();
-  if (!professional?.id) redirect("/professional/profile?error=complete-cadastro");
+  let { data: professional, error: professionalError } = await supabase
+    .from("professionals")
+    .select("id")
+    .eq("user_id", data.user.id)
+    .limit(1)
+    .maybeSingle();
+
+  if (!professional?.id) {
+    console.warn("[professional-form] Perfil nao visivel na primeira leitura", {
+      userId: data.user.id,
+      error: professionalError?.message ?? null
+    });
+    await ensureProfessionalPublicProfile(data.user);
+    const retry = await supabase.from("professionals").select("id").eq("user_id", data.user.id).limit(1).maybeSingle();
+    professional = retry.data;
+    professionalError = retry.error;
+  }
+
+  if (!professional?.id && hasSupabaseAdminEnv()) {
+    const adminResult = await createAdminClient().from("professionals").select("id").eq("user_id", data.user.id).limit(1).maybeSingle();
+    professional = adminResult.data;
+    professionalError = adminResult.error;
+  }
+
+  if (!professional?.id) {
+    professionalFormError(errorRoute, "perfil-profissional-indisponivel", {
+      userId: data.user.id,
+      error: professionalError?.message ?? null
+    });
+  }
 
   return { supabase, user: data.user, professional };
 }
@@ -147,6 +182,7 @@ export async function updateProfessionalProfileAction(formData: FormData) {
   const supabase = await createServerClient();
   const { data } = await supabase.auth.getUser();
   if (!data.user) redirect("/login");
+  await ensureProfessionalPublicProfile(data.user);
 
   const fullName = String(formData.get("fullName") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
@@ -167,22 +203,41 @@ export async function updateProfessionalProfileAction(formData: FormData) {
   const normalizedCpf = hasCpf ? onlyDigits(cpf) : null;
   const hasCep = onlyDigits(cep).length > 0;
 
-  if (fullName.length < 3) redirect("/professional/profile?error=nome-invalido");
-  if (email.length > 0 && !z.string().email().safeParse(email).success) redirect("/professional/profile?error=email-invalido");
-  if (hasCpf && !isValidCpf(cpf)) redirect("/professional/profile?error=cpf-invalido");
-  if (birthDate.length > 0 && (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate) || ageFromBirthDate(birthDate) < 14)) redirect("/professional/profile?error=data-invalida");
-  if (nationality.length < 2) redirect("/professional/profile?error=nacionalidade-invalida");
-  if (desiredRole.length < 2) redirect("/professional/profile?error=cargo-invalido");
-  if (city.length < 2 || !/^[A-Z]{2}$/.test(state)) redirect("/professional/profile?error=localizacao-invalida");
-  if (!isValidBrazilianPhone(phone)) redirect("/professional/profile?error=telefone-invalido");
-  if (hasCep && onlyDigits(cep).length !== 8) redirect("/professional/profile?error=cep-invalido");
-  if ((street.length > 0 && street.length < 2) || (neighborhood.length > 0 && neighborhood.length < 2)) redirect("/professional/profile?error=endereco-invalido");
+  if (fullName.length < 3) professionalFormError("/professional/profile", "nome-invalido");
+  if (email.length > 0 && !z.string().email().safeParse(email).success) professionalFormError("/professional/profile", "email-invalido");
+  if (hasCpf && !isValidCpf(cpf)) professionalFormError("/professional/profile", "cpf-invalido");
+  if (birthDate.length > 0 && (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate) || ageFromBirthDate(birthDate) < 14)) professionalFormError("/professional/profile", "data-invalida");
+  if (nationality.length < 2) professionalFormError("/professional/profile", "nacionalidade-invalida");
+  if (desiredRole.length < 2) professionalFormError("/professional/profile", "cargo-invalido");
+  if (city.length < 2 || !/^[A-Z]{2}$/.test(state)) professionalFormError("/professional/profile", "localizacao-invalida");
+  if (!isValidBrazilianPhone(phone)) professionalFormError("/professional/profile", "telefone-invalido");
+  if (hasCep && onlyDigits(cep).length !== 8) professionalFormError("/professional/profile", "cep-invalido");
+  if ((street.length > 0 && street.length < 2) || (neighborhood.length > 0 && neighborhood.length < 2)) professionalFormError("/professional/profile", "endereco-invalido");
 
-  let { data: professional } = await supabase
+  let { data: professional, error: professionalReadError } = await supabase
     .from("professionals")
     .select("id,email,cpf,birth_date,nationality,cep,street,address_number,neighborhood")
     .eq("user_id", data.user.id)
+    .limit(1)
     .maybeSingle();
+
+  if (!professional?.id && hasSupabaseAdminEnv()) {
+    const retry = await createAdminClient()
+      .from("professionals")
+      .select("id,email,cpf,birth_date,nationality,cep,street,address_number,neighborhood")
+      .eq("user_id", data.user.id)
+      .limit(1)
+      .maybeSingle();
+    professional = retry.data;
+    professionalReadError = retry.error;
+  }
+
+  if (professionalReadError) {
+    console.warn("[professional-form] Falha ao carregar perfil antes de salvar", {
+      userId: data.user.id,
+      error: professionalReadError.message
+    });
+  }
 
   if (normalizedCpf && normalizedCpf !== professional?.cpf) {
     const { data: duplicatedCpf } = await supabase.from("professionals").select("id,user_id").eq("cpf", normalizedCpf).neq("user_id", data.user.id).maybeSingle();
@@ -225,18 +280,31 @@ export async function updateProfessionalProfileAction(formData: FormData) {
   if (normalizedCpf || professional?.cpf) professionalPayload.cpf = normalizedCpf ?? professional?.cpf ?? null;
   if (birthDate || professional?.birth_date) professionalPayload.birth_date = birthDate || (professional?.birth_date ?? null);
 
-  const { error: profileError } = await supabase.from("profiles").upsert(profilePayload, { onConflict: "id" });
-  if (profileError) redirect("/professional/profile?error=erro-ao-salvar-perfil");
+  let { error: profileError } = await supabase.from("profiles").upsert(profilePayload, { onConflict: "id" });
+  if (profileError && hasSupabaseAdminEnv()) {
+    const retry = await createAdminClient().from("profiles").upsert(profilePayload, { onConflict: "id" });
+    profileError = retry.error;
+  }
+  if (profileError) professionalFormError("/professional/profile", "erro-ao-salvar-perfil", { userId: data.user.id, error: profileError.message });
   if (!professional?.id) {
-    const { data: createdProfessional, error: createError } = await supabase.from("professionals").insert(professionalPayload).select("id").single();
+    let { data: createdProfessional, error: createError } = await supabase.from("professionals").insert(professionalPayload).select("id").single();
+    if ((createError || !createdProfessional?.id) && hasSupabaseAdminEnv()) {
+      const retry = await createAdminClient().from("professionals").insert(professionalPayload).select("id").single();
+      createdProfessional = retry.data;
+      createError = retry.error;
+    }
     if (createError || !createdProfessional?.id) {
-      redirect(`/professional/profile?error=${encodeURIComponent(createError?.message ?? "perfil-nao-criado")}`);
+      professionalFormError("/professional/profile", "perfil-nao-criado", { userId: data.user.id, error: createError?.message ?? null });
     }
     professional = { ...professionalPayload, id: createdProfessional.id } as typeof professional;
   } else {
     const { education_level: _educationLevel, status: _status, user_id: _userId, ...updatePayload } = professionalPayload;
-    const { error: updateError } = await supabase.from("professionals").update(updatePayload).eq("user_id", data.user.id);
-    if (updateError) redirect("/professional/profile?error=erro-ao-salvar-profissional");
+    let { error: updateError } = await supabase.from("professionals").update(updatePayload).eq("user_id", data.user.id);
+    if (updateError && hasSupabaseAdminEnv()) {
+      const retry = await createAdminClient().from("professionals").update(updatePayload).eq("user_id", data.user.id);
+      updateError = retry.error;
+    }
+    if (updateError) professionalFormError("/professional/profile", "erro-ao-salvar-profissional", { userId: data.user.id, error: updateError.message });
   }
   const professionalId = professional?.id;
   if (!professionalId) redirect("/professional/profile?error=perfil-nao-criado");
@@ -271,15 +339,21 @@ export async function updateResumeProfileAction(formData: FormData) {
   const { supabase, user } = await getProfessionalContext();
   const data = parsed.data;
 
-  await supabase
+  const resumeProfilePayload = {
+    desired_role: data.desiredRole,
+    summary: data.summary ?? "",
+    education_level: data.educationLevel,
+    available_in_days: data.availableInDays
+  };
+  let { error: updateError } = await supabase
     .from("professionals")
-    .update({
-      desired_role: data.desiredRole,
-      summary: data.summary ?? "",
-      education_level: data.educationLevel,
-      available_in_days: data.availableInDays
-    })
+    .update(resumeProfilePayload)
     .eq("user_id", user.id);
+  if (updateError && hasSupabaseAdminEnv()) {
+    const retry = await createAdminClient().from("professionals").update(resumeProfilePayload).eq("user_id", user.id);
+    updateError = retry.error;
+  }
+  if (updateError) professionalFormError("/professional/resume", "erro-ao-salvar-profissional", { userId: user.id, error: updateError.message });
 
   revalidatePath("/professional/resume");
   revalidatePath("/professional/profile");
@@ -308,7 +382,7 @@ export async function updateResumePersonalAction(formData: FormData) {
     const field = String(issue?.path[0] ?? "dados");
     const knownCodes = new Set(["cpf-invalido", "data-invalida", "idade-minima", "telefone-invalido", "cep-invalido", "estado-invalido"]);
     const code = issue?.message && knownCodes.has(issue.message) ? issue.message : `${field}-invalido`;
-    redirect(`/professional/resume?error=${encodeURIComponent(code)}`);
+    professionalFormError("/professional/resume", code, { field });
   }
 
   const { supabase, user } = await getProfessionalContext();
@@ -321,31 +395,41 @@ export async function updateResumePersonalAction(formData: FormData) {
     .eq("cpf", onlyDigits(data.cpf))
     .neq("user_id", user.id)
     .maybeSingle();
-  if (duplicatedCpf) redirect("/professional/resume?error=cpf-ja-cadastrado");
+  if (duplicatedCpf) professionalFormError("/professional/resume", "cpf-ja-cadastrado", { userId: user.id });
 
-  const { error: profileError } = await supabase
+  const profilePayload = { id: user.id, full_name: fullName, email: data.email, phone: onlyDigits(data.phone) };
+  let { error: profileError } = await supabase
     .from("profiles")
-    .upsert({ id: user.id, full_name: fullName, email: data.email, phone: onlyDigits(data.phone) }, { onConflict: "id" });
-  if (profileError) redirect("/professional/resume?error=erro-ao-salvar-perfil");
+    .upsert(profilePayload, { onConflict: "id" });
+  if (profileError && hasSupabaseAdminEnv()) {
+    const retry = await createAdminClient().from("profiles").upsert(profilePayload, { onConflict: "id" });
+    profileError = retry.error;
+  }
+  if (profileError) professionalFormError("/professional/resume", "erro-ao-salvar-perfil", { userId: user.id, error: profileError.message });
 
-  const { error: professionalError } = await supabase
+  const personalPayload = {
+    full_name: fullName,
+    email: data.email,
+    cpf: onlyDigits(data.cpf),
+    birth_date: data.birthDate,
+    phone: onlyDigits(data.phone),
+    nationality: data.nationality,
+    cep: data.cep ? onlyDigits(data.cep) : null,
+    street: data.street || null,
+    address_number: data.addressNumber || null,
+    neighborhood: data.neighborhood || null,
+    city: data.city,
+    state: data.state
+  };
+  let { error: professionalError } = await supabase
     .from("professionals")
-    .update({
-      full_name: fullName,
-      email: data.email,
-      cpf: onlyDigits(data.cpf),
-      birth_date: data.birthDate,
-      phone: onlyDigits(data.phone),
-      nationality: data.nationality,
-      cep: data.cep ? onlyDigits(data.cep) : null,
-      street: data.street || null,
-      address_number: data.addressNumber || null,
-      neighborhood: data.neighborhood || null,
-      city: data.city,
-      state: data.state
-    })
+    .update(personalPayload)
     .eq("user_id", user.id);
-  if (professionalError) redirect("/professional/resume?error=erro-ao-salvar-profissional");
+  if (professionalError && hasSupabaseAdminEnv()) {
+    const retry = await createAdminClient().from("professionals").update(personalPayload).eq("user_id", user.id);
+    professionalError = retry.error;
+  }
+  if (professionalError) professionalFormError("/professional/resume", "erro-ao-salvar-profissional", { userId: user.id, error: professionalError.message });
 
   revalidatePath("/professional/resume");
   revalidatePath("/professional/profile");

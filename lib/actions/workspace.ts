@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth/access";
 import { ensureProfessionalPublicProfile } from "@/lib/auth/public-profile-sync";
+import { cleanInstitutionName, normalizeInstitutionName } from "@/lib/institutions";
+import { ensureInstitutionName } from "@/lib/institutions-server";
 import { createAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
 import { createServerClient } from "@/lib/supabase/server";
 import { ageFromBirthDate, isValidBrazilianPhone, isValidCnpj, isValidCpf, onlyDigits } from "@/lib/validations/br";
@@ -462,12 +464,13 @@ export async function addProfessionalEducationAction(formData: FormData) {
 
   if (!parsed.success) redirect("/professional/resume?error=formacao-invalida");
 
-  const { supabase } = await getProfessionalContext();
+  const { supabase, user } = await getProfessionalContext();
   const data = parsed.data;
+  const institutionName = await ensureInstitutionName(supabase, user.id, data.institution);
 
   await callResumeRpc(supabase, "add_professional_education", {
     level_input: data.level,
-    institution_input: data.institution,
+    institution_input: institutionName ?? data.institution,
     course_name_input: data.courseName,
     completed_at_input: data.completedAt || null
   }, "erro-ao-salvar-formacao");
@@ -486,12 +489,13 @@ export async function addProfessionalCourseAction(formData: FormData) {
 
   if (!parsed.success) redirect("/professional/resume?error=curso-invalido");
 
-  const { supabase } = await getProfessionalContext();
+  const { supabase, user } = await getProfessionalContext();
   const data = parsed.data;
+  const institutionName = await ensureInstitutionName(supabase, user.id, data.institution);
 
   await callResumeRpc(supabase, "add_professional_course", {
     name_input: data.name,
-    institution_input: data.institution || null,
+    institution_input: institutionName || null,
     workload_hours_input: data.workloadHours ?? null,
     completed_at_input: data.completedAt || null
   }, "erro-ao-salvar-curso");
@@ -1162,4 +1166,43 @@ export async function updateProcessStatusAction(formData: FormData) {
   revalidatePath("/admin/referrals");
   revalidatePath("/admin/hirings");
   redirect(`${redirectTo}?message=processo-atualizado`);
+}
+
+export async function updateInstitutionAction(formData: FormData) {
+  await requireRole("admin");
+  const institutionId = String(formData.get("institutionId") ?? "");
+  const name = cleanInstitutionName(String(formData.get("name") ?? ""));
+  const status = String(formData.get("status") ?? "");
+  if (!institutionId || name.length < 2 || !["active", "pending", "archived"].includes(status)) redirect("/admin/institutions?error=dados-invalidos");
+
+  const supabase = await createServerClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) redirect("/login");
+
+  const { error } = await supabase
+    .from("institutions")
+    .update({
+      name,
+      normalized_name: normalizeInstitutionName(name),
+      status,
+      approved_by: status === "active" ? userData.user.id : null,
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", institutionId);
+
+  if (error) redirect(`/admin/institutions?error=${encodeURIComponent(error.message)}`);
+  revalidatePath("/admin/institutions");
+  redirect("/admin/institutions?message=instituicao-atualizada");
+}
+
+export async function deleteInstitutionAction(formData: FormData) {
+  await requireRole("admin");
+  const institutionId = String(formData.get("institutionId") ?? "");
+  if (!institutionId) redirect("/admin/institutions?error=dados-invalidos");
+
+  const supabase = await createServerClient();
+  const { error } = await supabase.from("institutions").delete().eq("id", institutionId);
+  if (error) redirect(`/admin/institutions?error=${encodeURIComponent(error.message)}`);
+  revalidatePath("/admin/institutions");
+  redirect("/admin/institutions?message=instituicao-excluida");
 }

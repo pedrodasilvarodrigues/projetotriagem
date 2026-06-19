@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { BriefcaseBusiness, CheckCircle2, FileText, GraduationCap, Languages, Plus, ShieldCheck, Sparkles, Target, Upload } from "lucide-react";
 import { AppShell } from "@/components/app/shell";
+import { DateTextInput } from "@/components/forms/date-text-input";
+import { InstitutionAutocomplete } from "@/components/forms/institution-autocomplete";
 import { ResumeDownloadCustomizer } from "@/components/professional/resume-download-customizer";
 import { PersonalDataFields } from "@/components/professional/personal-data-fields";
 import { ResumeSectionNav } from "@/components/professional/resume-section-nav";
@@ -264,9 +266,9 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             </div>
             <form action={addProfessionalEducationAction} className="mt-6 grid gap-4 border-t border-slate-200 pt-5 md:grid-cols-2">
               <label className="text-sm font-semibold">Tipo de formacao<select name="level" className="field-input mt-2">{educationOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-              <label className="text-sm font-semibold">Instituicao<input name="institution" required className="field-input mt-2" /></label>
+              <InstitutionAutocomplete required />
               <label className="text-sm font-semibold">Nome do curso ou area<input name="courseName" required className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">Conclusao<input name="completedAt" type="date" className="field-input mt-2" /></label>
+              <label className="text-sm font-semibold">Conclusao<DateTextInput name="completedAt" className="field-input mt-2" /></label>
               <div className="md:col-span-2"><button className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white" type="submit"><Plus aria-hidden="true" size={16} />Adicionar historico academico</button></div>
             </form>
           </section>
@@ -289,8 +291,8 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             <form action={addProfessionalExperienceAction} className="mt-6 grid gap-4 border-t border-slate-200 pt-5 md:grid-cols-2">
               <label className="text-sm font-semibold">Empresa<input name="companyName" required className="field-input mt-2" /></label>
               <label className="text-sm font-semibold">Cargo<input name="roleTitle" required className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">Inicio<input name="startedAt" required type="date" className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">Fim<input name="endedAt" type="date" className="field-input mt-2" /></label>
+              <label className="text-sm font-semibold">Inicio<DateTextInput name="startedAt" required className="field-input mt-2" /></label>
+              <label className="text-sm font-semibold">Fim<DateTextInput name="endedAt" className="field-input mt-2" /></label>
               <label className="flex items-center gap-2 text-sm font-semibold md:col-span-2"><input name="isCurrent" type="checkbox" /> Trabalho atualmente aqui</label>
               <label className="text-sm font-semibold md:col-span-2">Atividades e resultados<textarea name="description" required rows={4} className="field-input mt-2" /></label>
               <div className="md:col-span-2"><button className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white" type="submit"><Plus aria-hidden="true" size={16} />Adicionar experiencia</button></div>
@@ -311,9 +313,9 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             </div>
             <form action={addProfessionalCourseAction} className="mt-6 grid gap-4 border-t border-slate-200 pt-5 md:grid-cols-2">
               <label className="text-sm font-semibold">Curso<input name="name" required className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">Instituicao<input name="institution" className="field-input mt-2" /></label>
+              <InstitutionAutocomplete required={false} />
               <label className="text-sm font-semibold">Carga horaria<input name="workloadHours" type="number" min="0" className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">Conclusao<input name="completedAt" type="date" className="field-input mt-2" /></label>
+              <label className="text-sm font-semibold">Conclusao<DateTextInput name="completedAt" className="field-input mt-2" /></label>
               <div className="md:col-span-2"><button className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white" type="submit"><Plus aria-hidden="true" size={16} />Adicionar curso</button></div>
             </form>
           </section>

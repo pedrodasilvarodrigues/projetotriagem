@@ -1,4 +1,6 @@
 import { ErrorBanner, Field, OnboardingLayout } from "@/components/auth/onboarding-layout";
+import { DateTextInput } from "@/components/forms/date-text-input";
+import { InstitutionAutocomplete } from "@/components/forms/institution-autocomplete";
 import { generateResumeAction, uploadResumeAction } from "@/lib/actions/onboarding";
 
 const skills = ["Informatica", "Excel", "Atendimento", "Vendas", "Administracao", "TI", "Logistica", "Financeiro", "Marketing", "Idiomas"];
@@ -33,7 +35,7 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
               <Field label="Escolaridade" name="education" />
               <Field label="Curso Tecnico" name="technicalCourse" required={false} />
               <Field label="Graduacao" name="degree" required={false} />
-              <Field label="Instituicao" name="institution" />
+              <InstitutionAutocomplete required className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 focus:border-blue-700" labelClassName="text-sm font-medium text-slate-800" />
               <Field label="Ano de Conclusao" name="completionYear" type="number" required={false} />
               <Field label="Curso principal" name="courseName" />
             </fieldset>
@@ -42,8 +44,8 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
               <legend className="mb-3 text-sm font-semibold text-slate-900 md:col-span-2">Experiencias</legend>
               <Field label="Empresa" name="experienceCompany" required={false} />
               <Field label="Cargo" name="experienceRole" required={false} />
-              <Field label="Periodo Inicial" name="experienceStart" type="date" required={false} />
-              <Field label="Periodo Final" name="experienceEnd" type="date" required={false} />
+              <label className="block text-sm font-medium text-slate-800">Periodo Inicial<DateTextInput name="experienceStart" className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 focus:border-blue-700" /></label>
+              <label className="block text-sm font-medium text-slate-800">Periodo Final<DateTextInput name="experienceEnd" className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 focus:border-blue-700" /></label>
               <label className="block text-sm font-medium text-slate-800 md:col-span-2">
                 Descricao
                 <textarea name="experienceDescription" className="mt-1 min-h-24 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm" />
@@ -53,12 +55,12 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             <fieldset className="grid gap-4 md:grid-cols-2">
               <legend className="mb-3 text-sm font-semibold text-slate-900 md:col-span-2">Cursos e certificados</legend>
               <Field label="Nome do Curso" name="freeCourseName" required={false} />
-              <Field label="Instituicao" name="freeCourseInstitution" required={false} />
+              <InstitutionAutocomplete name="freeCourseInstitution" required={false} className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 focus:border-blue-700" labelClassName="text-sm font-medium text-slate-800" />
               <Field label="Carga Horaria" name="workload" type="number" required={false} />
               <Field label="Ano" name="courseYear" type="number" required={false} />
               <Field label="Nome do Certificado" name="certificateName" required={false} />
-              <Field label="Instituicao" name="certificateInstitution" required={false} />
-              <Field label="Data" name="certificateDate" type="date" required={false} />
+              <InstitutionAutocomplete name="certificateInstitution" required={false} className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 focus:border-blue-700" labelClassName="text-sm font-medium text-slate-800" />
+              <label className="block text-sm font-medium text-slate-800">Data<DateTextInput name="certificateDate" className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 focus:border-blue-700" /></label>
               <Field label="Arquivo opcional" name="certificateFile" type="file" required={false} />
             </fieldset>
 

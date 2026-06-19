@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { ensureInstitutionName } from "@/lib/institutions-server";
 import { generateResumePdf } from "@/lib/pdf/resume";
 import { createServerClient } from "@/lib/supabase/server";
 import { ageFromBirthDate, isValidBrazilianPhone, isValidCnpj, isValidCpf, onlyDigits } from "@/lib/validations/br";
@@ -186,8 +187,11 @@ export async function generateResumeAction(formData: FormData) {
     redirect("/onboarding/professional/resume?error=dados-do-curriculo-obrigatorios");
   }
 
-  if (education && institution && courseName) {
-    await supabase.from("professional_educations").insert({ professional_id: professional.id, level: "medio", institution, course_name: courseName });
+  const institutionName = await ensureInstitutionName(supabase, user.id, institution);
+  const freeCourseInstitutionName = await ensureInstitutionName(supabase, user.id, freeCourseInstitution);
+
+  if (education && institutionName && courseName) {
+    await supabase.from("professional_educations").insert({ professional_id: professional.id, level: "medio", institution: institutionName, course_name: courseName });
   }
 
   if (experienceCompany && experienceRole && experienceStart) {
@@ -205,7 +209,7 @@ export async function generateResumeAction(formData: FormData) {
     await supabase.from("professional_courses").insert({
       professional_id: professional.id,
       name: freeCourseName,
-      institution: freeCourseInstitution || null,
+      institution: freeCourseInstitutionName || null,
       workload_hours: workload ? Number(workload) : null
     });
   }
@@ -221,14 +225,14 @@ export async function generateResumeAction(formData: FormData) {
     state: professional.state,
     education,
     courseName,
-    institution,
+    institution: institutionName ?? institution,
     completionYear,
     experienceCompany,
     experienceRole,
     experiencePeriod: [experienceStart, experienceEnd].filter(Boolean).join(" - "),
     experienceDescription,
     freeCourseName,
-    freeCourseInstitution,
+    freeCourseInstitution: freeCourseInstitutionName ?? freeCourseInstitution,
     workload,
     skills: skillValues
   });

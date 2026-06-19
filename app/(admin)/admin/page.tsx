@@ -5,7 +5,7 @@ import { createServerClient } from "@/lib/supabase/server";
 const quickActions = [
   ["Gerenciar profissionais", "Buscar, editar, bloquear, arquivar e encaminhar profissionais.", "/admin/professionals"],
   ["Gerenciar empresas", "Acompanhar empresas, status, demandas e profissionais apresentados.", "/admin/companies"],
-  ["Gerenciar demandas", "Criar, encerrar, reabrir e arquivar demandas.", "/admin/demands"],
+  ["Gerenciar demandas", "Acompanhar demandas, apresentar candidatos por compatibilidade e controlar fila reserva.", "/admin/demands"],
   ["Acompanhar processos", "Controlar triagem, apresentacao, entrevista, resultado e contratacao.", "/admin/processes"]
 ] as const;
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app/shell";
-import { archiveProfessionalAction, presentProfessionalToCompanyAction, updateProfessionalStatusAction } from "@/lib/actions/workspace";
+import { archiveProfessionalAction, updateProfessionalStatusAction } from "@/lib/actions/workspace";
 import { createServerClient } from "@/lib/supabase/server";
 
 export default async function AdminProfessionalsPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string; city?: string; error?: string; message?: string }> }) {
@@ -16,9 +16,8 @@ export default async function AdminProfessionalsPage({ searchParams }: { searchP
   if (params.status) query = query.eq("status", params.status);
   if (params.city) query = query.ilike("city", `%${params.city}%`);
 
-  const [{ data: professionals }, { data: companies }, { data: presentations }] = await Promise.all([
+  const [{ data: professionals }, { data: presentations }] = await Promise.all([
     query,
-    supabase.from("companies").select("id,trade_name,status").is("deleted_at", null).order("trade_name"),
     supabase.from("professional_presentations").select("id,professional_id,company_id,status,presented_at,company:companies(trade_name)").order("presented_at", { ascending: false }).limit(80)
   ]);
 
@@ -44,14 +43,13 @@ export default async function AdminProfessionalsPage({ searchParams }: { searchP
           </form>
         </section>
 
-        <section id="apresentar" className="scroll-mt-24 rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
-          <span id="status" className="block scroll-mt-24" />
+        <section id="status" className="scroll-mt-24 rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
           <div className="mb-4">
             <h2 className="text-lg font-semibold">Gerenciamento completo</h2>
-            <p className="text-sm text-slate-600">Visualize, bloqueie, arquive, reative e apresente profissionais para empresas.</p>
+            <p className="text-sm text-slate-600">Visualize, bloqueie, arquive e reative profissionais. A apresentacao de candidatos agora acontece dentro da aba Demandas, por compatibilidade.</p>
           </div>
           <table className="data-table">
-            <thead><tr><th>Profissional</th><th>Perfil</th><th>Status</th><th>Apresentar</th><th>Acoes</th></tr></thead>
+            <thead><tr><th>Profissional</th><th>Perfil</th><th>Status</th><th>Acoes</th></tr></thead>
             <tbody>
               {(professionals ?? []).map((professional) => (
                 <tr key={professional.id}>
@@ -61,18 +59,6 @@ export default async function AdminProfessionalsPage({ searchParams }: { searchP
                   </td>
                   <td>{professional.desired_role}<p className="text-xs text-slate-500">{professional.city}/{professional.state}</p></td>
                   <td>{professional.deleted_at ? "arquivado" : professional.status}</td>
-                  <td>
-                    <form action={presentProfessionalToCompanyAction} className="grid gap-2">
-                      <input type="hidden" name="professionalId" value={professional.id} />
-                      <input type="hidden" name="redirectTo" value="/admin/professionals" />
-                      <select name="companyId" required className="rounded border border-slate-300 px-2 py-2 text-xs">
-                        <option value="">Selecionar empresa</option>
-                        {(companies ?? []).map((company) => <option key={company.id} value={company.id}>{company.trade_name}</option>)}
-                      </select>
-                      <input name="notes" className="rounded border border-slate-300 px-2 py-2 text-xs" placeholder="Observacao opcional" />
-                      <button className="rounded bg-blue-700 px-3 py-2 text-xs font-semibold text-white">Apresentar</button>
-                    </form>
-                  </td>
                   <td>
                     <div className="grid gap-2">
                       <Link className="rounded border border-slate-300 px-3 py-2 text-center text-xs font-semibold text-slate-700" href={`/admin/professionals/${professional.id}`}>Ver perfil e curriculo</Link>
@@ -96,7 +82,7 @@ export default async function AdminProfessionalsPage({ searchParams }: { searchP
                   </td>
                 </tr>
               ))}
-              {(professionals ?? []).length === 0 ? <tr><td colSpan={5}>Nenhum profissional encontrado.</td></tr> : null}
+              {(professionals ?? []).length === 0 ? <tr><td colSpan={4}>Nenhum profissional encontrado.</td></tr> : null}
             </tbody>
           </table>
         </section>

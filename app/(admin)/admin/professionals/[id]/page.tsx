@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app/shell";
-import { archiveProfessionalAction, presentProfessionalToCompanyAction, updateProfessionalStatusAction } from "@/lib/actions/workspace";
+import { archiveProfessionalAction, updateProfessionalStatusAction } from "@/lib/actions/workspace";
 import { createServerClient } from "@/lib/supabase/server";
 
 function one<T>(value: T | T[] | null) {
@@ -12,7 +12,6 @@ export default async function AdminProfessionalDetailPage({ params }: { params: 
   const supabase = await createServerClient();
   const [
     { data: professional },
-    { data: companies },
     { data: educations },
     { data: experiences },
     { data: courses },
@@ -22,7 +21,6 @@ export default async function AdminProfessionalDetailPage({ params }: { params: 
     { data: presentations }
   ] = await Promise.all([
     supabase.from("professionals").select("*").eq("id", id).maybeSingle(),
-    supabase.from("companies").select("id,trade_name,status").is("deleted_at", null).order("trade_name"),
     supabase.from("professional_educations").select("level,institution,course_name,completed_at").eq("professional_id", id).order("created_at", { ascending: false }),
     supabase.from("professional_experiences").select("company_name,role_title,started_at,ended_at,is_current,description").eq("professional_id", id).order("started_at", { ascending: false }),
     supabase.from("professional_courses").select("name,institution,workload_hours,completed_at").eq("professional_id", id).order("created_at", { ascending: false }),
@@ -52,16 +50,9 @@ export default async function AdminProfessionalDetailPage({ params }: { params: 
               <p className="mt-4 text-sm leading-6 text-slate-700">{professional.summary ?? "Resumo profissional ainda nao informado."}</p>
             </div>
             <div className="grid gap-2 rounded-lg bg-slate-50 p-4">
-              <form action={presentProfessionalToCompanyAction} className="grid gap-2">
-                <input type="hidden" name="professionalId" value={professional.id} />
-                <input type="hidden" name="redirectTo" value={`/admin/professionals/${professional.id}`} />
-                <select name="companyId" required className="field-input">
-                  <option value="">Selecionar empresa</option>
-                  {(companies ?? []).map((company) => <option key={company.id} value={company.id}>{company.trade_name}</option>)}
-                </select>
-                <textarea name="notes" className="field-input min-h-20" placeholder="Observacao para o historico" />
-                <button className="rounded bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Apresentar para empresa</button>
-              </form>
+              <p className="rounded border border-blue-100 bg-blue-50 p-3 text-sm text-blue-900">
+                Para apresentar este profissional, acesse a aba Demandas e escolha a demanda desejada. A lista sera ordenada por compatibilidade.
+              </p>
               <form action={updateProfessionalStatusAction} className="grid gap-2">
                 <input type="hidden" name="professionalId" value={professional.id} />
                 <input type="hidden" name="redirectTo" value={`/admin/professionals/${professional.id}`} />

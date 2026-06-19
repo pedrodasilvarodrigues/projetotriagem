@@ -1049,6 +1049,39 @@ export async function presentProfessionalToCompanyAction(formData: FormData) {
   redirect(`${redirectTo}?message=profissional-apresentado`);
 }
 
+export async function routeProfessionalToDemandAction(formData: FormData) {
+  await requireRole("admin");
+  const professionalId = String(formData.get("professionalId") ?? "");
+  const demandId = String(formData.get("demandId") ?? "");
+  const mode = String(formData.get("mode") ?? "");
+  const redirectTo = String(formData.get("redirectTo") ?? "/admin/demands");
+  if (!professionalId || !demandId || !["present", "queue"].includes(mode)) redirect(`${redirectTo}?error=dados-invalidos`);
+
+  const supabase = await createServerClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) redirect("/login");
+
+  const status = mode === "present" ? "forwarded" : "waiting";
+  const { error } = await supabase.from("screening_processes").upsert({
+    demand_id: demandId,
+    professional_id: professionalId,
+    status,
+    admin_owner_id: userData.user.id,
+    updated_at: new Date().toISOString()
+  }, { onConflict: "demand_id,professional_id" });
+
+  if (error) redirect(`${redirectTo}?error=${encodeURIComponent(error.message)}`);
+  if (mode === "present") {
+    await supabase.from("demands").update({ status: "screening" }).eq("id", demandId).in("status", ["draft", "active"]);
+  }
+  revalidatePath("/admin/demands");
+  revalidatePath("/admin/processes");
+  revalidatePath("/admin/referrals");
+  revalidatePath("/admin/professionals");
+  revalidatePath(`/admin/professionals/${professionalId}`);
+  redirect(`${redirectTo}?message=${mode === "present" ? "profissional-apresentado" : "profissional-na-fila"}`);
+}
+
 export async function createAdminDemandAction(formData: FormData) {
   await requireRole("admin");
   const parsed = adminDemandSchema.safeParse({

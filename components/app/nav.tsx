@@ -96,7 +96,6 @@ const adminNavGroups = [
     items: [
       { href: "/admin/professionals", label: "Listar profissionais", icon: UserRoundSearch },
       { href: "/admin/professionals#buscar", label: "Pesquisar / filtrar", icon: Search },
-      { href: "/admin/professionals#apresentar", label: "Encaminhar profissional", icon: Send },
       { href: "/admin/professionals#status", label: "Editar / bloquear", icon: Pencil },
       { href: "/admin/professionals#status", label: "Arquivar / reativar", icon: UserX },
       { href: "/admin/professionals", label: "Adicionar profissional", icon: UserPlus }
@@ -116,7 +115,8 @@ const adminNavGroups = [
     label: "Demandas",
     items: [
       { href: "/admin/demands", label: "Listar demandas", icon: ClipboardCheck },
-      { href: "/admin/demands#criar", label: "Criar demanda", icon: BriefcaseBusiness },
+      { href: "/admin/demands#apresentar", label: "Apresentar candidato", icon: Send },
+      { href: "/admin/demands#apresentar", label: "Colocar na fila", icon: UserPlus },
       { href: "/admin/demands#status", label: "Encerrar / reabrir", icon: RotateCcw },
       { href: "/admin/demands#status", label: "Arquivar demanda", icon: Archive }
     ]

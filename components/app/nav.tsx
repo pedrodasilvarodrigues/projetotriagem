@@ -16,6 +16,7 @@ import {
   Landmark,
   LayoutGrid,
   LogOut,
+  Menu,
   Plug,
   Search,
   Settings,
@@ -23,6 +24,7 @@ import {
   UserRoundCheck,
   UserRoundCog,
   UserRoundSearch,
+  X,
   type LucideIcon
 } from "lucide-react";
 import type { AppRole } from "@/lib/auth/access";
@@ -80,6 +82,7 @@ export function AppNav({ role, preferredLanguage }: { role: AppRole; preferredLa
   const nav = navItems[role];
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
   const translated = useMemo(() => ({
     title: translateUi(nav.title, preferredLanguage),
     subtitle:
@@ -121,18 +124,59 @@ export function AppNav({ role, preferredLanguage }: { role: AppRole; preferredLa
               </Link>
               <button
                 type="button"
-                aria-expanded={!isCollapsed}
-                onClick={() => setIsCollapsed((current) => !current)}
-                className="inline-flex min-h-10 shrink-0 items-center gap-2 border border-white/15 bg-white/8 px-3 py-2 text-sm font-semibold text-slate-100 transition hover:border-[#d6a238] hover:text-white"
+                aria-controls="admin-mobile-sidebar"
+                aria-expanded={isAdminMenuOpen}
+                aria-label={isAdminMenuOpen ? "Fechar menu administrativo" : "Abrir menu administrativo"}
+                onClick={() => setIsAdminMenuOpen((current) => !current)}
+                className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 border border-white/15 bg-white/8 px-3 py-2 text-sm font-semibold text-slate-100 transition hover:border-[#d6a238] hover:text-white"
               >
-                {isCollapsed ? <ChevronDown aria-hidden="true" size={16} /> : <ChevronUp aria-hidden="true" size={16} />}
-                <span className="sm:hidden">Menu</span>
-                <span className="hidden sm:inline">{preferredLanguage === "en-US" ? (isCollapsed ? "Show menu" : "Collapse menu") : preferredLanguage === "es-ES" ? (isCollapsed ? "Mostrar menu" : "Ocultar menu") : (isCollapsed ? "Mostrar menu" : "Recolher menu")}</span>
+                {isAdminMenuOpen ? <X aria-hidden="true" size={18} /> : <Menu aria-hidden="true" size={18} />}
+                <span>Menu</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <div className={`fixed inset-0 z-50 lg:hidden ${isAdminMenuOpen ? "" : "pointer-events-none"}`} aria-hidden={!isAdminMenuOpen}>
+          <button
+            type="button"
+            aria-label="Fechar menu administrativo"
+            onClick={() => setIsAdminMenuOpen(false)}
+            className={[
+              "absolute inset-0 bg-slate-950/55 transition-opacity",
+              isAdminMenuOpen ? "opacity-100" : "opacity-0"
+            ].join(" ")}
+          />
+          <aside
+            id="admin-mobile-sidebar"
+            className={[
+              "absolute inset-y-0 left-0 flex w-[min(86vw,20rem)] max-w-full flex-col border-r-4 border-[#d6a238] bg-[#18212f] text-white shadow-[12px_0_32px_rgba(15,23,42,0.3)] transition-transform duration-200",
+              isAdminMenuOpen ? "translate-x-0" : "-translate-x-full"
+            ].join(" ")}
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-4">
+              <Link href="/admin" onClick={() => setIsAdminMenuOpen(false)} className="flex min-w-0 items-center gap-3">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded border border-white/20 bg-[#d6a238] text-[#18212f]">
+                  <BriefcaseBusiness aria-hidden="true" size={20} />
+                </span>
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-semibold uppercase tracking-normal">
+                    {preferredLanguage === "en-US" ? "Professional Screening" : preferredLanguage === "es-ES" ? "Triagem Profesional" : "Triagem Profissional"}
+                  </span>
+                  <span className="block truncate text-xs text-slate-300">{translated.subtitle}</span>
+                </span>
+              </Link>
+              <button
+                type="button"
+                aria-label="Fechar menu administrativo"
+                onClick={() => setIsAdminMenuOpen(false)}
+                className="inline-flex size-10 shrink-0 items-center justify-center border border-white/15 bg-white/8 text-slate-100 transition hover:border-[#d6a238] hover:text-white"
+              >
+                <X aria-hidden="true" size={18} />
               </button>
             </div>
 
-            <div className={`${isCollapsed ? "hidden" : "mt-4"}`}>
-              <nav aria-label={`Menu ${translated.title}`} className="grid max-w-full grid-cols-2 gap-2 border border-white/15 bg-white/8 p-1 sm:grid-cols-3">
+            <nav aria-label={`Menu ${translated.title}`} className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-3 py-4">
                 {nav.items.map((item) => {
                   const isActive = pathname === item.href || (item.href !== nav.items[0].href && pathname.startsWith(`${item.href}/`));
 
@@ -140,29 +184,32 @@ export function AppNav({ role, preferredLanguage }: { role: AppRole; preferredLa
                     <Link
                       key={item.href}
                       href={item.href}
+                      onClick={() => setIsAdminMenuOpen(false)}
                       aria-current={isActive ? "page" : undefined}
                       className={[
-                        "inline-flex min-h-10 min-w-0 items-center justify-center gap-2 border px-2 py-2 text-center text-xs font-semibold transition",
+                        "inline-flex min-h-11 min-w-0 items-center gap-3 border px-3 py-2 text-sm font-semibold transition",
                         isActive
                           ? "border-[#d6a238] bg-[#d6a238] text-[#18212f]"
                           : "border-transparent text-slate-200 hover:border-white/25 hover:bg-white/10 hover:text-white"
                       ].join(" ")}
                     >
-                      <item.icon aria-hidden="true" className="shrink-0" size={16} />
+                      <item.icon aria-hidden="true" className="shrink-0" size={18} />
                       <span className="min-w-0 truncate">{translateUi(item.label, preferredLanguage)}</span>
                     </Link>
                   );
                 })}
-                <form action={signOutAction} className="contents">
-                  <button className="inline-flex min-h-10 min-w-0 items-center justify-center gap-2 border border-transparent px-2 py-2 text-center text-xs font-semibold text-slate-200 transition hover:border-red-300/60 hover:bg-red-500/15 hover:text-white" type="submit">
-                    <LogOut aria-hidden="true" size={16} />
-                    <span className="min-w-0 truncate">{preferredLanguage === "en-US" ? "Sign out" : preferredLanguage === "es-ES" ? "Salir" : "Sair"}</span>
-                  </button>
-                </form>
-              </nav>
+            </nav>
+
+            <div className="border-t border-white/10 p-3">
+              <form action={signOutAction}>
+                <button className="inline-flex min-h-11 w-full min-w-0 items-center gap-3 border border-transparent px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-red-300/60 hover:bg-red-500/15 hover:text-white" type="submit">
+                  <LogOut aria-hidden="true" size={18} />
+                  <span className="min-w-0 truncate">{preferredLanguage === "en-US" ? "Sign out" : preferredLanguage === "es-ES" ? "Salir" : "Sair"}</span>
+                </button>
+              </form>
             </div>
-          </div>
-        </header>
+          </aside>
+        </div>
 
         <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r-4 border-[#d6a238] bg-[#18212f] text-white shadow-[12px_0_32px_rgba(15,23,42,0.18)] lg:flex">
           <div className="border-b border-white/10 px-5 py-5">

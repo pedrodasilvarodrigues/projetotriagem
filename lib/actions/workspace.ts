@@ -137,6 +137,28 @@ function professionalFormError(route: "/professional/profile" | "/professional/r
   redirect(`${route}?error=${encodeURIComponent(code)}`);
 }
 
+async function insertResumeRecord(
+  supabase: Awaited<ReturnType<typeof createServerClient>>,
+  table: string,
+  payload: Record<string, unknown>,
+  errorCode: string
+) {
+  let { error } = await supabase.from(table).insert(payload);
+
+  if (error && hasSupabaseAdminEnv()) {
+    const retry = await createAdminClient().from(table).insert(payload);
+    error = retry.error;
+  }
+
+  if (error) {
+    professionalFormError("/professional/resume", errorCode, {
+      table,
+      error: error.message,
+      code: error.code
+    });
+  }
+}
+
 async function getProfessionalContext(errorRoute: "/professional/profile" | "/professional/resume" = "/professional/resume") {
   await requireRole("professional");
   const supabase = await createServerClient();
@@ -449,13 +471,13 @@ export async function addProfessionalEducationAction(formData: FormData) {
   const { supabase, professional } = await getProfessionalContext();
   const data = parsed.data;
 
-  await supabase.from("professional_educations").insert({
+  await insertResumeRecord(supabase, "professional_educations", {
     professional_id: professional.id,
     level: data.level,
     institution: data.institution,
     course_name: data.courseName,
     completed_at: data.completedAt || null
-  });
+  }, "erro-ao-salvar-formacao");
 
   revalidatePath("/professional/resume");
   redirect("/professional/resume?message=formacao-adicionada");
@@ -474,13 +496,13 @@ export async function addProfessionalCourseAction(formData: FormData) {
   const { supabase, professional } = await getProfessionalContext();
   const data = parsed.data;
 
-  await supabase.from("professional_courses").insert({
+  await insertResumeRecord(supabase, "professional_courses", {
     professional_id: professional.id,
     name: data.name,
     institution: data.institution || null,
     workload_hours: data.workloadHours ?? null,
     completed_at: data.completedAt || null
-  });
+  }, "erro-ao-salvar-curso");
 
   revalidatePath("/professional/resume");
   redirect("/professional/resume?message=curso-adicionado");
@@ -495,11 +517,11 @@ export async function addProfessionalLanguageAction(formData: FormData) {
   if (!parsed.success) redirect("/professional/resume?error=idioma-invalido");
 
   const { supabase, professional } = await getProfessionalContext();
-  await supabase.from("professional_languages").insert({
+  await insertResumeRecord(supabase, "professional_languages", {
     professional_id: professional.id,
     language_name: parsed.data.languageName,
     proficiency: parsed.data.proficiency
-  });
+  }, "erro-ao-salvar-idioma");
 
   revalidatePath("/professional/resume");
   redirect("/professional/resume?message=idioma-adicionado");
@@ -515,12 +537,12 @@ export async function addProfessionalSkillAction(formData: FormData) {
   if (!parsed.success) redirect("/professional/resume?error=habilidade-invalida");
 
   const { supabase, professional } = await getProfessionalContext();
-  await supabase.from("professional_skills").insert({
+  await insertResumeRecord(supabase, "professional_skills", {
     professional_id: professional.id,
     name: parsed.data.name,
     skill_type: parsed.data.skillType,
     proficiency: parsed.data.proficiency
-  });
+  }, "erro-ao-salvar-habilidade");
 
   revalidatePath("/professional/resume");
   redirect("/professional/resume?message=habilidade-adicionada");
@@ -579,7 +601,7 @@ export async function addProfessionalExperienceAction(formData: FormData) {
   const { supabase, professional } = await getProfessionalContext();
   const data = parsed.data;
 
-  await supabase.from("professional_experiences").insert({
+  await insertResumeRecord(supabase, "professional_experiences", {
     professional_id: professional.id,
     company_name: data.companyName,
     role_title: data.roleTitle,
@@ -587,7 +609,7 @@ export async function addProfessionalExperienceAction(formData: FormData) {
     ended_at: data.isCurrent ? null : data.endedAt || null,
     is_current: Boolean(data.isCurrent),
     description: data.description
-  });
+  }, "erro-ao-salvar-experiencia");
 
   revalidatePath("/professional/resume");
   redirect("/professional/resume?message=experiencia-adicionada");

@@ -16,6 +16,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Acoes do curriculo nao redirecionam mais para o perfil quando a leitura do profissional falha; o contexto ressincroniza a linha, permanece na aba de origem e usa fallback seguro de persistencia para o proprio usuario.
 - Criada migration `20260619012252_fix_professionals_rls_recursion.sql` para remover a recursao RLS entre `professionals` e `screening_processes`, causa raiz do loop perfil/curriculo em contas profissionais.
 - Aplicada no Supabase de producao a correcao RLS de `professionals`; leitura do proprio registro profissional validada sem erro `42P17`.
+- Blocos do curriculo fora de dados pessoais agora tratam erro real do Supabase e tentam fallback server-side ao salvar formacao, cursos, idiomas, habilidades e experiencias.
 - Area de curriculo com painel de qualidade, checklist de preenchimento e proximos ajustes recomendados.
 - Navegacao superior por subgrupos na area de curriculo.
 - Painel de personalizacao para baixar CV com 3 modelos, 7 cores e opcao de pretensao salarial.

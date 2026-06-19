@@ -40,6 +40,11 @@ const personalErrorMessages: Record<string, string> = {
   "estado-invalido": "Informe o estado com duas letras.",
   "erro-ao-salvar-perfil": "Nao foi possivel salvar os dados gerais. Tente novamente.",
   "erro-ao-salvar-profissional": "Nao foi possivel salvar os dados profissionais. Tente novamente.",
+  "erro-ao-salvar-formacao": "Nao foi possivel salvar a formacao. Tente novamente.",
+  "erro-ao-salvar-curso": "Nao foi possivel salvar o curso. Tente novamente.",
+  "erro-ao-salvar-idioma": "Nao foi possivel salvar o idioma. Tente novamente.",
+  "erro-ao-salvar-habilidade": "Nao foi possivel salvar a habilidade. Tente novamente.",
+  "erro-ao-salvar-experiencia": "Nao foi possivel salvar a experiencia. Tente novamente.",
   "perfil-profissional-indisponivel": "Nao foi possivel carregar seu perfil para salvar. Atualize a pagina e tente novamente."
 };
 

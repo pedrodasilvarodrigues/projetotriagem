@@ -5,12 +5,16 @@ Portal de Triagem Profissional
 Plataforma de recrutamento e triagem profissional que conecta profissionais e empresas por meio de cadastro, banco de talentos, demandas, compatibilidade e encaminhamento qualificado.
 
 # Concluido
-- Redesign visual completo aplicado para a identidade do Portal Encaixe:
+- Redesign visual completo e polimento da UX aplicados para a identidade do Portal Encaixe:
   - Definida nova paleta de cores (Azul-marinho `#0F2D4E`, Laranja `#F2811D`, etc.) e tipografia (*Poppins* e *Plus Jakarta Sans*) no globals.css.
   - Criado componente de logotipo animado logo.tsx (aperto de mãos + engrenagem).
   - Redesenhada a Landing Page pública (public-home.tsx) com nova seção Hero clara, botões e cards com elevação.
   - Atualizadas as telas de autenticação (login, register, forgot-password, update-password, confirm-email) com layouts modernos e cores da nova marca.
   - Ajustadas as barras de navegação (nav.tsx), cabeçalhos e cascas gerais do sistema (shell.tsx).
+  - Adicionadas animações interativas e fluidas (splash screen com sessionStorage e pular com Esc, efeito Tilt 3D com acompanhamento do cursor do mouse no desktop, e efeito flutuante nos backgrounds).
+  - Implementado sistema de Scroll Reveal (IntersectionObserver) para carregamento gradual das seções e cards da Landing Page ao rolar a página.
+  - Inseridas transições de rota suaves de slide/fade-in (AppShell) ao navegar pelos menus dos dashboards.
+  - Refatorados formulários de cadastro de Profissional e Empresa para usar os novos inputs arredondados da marca e feedback de botão ao submeter.
 - PDF de memoria tecnica para continuidade no Claude criado em `output/pdf/memoria-projeto-triagem-claude.pdf`, com arquitetura, rotas, fluxos criticos, integracoes, comandos e pendencias do Projeto Triagem.
 - Ambientes separados para profissional, empresa e administrador.
 - Login, cadastro, onboarding e protecao de acesso por perfil.

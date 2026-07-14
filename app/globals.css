@@ -45,6 +45,67 @@
 
   --font-sans: 'Plus Jakarta Sans', 'Inter', ui-sans-serif, system-ui;
   --font-display: 'Poppins', 'Sora', sans-serif;
+
+  --animate-fade-in-up: fade-in-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-scale-in: scale-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  --animate-pulse-glow: pulse-glow 2s infinite alternate;
+  --animate-float-slow: float-slow 8s ease-in-out infinite alternate;
+  --animate-shimmer: shimmer 2.5s infinite linear;
+  
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.92);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes pulse-glow {
+    0% {
+      box-shadow: 0 0 0 0 rgba(242, 129, 29, 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(242, 129, 29, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(242, 129, 29, 0);
+    }
+  }
+  
+  @keyframes float-slow {
+    0% {
+      transform: translateY(0) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-12px) rotate(1.5deg);
+    }
+    100% {
+      transform: translateY(0) rotate(0deg);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
 }
 
 @utility btn-primary {
@@ -327,4 +388,55 @@ a.bg-white {
     min-height: 2.5rem;
     width: 100%;
   }
+}
+
+/* Animation helper classes */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(24px) scale(0.98);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.delay-100 {
+  transition-delay: 100ms !important;
+}
+
+.delay-200 {
+  transition-delay: 200ms !important;
+}
+
+.delay-300 {
+  transition-delay: 300ms !important;
+}
+
+.delay-400 {
+  transition-delay: 400ms !important;
+}
+
+.animate-delay-100 {
+  animation-delay: 100ms !important;
+}
+
+.animate-delay-200 {
+  animation-delay: 200ms !important;
+}
+
+.animate-delay-300 {
+  animation-delay: 300ms !important;
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(241, 244, 248, 0.6) 25%,
+    rgba(226, 232, 240, 0.9) 37%,
+    rgba(241, 244, 248, 0.6) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
 }

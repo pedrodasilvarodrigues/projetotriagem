@@ -21,11 +21,11 @@ export async function AppShell({ title, eyebrow, children }: { title: string; ey
       <LanguageRuntime preferredLanguage={language} />
       <AppNav role={role} preferredLanguage={language} />
       <main id="conteudo" className={mainClassName}>
-        <header className="mb-4 border-l-4 border-[#F2811D] bg-transparent py-2 pl-3 sm:mb-6 sm:pl-4">
+        <header className="mb-4 border-l-4 border-[#F2811D] bg-transparent py-2 pl-3 sm:mb-6 sm:pl-4 animate-fade-in-up">
           <p className="text-xs font-bold uppercase tracking-normal text-[#6B7280]">{translateUi(eyebrow, language)}</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-normal text-[#0F2D4E] sm:text-3xl">{translateUi(title, language)}</h1>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-[#0F2D4E] sm:text-3xl font-display">{translateUi(title, language)}</h1>
         </header>
-        <section className="min-w-0">{children}</section>
+        <section className="min-w-0 animate-fade-in-up animate-delay-100">{children}</section>
       </main>
     </div>
   );

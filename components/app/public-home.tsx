@@ -19,6 +19,8 @@ import {
   ShieldCheck,
   TrendingUp,
   UserRoundCheck,
+  Cog,
+  Handshake,
   type LucideIcon
 } from "lucide-react";
 import { PortalEncaixeLogo } from "@/components/app/logo";
@@ -110,6 +112,147 @@ function initials(name: string) {
     .toUpperCase();
 }
 
+function PortalEncaixeIntro({ onComplete }: { onComplete: () => void }) {
+  const [lettersVisible, setLettersVisible] = useState(false);
+  const [fadeOut, setFadeOut] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" || e.key === "Enter") {
+        handleSkip();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
+    const letterTimer = setTimeout(() => {
+      setLettersVisible(true);
+    }, 400);
+
+    const completeTimer = setTimeout(() => {
+      handleSkip();
+    }, 2500);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      clearTimeout(letterTimer);
+      clearTimeout(completeTimer);
+    };
+  }, [fadeOut]);
+
+  const handleSkip = () => {
+    if (fadeOut) return;
+    setFadeOut(true);
+    setTimeout(() => {
+      onComplete();
+    }, 500);
+  };
+
+  const title = "PORTAL ENCAIXE";
+
+  return (
+    <div 
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0F2D4E] text-[#FAFBFC] transition-opacity duration-500 ${fadeOut ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Introdução do Portal Encaixe"
+    >
+      <div className="flex flex-col items-center gap-6 text-center select-none">
+        {/* Animated Icon */}
+        <div className="relative flex size-24 items-center justify-center rounded-2xl bg-gradient-to-br from-[#1B4E78] to-[#0F2D4E] text-[#FAFBFC] shadow-2xl border border-white/10 overflow-hidden">
+          {/* Animated gear/cog: spins rapidly, then slows down to a stop */}
+          <Cog className="absolute size-20 text-[#F2811D]/35 animate-[spin_3s_cubic-bezier(0.25,1,0.5,1)_infinite]" />
+          {/* Handshake: scales up in stagger */}
+          <Handshake className="relative size-12 text-[#FAFBFC] animate-scale-in" style={{ animationDelay: "300ms" }} />
+        </div>
+
+        {/* Text staggered letter-by-letter */}
+        <div className="mt-4 flex flex-col items-center">
+          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-widest text-white flex gap-[2px]">
+            {title.split("").map((char, i) => (
+              <span 
+                key={i} 
+                className={`inline-block transition-all duration-300 transform ${lettersVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+                style={{ 
+                  transitionDelay: `${i * 50}ms`,
+                  marginRight: char === " " ? "8px" : "0"
+                }}
+              >
+                {char !== " " ? char : ""}
+              </span>
+            ))}
+          </h1>
+          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#F2811D] mt-2 animate-fade-in-up" style={{ animationDelay: "1100ms" }}>
+            Conectando você ao profissional certo
+          </span>
+        </div>
+      </div>
+
+      <button 
+        onClick={handleSkip}
+        className="absolute bottom-10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-400 border border-slate-700/60 rounded-xl hover:text-white hover:border-slate-500 transition duration-200 cursor-pointer"
+      >
+        Pular Introdução (Esc)
+      </button>
+    </div>
+  );
+}
+
+function TiltMockup({ src, alt }: { src: string; alt: string }) {
+  const [tiltStyle, setTiltStyle] = useState<React.CSSProperties>({});
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isMobile || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const el = e.currentTarget;
+    const rect = el.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const xc = rect.width / 2;
+    const yc = rect.height / 2;
+    
+    const rotateX = -(y - yc) / (rect.height / 12);
+    const rotateY = (x - xc) / (rect.width / 12);
+    
+    setTiltStyle({
+      transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`,
+      transition: "transform 0.15s cubic-bezier(0.25, 1, 0.5, 1)"
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTiltStyle({
+      transform: "perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)",
+      transition: "transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)"
+    });
+  };
+
+  return (
+    <div 
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={tiltStyle}
+      className="relative w-full max-w-md lg:max-w-none rounded-3xl overflow-hidden shadow-2xl border border-white/60 aspect-[4/3] object-cover cursor-pointer select-none"
+    >
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0F2D4E]/20 to-transparent z-10 pointer-events-none" />
+      <img 
+        src={src} 
+        alt={alt} 
+        className="w-full h-full object-cover transition-transform duration-300" 
+      />
+    </div>
+  );
+}
+
 function AnimatedCounter({ value, label }: { value: number; label: string }) {
   const [display, setDisplay] = useState(0);
 
@@ -132,15 +275,15 @@ function AnimatedCounter({ value, label }: { value: number; label: string }) {
 
   return (
     <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-orange-100 hover:shadow-md">
-      <strong className="block text-3xl font-extrabold tracking-tight text-blue-700">+{display.toLocaleString("pt-BR")}</strong>
+      <strong className="block text-3xl font-extrabold tracking-tight text-blue-750">+{display.toLocaleString("pt-BR")}</strong>
       <span className="mt-2 block text-xs font-bold uppercase tracking-wider text-slate-500">{label}</span>
     </div>
   );
 }
 
-function InfoCard({ title, text, icon: Icon }: { title: string; text: string; icon: LucideIcon }) {
+function InfoCard({ title, text, icon: Icon, delayClass = "" }: { title: string; text: string; icon: LucideIcon; delayClass?: string }) {
   return (
-    <article className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-orange-200 hover:shadow-xl">
+    <article className={`reveal-on-scroll ${delayClass} rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-orange-200 hover:shadow-xl`}>
       <div className="flex size-12 items-center justify-center rounded-xl bg-orange-50 text-orange-500 shadow-inner">
         <Icon aria-hidden="true" size={22} />
       </div>
@@ -152,6 +295,7 @@ function InfoCard({ title, text, icon: Icon }: { title: string; text: string; ic
 
 export function PublicHome({ stats, companies }: { stats: PublicStats; companies: PublicCompany[] }) {
   const [scrolled, setScrolled] = useState(false);
+  const [showIntro, setShowIntro] = useState(false);
   const companyList = companies.length > 0 ? companies : fallbackCompanies;
   const marqueeItems = useMemo(() => [...companyList, ...companyList], [companyList]);
 
@@ -165,10 +309,59 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Intro loader session check
+  useEffect(() => {
+    const hasSeen = sessionStorage.getItem("hasSeenSplash");
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (!hasSeen && !prefersReducedMotion) {
+      setShowIntro(true);
+      document.documentElement.style.overflow = "hidden";
+    }
+  }, []);
+
+  const handleIntroComplete = () => {
+    setShowIntro(false);
+    sessionStorage.setItem("hasSeenSplash", "true");
+    document.documentElement.style.overflow = "";
+  };
+
+  // Scroll reveal setup
+  useEffect(() => {
+    if (showIntro) return;
+    
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.querySelectorAll(".reveal-on-scroll").forEach((el) => {
+        el.classList.add("is-visible");
+      });
+      return;
+    }
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.08, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    document.querySelectorAll(".reveal-on-scroll").forEach((el) => {
+      observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [showIntro]);
+
   return (
     <main id="conteudo" className="min-h-screen bg-[#FAFBFC] text-slate-900 font-sans">
+      {showIntro && <PortalEncaixeIntro onComplete={handleIntroComplete} />}
+
       {/* Header institucional */}
-      <header className={`fixed inset-x-0 top-0 z-50 h-20 border-b transition-all duration-200 ${scrolled ? "border-slate-200/80 bg-white/90 backdrop-blur-md shadow-sm" : "border-transparent bg-white/40 backdrop-blur-sm"}`}>
+      <header className={`fixed inset-x-0 top-0 z-50 h-20 border-b transition-all duration-300 ${scrolled ? "border-slate-200/80 bg-white/90 backdrop-blur-md shadow-sm" : "border-transparent bg-white/40 backdrop-blur-sm"}`}>
         <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-3">
             <PortalEncaixeLogo />
@@ -185,7 +378,7 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
             <Link href="/login" className="btn-secondary py-2 px-4 rounded-xl text-xs sm:text-sm">
               Entrar
             </Link>
-            <Link href="/register" className="btn-primary py-2 px-4 rounded-xl text-xs sm:text-sm shadow-md">
+            <Link href="/register" className="btn-primary py-2 px-4 rounded-xl text-xs sm:text-sm shadow-md animate-pulse-glow">
               Criar Conta
             </Link>
           </div>
@@ -194,50 +387,49 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
 
       {/* Hero Section */}
       <section id="inicio" className="relative overflow-hidden bg-gradient-to-b from-white to-[#F1F4F8] pt-32 pb-20 md:pt-40 md:pb-28">
-        <div className="absolute inset-0 opacity-30 pointer-events-none">
-          <div className="absolute top-1/4 right-0 size-96 rounded-full bg-orange-200 blur-3xl" />
-          <div className="absolute bottom-10 left-10 size-80 rounded-full bg-blue-200 blur-3xl" />
+        <div className="absolute inset-0 opacity-40 pointer-events-none overflow-hidden">
+          <div className="absolute top-1/4 right-[10%] size-96 rounded-full bg-orange-200/50 blur-3xl animate-float-slow" />
+          <div className="absolute bottom-10 left-[5%] size-80 rounded-full bg-blue-200/40 blur-3xl animate-float-slow animate-delay-200" />
         </div>
         <div className="relative mx-auto max-w-7xl px-6 lg:grid lg:grid-cols-12 lg:gap-12 items-center">
           <div className="lg:col-span-7 flex flex-col justify-center">
-            <p className="inline-flex w-fit items-center gap-2 rounded-full bg-orange-50 px-4 py-1.5 text-xs font-bold text-orange-600 ring-1 ring-orange-100">
+            <p className="inline-flex w-fit items-center gap-2 rounded-full bg-orange-50 px-4 py-1.5 text-xs font-bold text-orange-600 ring-1 ring-orange-100 animate-fade-in-up">
               <TrendingUp aria-hidden="true" size={14} />
               Oportunidades e carreiras em sintonia
             </p>
-            <h1 className="mt-6 font-display text-4xl font-extrabold leading-tight tracking-tight text-blue-700 sm:text-6xl">
+            <h1 className="mt-6 font-display text-4xl font-extrabold leading-tight tracking-tight text-blue-700 sm:text-6xl animate-fade-in-up animate-delay-100">
               Conectando você ao <span className="text-orange-500">profissional certo</span>.
             </h1>
-            <p className="mt-6 max-w-xl text-base leading-8 text-slate-500 font-medium">
+            <p className="mt-6 max-w-xl text-base leading-8 text-slate-500 font-medium animate-fade-in-up animate-delay-200">
               Cadastre seu perfil de forma segura, participe de processos de triagem objetivos e seja encaminhado para demandas reais de empresas parceiras.
             </p>
-            <div className="mt-8 flex flex-wrap gap-4">
-              <Link href="/register" className="btn-primary py-3.5 px-6 rounded-xl flex items-center gap-2 shadow-lg shadow-orange-500/20 text-sm">
+            <div className="mt-8 flex flex-wrap gap-4 animate-fade-in-up animate-delay-300">
+              <Link href="/register" className="btn-primary py-3.5 px-6 rounded-xl flex items-center gap-2 shadow-lg shadow-orange-500/20 text-sm hover:scale-[1.04] transition-all">
                 Criar Conta Grátis
                 <ArrowRight aria-hidden="true" size={18} />
               </Link>
-              <Link href="/login" className="btn-secondary py-3.5 px-6 rounded-xl flex items-center gap-2 text-sm bg-white">
+              <Link href="/login" className="btn-secondary py-3.5 px-6 rounded-xl flex items-center gap-2 text-sm bg-white hover:scale-[1.02] transition-all">
                 Fazer Login
                 <Mail aria-hidden="true" size={18} />
               </Link>
             </div>
           </div>
-          <div className="lg:col-span-5 mt-12 lg:mt-0 relative flex items-center justify-center">
-            <div className="absolute size-full rounded-3xl bg-gradient-to-tr from-blue-900/10 to-orange-500/10 -rotate-2 scale-105 pointer-events-none" />
-            <img 
+          <div className="lg:col-span-5 mt-12 lg:mt-0 relative flex items-center justify-center animate-fade-in-up animate-delay-300">
+            <div className="absolute size-full rounded-3xl bg-gradient-to-tr from-blue-900/10 to-orange-500/10 -rotate-2 scale-105 pointer-events-none animate-pulse-glow" />
+            <TiltMockup 
               src={heroImage} 
               alt="Entrevista profissional" 
-              className="relative w-full max-w-md lg:max-w-none rounded-3xl shadow-2xl border border-white/60 aspect-[4/3] object-cover" 
             />
           </div>
         </div>
       </section>
 
       {/* Marquee de empresas */}
-      <section aria-label="Empresas parceiras" className="border-y border-slate-100 bg-[#F1F4F8]/50 py-10">
+      <section aria-label="Empresas parceiras" className="reveal-on-scroll border-y border-slate-100 bg-[#F1F4F8]/50 py-10">
         <div className="mx-auto max-w-7xl px-6">
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400">Empresas parceiras da plataforma</h2>
-            <span className="text-xs font-semibold text-orange-500 bg-orange-50 px-2.5 py-1 rounded-full">Triagem e cadastro LGPD ativos</span>
+            <span className="text-xs font-semibold text-orange-500 bg-orange-50 px-2.5 py-1 rounded-full shadow-inner">Triagem e cadastro LGPD ativos</span>
           </div>
           <div className="overflow-hidden">
             <div className="home-marquee flex w-max gap-4">
@@ -262,7 +454,7 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
       </section>
 
       {/* Contadores */}
-      <section className="py-16">
+      <section className="reveal-on-scroll py-16">
         <div className="mx-auto grid max-w-7xl gap-4 px-6 sm:grid-cols-2 md:grid-cols-4">
           <AnimatedCounter value={stats.professionals} label="Profissionais" />
           <AnimatedCounter value={stats.companies} label="Empresas Parceiras" />
@@ -274,13 +466,13 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
       {/* Como funciona */}
       <section id="como-funciona" className="border-y border-slate-100 bg-[#F1F4F8] py-20">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="max-w-3xl">
+          <div className="max-w-3xl reveal-on-scroll">
             <p className="text-xs font-bold uppercase tracking-wider text-orange-500">Como funciona</p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-blue-700 font-display">Uma jornada clara entre cadastro, análise e contratação.</h2>
           </div>
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {steps.map((step, index) => (
-              <article key={step.title} className="relative rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm transition hover:shadow-md duration-300">
+              <article key={step.title} className="reveal-on-scroll rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm transition hover:shadow-xl hover:-translate-y-1.5 duration-300" style={{ transitionDelay: `${index * 100}ms` }}>
                 {index < steps.length - 1 ? <div className="absolute left-[calc(100%-10px)] top-10 hidden h-0.5 w-8 bg-orange-200 lg:block" /> : null}
                 <div className="flex items-center justify-between gap-3">
                   <span className="flex size-12 items-center justify-center rounded-xl bg-blue-700 text-white shadow-md shadow-blue-900/15">
@@ -300,13 +492,13 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
       {/* Benefícios profissionais */}
       <section id="profissionais" className="py-20">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="max-w-3xl">
+          <div className="max-w-3xl reveal-on-scroll">
             <p className="text-xs font-bold uppercase tracking-wider text-orange-500">Para Profissionais</p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-blue-700 font-display">Organize sua presença profissional em um único lugar.</h2>
           </div>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {professionalBenefits.map((benefit) => (
-              <InfoCard key={benefit.title} {...benefit} />
+            {professionalBenefits.map((benefit, idx) => (
+              <InfoCard key={benefit.title} {...benefit} delayClass={`delay-${idx * 100}`} />
             ))}
           </div>
         </div>
@@ -315,13 +507,13 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
       {/* Benefícios empresas */}
       <section id="empresas" className="bg-[#F1F4F8] py-20">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="max-w-3xl">
+          <div className="max-w-3xl reveal-on-scroll">
             <p className="text-xs font-bold uppercase tracking-wider text-orange-500">Para Empresas</p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-blue-700 font-display">Demandas privadas com triagem qualificada e segura.</h2>
           </div>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {companyBenefits.map((benefit) => (
-              <InfoCard key={benefit.title} {...benefit} />
+            {companyBenefits.map((benefit, idx) => (
+              <InfoCard key={benefit.title} {...benefit} delayClass={`delay-${idx * 100}`} />
             ))}
           </div>
         </div>
@@ -330,13 +522,13 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
       {/* Histórias de sucesso / depoimentos */}
       <section className="py-20">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="max-w-3xl">
+          <div className="max-w-3xl reveal-on-scroll">
             <p className="text-xs font-bold uppercase tracking-wider text-orange-500">Casos de Sucesso</p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-blue-700 font-display">Pessoas e empresas que vivenciaram uma triagem mais objetiva.</h2>
           </div>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {testimonials.map((testimonial) => (
-              <article key={testimonial.name} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition duration-200">
+            {testimonials.map((testimonial, idx) => (
+              <article key={testimonial.name} className="reveal-on-scroll rounded-2xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col justify-between hover:shadow-xl hover:-translate-y-1 transition duration-300" style={{ transitionDelay: `${idx * 100}ms` }}>
                 <p className="text-base leading-7 text-slate-600 font-medium italic">"{testimonial.quote}"</p>
                 <div className="mt-6 flex items-center gap-3">
                   <div className="flex size-11 items-center justify-center rounded-xl bg-orange-50 text-sm font-bold text-orange-500 shadow-inner">
@@ -356,37 +548,37 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
       {/* Diferenciais */}
       <section className="border-t border-slate-100 bg-[#F1F4F8] py-20">
         <div className="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[0.8fr_1.2fr] items-center">
-          <div>
+          <div className="reveal-on-scroll">
             <p className="text-xs font-bold uppercase tracking-wider text-orange-500">Diferenciais</p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-blue-700 font-display">O que torna a nossa triagem mais confiável.</h2>
             <p className="mt-4 leading-7 text-slate-500 font-medium">Combinamos cadastro padronizado de currículos, regras inteligentes de compatibilidade e triagem com avaliação humana para evitar o desgaste de currículos em vitrines públicas.</p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2">
-            {differentials.map((item) => (
-              <InfoCard key={item.title} {...item} />
+            {differentials.map((item, idx) => (
+              <InfoCard key={item.title} {...item} delayClass={`delay-${idx * 100}`} />
             ))}
           </div>
         </div>
       </section>
 
       {/* LGPD Banner */}
-      <section className="bg-gradient-to-br from-[#0F2D4E] to-[#1B4E78] py-20 text-white relative overflow-hidden">
+      <section className="reveal-on-scroll bg-gradient-to-br from-[#0F2D4E] to-[#1B4E78] py-20 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 pointer-events-none">
-          <div className="absolute top-0 right-0 size-80 rounded-full bg-orange-500 blur-2xl" />
+          <div className="absolute top-0 right-0 size-80 rounded-full bg-orange-500 blur-2xl animate-float-slow" />
         </div>
         <div className="relative mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[1fr_0.9fr] items-center">
           <div>
-            <div className="mb-5 flex size-12 items-center justify-center rounded-xl bg-white/10 text-orange-400">
+            <div className="mb-5 flex size-12 items-center justify-center rounded-xl bg-white/10 text-orange-400 shadow-inner">
               <LockKeyhole aria-hidden="true" size={24} />
             </div>
             <h2 className="text-3xl font-bold tracking-tight font-display">Seus dados sempre protegidos</h2>
-            <p className="mt-4 max-w-xl leading-8 text-blue-100 font-medium">
+            <p className="mt-4 max-w-xl leading-8 text-blue-100/90 font-medium">
               Todo o tratamento de dados no Portal Encaixe segue rigorosamente a LGPD. O profissional mantém controle total sobre seus dados e consentimentos.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            {["Consentimento explícito", "Privacidade de dados", "Histórico de auditoria", "Segurança por perfil"].map((item) => (
-              <div key={item} className="rounded-xl border border-white/10 bg-white/5 p-5 text-sm font-semibold tracking-wide text-blue-100 flex items-center gap-3">
+            {["Consentimento explícito", "Privacidade de dados", "Histórico de auditoria", "Segurança por perfil"].map((item, idx) => (
+              <div key={item} className="reveal-on-scroll rounded-xl border border-white/10 bg-white/5 p-5 text-sm font-semibold tracking-wide text-blue-100 flex items-center gap-3" style={{ transitionDelay: `${idx * 100}ms` }}>
                 <CheckCircle2 size={16} className="text-orange-400" />
                 {item}
               </div>
@@ -398,11 +590,11 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
       {/* FAQ */}
       <section className="py-20">
         <div className="mx-auto max-w-4xl px-6">
-          <p className="text-xs font-bold uppercase tracking-wider text-orange-500 text-center">FAQ</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-blue-700 text-center font-display">Perguntas Frequentes</h2>
-          <div className="mt-10 divide-y divide-slate-100 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+          <p className="reveal-on-scroll text-xs font-bold uppercase tracking-wider text-orange-500 text-center">FAQ</p>
+          <h2 className="reveal-on-scroll mt-2 text-3xl font-bold tracking-tight text-blue-700 text-center font-display">Perguntas Frequentes</h2>
+          <div className="reveal-on-scroll mt-10 divide-y divide-slate-100 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
             {faq.map(([question, answer]) => (
-              <details key={question} className="group p-5 transition-all duration-300">
+              <details key={question} className="group p-5 transition-all duration-300 hover:bg-slate-50/50">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-bold text-blue-750 font-display">
                   {question}
                   <ChevronDown aria-hidden="true" className="shrink-0 text-slate-400 transition group-open:rotate-180" size={18} />
@@ -417,12 +609,12 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
       {/* CTA Final */}
       <section className="bg-[#F1F4F8] py-16">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="rounded-3xl bg-gradient-to-br from-[#0F2D4E] to-[#1B4E78] p-8 md:p-12 shadow-xl text-white flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+          <div className="reveal-on-scroll rounded-3xl bg-gradient-to-br from-[#0F2D4E] to-[#1B4E78] p-8 md:p-12 shadow-xl text-white flex flex-col md:flex-row md:items-center md:justify-between gap-8">
             <div>
               <h2 className="text-3xl font-bold tracking-tight font-display">Pronto para dar o próximo passo?</h2>
               <p className="mt-2 text-sm text-blue-200 max-w-md font-medium">Faça seu cadastro agora mesmo, estruture seu currículo e conecte-se com as melhores empresas.</p>
             </div>
-            <Link href="/register" className="btn-primary py-4 px-6 rounded-xl flex items-center gap-2 shadow-lg shadow-orange-500/25 self-start md:self-auto text-sm">
+            <Link href="/register" className="btn-primary py-4 px-6 rounded-xl flex items-center gap-2 shadow-lg shadow-orange-500/25 self-start md:self-auto text-sm hover:scale-[1.04] transition-all animate-pulse-glow">
               Criar Cadastro
               <ArrowRight aria-hidden="true" size={18} />
             </Link>

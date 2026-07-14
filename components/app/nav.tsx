@@ -30,6 +30,7 @@ import {
 import type { AppRole } from "@/lib/auth/access";
 import { signOutAction } from "@/lib/actions/auth";
 import { type AppLanguage, translateUi } from "@/lib/i18n/ui";
+import { PortalEncaixeLogo } from "@/components/app/logo";
 
 const navItems = {
   admin: {
@@ -109,19 +110,11 @@ export function AppNav({ role, preferredLanguage }: { role: AppRole; preferredLa
   if (role === "admin") {
     return (
       <>
-        <header className="sticky top-0 z-40 border-b-4 border-[#d6a238] bg-[#18212f] text-white shadow-[0_10px_30px_rgba(15,23,42,0.18)] lg:hidden">
+        <header className="sticky top-0 z-40 border-b-4 border-[#F2811D] bg-[#0F2D4E] text-white shadow-[0_10px_30px_rgba(15,23,42,0.18)] lg:hidden">
           <div className="mx-auto max-w-7xl px-3 py-3 sm:px-5">
             <div className="flex items-center justify-between gap-3">
               <Link href="/admin" className="flex min-w-0 flex-1 items-center gap-3">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded border border-white/20 bg-[#d6a238] text-[#18212f]">
-                  <BriefcaseBusiness aria-hidden="true" size={20} />
-                </span>
-                <span className="min-w-0">
-                  <span className="block truncate text-sm font-semibold uppercase tracking-normal">
-                    {preferredLanguage === "en-US" ? "Professional Screening" : preferredLanguage === "es-ES" ? "Triagem Profesional" : "Triagem Profissional"}
-                  </span>
-                  <span className="block truncate text-xs text-slate-300">{translated.subtitle}</span>
-                </span>
+                <PortalEncaixeLogo />
               </Link>
               <button
                 type="button"
@@ -129,7 +122,7 @@ export function AppNav({ role, preferredLanguage }: { role: AppRole; preferredLa
                 aria-expanded={isAdminMenuOpen}
                 aria-label={isAdminMenuOpen ? "Fechar menu administrativo" : "Abrir menu administrativo"}
                 onClick={() => setIsAdminMenuOpen((current) => !current)}
-                className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 border border-white/15 bg-white/8 px-3 py-2 text-sm font-semibold text-slate-100 transition hover:border-[#d6a238] hover:text-white"
+                className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 border border-white/15 bg-white/8 px-3 py-2 text-sm font-semibold text-slate-100 transition hover:border-[#F2811D] hover:text-white"
               >
                 {isAdminMenuOpen ? <X aria-hidden="true" size={18} /> : <Menu aria-hidden="true" size={18} />}
                 <span>Menu</span>
@@ -151,27 +144,19 @@ export function AppNav({ role, preferredLanguage }: { role: AppRole; preferredLa
           <aside
             id="admin-mobile-sidebar"
             className={[
-              "absolute inset-y-0 left-0 flex w-[min(86vw,20rem)] max-w-full flex-col border-r-4 border-[#d6a238] bg-[#18212f] text-white shadow-[12px_0_32px_rgba(15,23,42,0.3)] transition-transform duration-200",
+              "absolute inset-y-0 left-0 flex w-[min(86vw,20rem)] max-w-full flex-col border-r-4 border-[#F2811D] bg-[#0F2D4E] text-white shadow-[12px_0_32px_rgba(15,23,42,0.3)] transition-transform duration-200",
               isAdminMenuOpen ? "translate-x-0" : "-translate-x-full"
             ].join(" ")}
           >
             <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-4">
               <Link href="/admin" onClick={() => setIsAdminMenuOpen(false)} className="flex min-w-0 items-center gap-3">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded border border-white/20 bg-[#d6a238] text-[#18212f]">
-                  <BriefcaseBusiness aria-hidden="true" size={20} />
-                </span>
-                <span className="min-w-0">
-                  <span className="block truncate text-sm font-semibold uppercase tracking-normal">
-                    {preferredLanguage === "en-US" ? "Professional Screening" : preferredLanguage === "es-ES" ? "Triagem Profesional" : "Triagem Profissional"}
-                  </span>
-                  <span className="block truncate text-xs text-slate-300">{translated.subtitle}</span>
-                </span>
+                <PortalEncaixeLogo />
               </Link>
               <button
                 type="button"
                 aria-label="Fechar menu administrativo"
                 onClick={() => setIsAdminMenuOpen(false)}
-                className="inline-flex size-10 shrink-0 items-center justify-center border border-white/15 bg-white/8 text-slate-100 transition hover:border-[#d6a238] hover:text-white"
+                className="inline-flex size-10 shrink-0 items-center justify-center border border-white/15 bg-white/8 text-slate-100 transition hover:border-[#F2811D] hover:text-white"
               >
                 <X aria-hidden="true" size={18} />
               </button>
@@ -190,7 +175,7 @@ export function AppNav({ role, preferredLanguage }: { role: AppRole; preferredLa
                     className={[
                       "inline-flex min-h-11 w-full min-w-0 items-center gap-3 border px-3 py-2 text-sm font-semibold transition",
                       isActive
-                        ? "border-[#d6a238] bg-[#d6a238] text-[#18212f]"
+                        ? "border-[#F2811D] bg-[#F2811D] text-white"
                         : "border-transparent text-slate-200 hover:border-white/25 hover:bg-white/10 hover:text-white"
                     ].join(" ")}
                   >
@@ -212,18 +197,10 @@ export function AppNav({ role, preferredLanguage }: { role: AppRole; preferredLa
           </aside>
         </div>
 
-        <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r-4 border-[#d6a238] bg-[#18212f] text-white shadow-[12px_0_32px_rgba(15,23,42,0.18)] lg:flex">
+        <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r-4 border-[#F2811D] bg-[#0F2D4E] text-white shadow-[12px_0_32px_rgba(15,23,42,0.18)] lg:flex">
           <div className="border-b border-white/10 px-5 py-5">
             <Link href="/admin" className="flex items-center gap-3">
-              <span className="flex size-12 shrink-0 items-center justify-center rounded border border-white/20 bg-[#d6a238] text-[#18212f]">
-                <BriefcaseBusiness aria-hidden="true" size={22} />
-              </span>
-              <span className="min-w-0">
-                <span className="block truncate text-sm font-semibold uppercase tracking-normal">
-                  {preferredLanguage === "en-US" ? "Professional Screening" : preferredLanguage === "es-ES" ? "Triagem Profesional" : "Triagem Profissional"}
-                </span>
-                <span className="block truncate text-xs text-slate-300">{translated.subtitle}</span>
-              </span>
+              <PortalEncaixeLogo />
             </Link>
           </div>
 
@@ -239,7 +216,7 @@ export function AppNav({ role, preferredLanguage }: { role: AppRole; preferredLa
                   className={[
                     "inline-flex min-h-11 w-full items-center gap-3 border px-3 py-2 text-sm font-semibold transition",
                     isActive
-                      ? "border-[#d6a238] bg-[#d6a238] text-[#18212f] shadow-sm"
+                      ? "border-[#F2811D] bg-[#F2811D] text-white shadow-sm"
                       : "border-transparent text-slate-200 hover:border-white/20 hover:bg-white/10 hover:text-white"
                   ].join(" ")}
                 >
@@ -264,23 +241,17 @@ export function AppNav({ role, preferredLanguage }: { role: AppRole; preferredLa
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b-4 border-[#d6a238] bg-[#18212f] text-white shadow-[0_10px_30px_rgba(15,23,42,0.18)]">
+    <header className="sticky top-0 z-40 border-b-4 border-[#F2811D] bg-[#0F2D4E] text-white shadow-[0_10px_30px_rgba(15,23,42,0.18)]">
       <div className="mx-auto max-w-7xl px-3 py-3 sm:px-5">
         <div className="flex items-center justify-between gap-3">
           <Link href={nav.items[0].href} className="flex min-w-0 flex-1 items-center gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded border border-white/20 bg-[#d6a238] text-[#18212f] sm:size-11">
-              <BriefcaseBusiness aria-hidden="true" size={20} />
-            </span>
-            <span className="min-w-0">
-              <span className="block truncate text-sm font-semibold uppercase tracking-normal">{preferredLanguage === "en-US" ? "Professional Screening" : preferredLanguage === "es-ES" ? "Triagem Profesional" : "Triagem Profissional"}</span>
-              <span className="block truncate text-xs text-slate-300">{translated.subtitle}</span>
-            </span>
+            <PortalEncaixeLogo />
           </Link>
           <button
             type="button"
             aria-expanded={!isCollapsed}
             onClick={() => setIsCollapsed((current) => !current)}
-            className="inline-flex min-h-10 shrink-0 items-center gap-2 border border-white/15 bg-white/8 px-3 py-2 text-sm font-semibold text-slate-100 transition hover:border-[#d6a238] hover:text-white"
+            className="inline-flex min-h-10 shrink-0 items-center gap-2 border border-white/15 bg-white/8 px-3 py-2 text-sm font-semibold text-slate-100 transition hover:border-[#F2811D] hover:text-white"
           >
             {isCollapsed ? <ChevronDown aria-hidden="true" size={16} /> : <ChevronUp aria-hidden="true" size={16} />}
             <span className="hidden sm:inline">{preferredLanguage === "en-US" ? (isCollapsed ? "Show menu" : "Collapse menu") : preferredLanguage === "es-ES" ? (isCollapsed ? "Mostrar menu" : "Ocultar menu") : (isCollapsed ? "Mostrar menu" : "Recolher menu")}</span>
@@ -301,7 +272,7 @@ export function AppNav({ role, preferredLanguage }: { role: AppRole; preferredLa
                   className={[
                     "inline-flex min-h-10 shrink-0 items-center justify-start gap-2 border px-3 py-2 text-left text-xs font-semibold transition sm:text-sm",
                     isActive
-                      ? "border-[#d6a238] bg-[#d6a238] text-[#18212f]"
+                      ? "border-[#F2811D] bg-[#F2811D] text-white"
                       : "border-transparent text-slate-200 hover:border-white/25 hover:bg-white/10 hover:text-white"
                   ].join(" ")}
                 >

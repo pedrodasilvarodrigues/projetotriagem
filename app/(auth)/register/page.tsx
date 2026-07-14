@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, BriefcaseBusiness, Building2, CheckCircle2, UserRoundCheck } from "lucide-react";
+import { ArrowRight, Building2, CheckCircle2, UserRoundCheck } from "lucide-react";
 import { CompanyRegisterForm } from "@/components/auth/company-register-form";
 import { ProfessionalRegisterForm } from "@/components/auth/professional-register-form";
 import { signInWithGoogleAction } from "@/lib/actions/auth";
 import { resolveAuthenticatedEntryPath } from "@/lib/auth/entry";
 import { createServerClient } from "@/lib/supabase/server";
+import { PortalEncaixeLogo } from "@/components/app/logo";
 
 export const dynamic = "force-dynamic";
 
@@ -42,21 +43,22 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
   const isCompany = accountType === "company";
 
   return (
-    <main id="conteudo" className="grid min-h-screen bg-slate-50 text-slate-950 lg:grid-cols-[minmax(0,0.88fr)_minmax(620px,1fr)]">
+    <main id="conteudo" className="grid min-h-screen bg-[#F1F4F8] text-slate-900 lg:grid-cols-[minmax(0,0.88fr)_minmax(620px,1fr)]">
       <section className="relative hidden overflow-hidden lg:block">
         <img
           src="https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1500&q=85"
-          alt="Reuniao profissional para contratação"
+          alt="Reunião profissional para contratação"
           className="h-full w-full object-cover"
         />
         <div className="absolute inset-0 bg-slate-950/38" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,45,78,0.30),rgba(15,45,78,0.85))]" />
         <div className="absolute inset-x-0 bottom-0 p-10 text-white">
           <div className="max-w-lg">
-            <p className="inline-flex items-center gap-2 rounded-md bg-white/15 px-3 py-1 text-sm font-medium ring-1 ring-white/20">
-              <CheckCircle2 aria-hidden="true" size={16} />
+            <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold ring-1 ring-white/20">
+              <CheckCircle2 aria-hidden="true" size={14} className="text-orange-400" />
               Cadastro gratuito
             </p>
-            <h1 className="mt-5 text-3xl font-semibold leading-tight tracking-normal">Um perfil completo aumenta a clareza da triagem e das oportunidades.</h1>
+            <h1 className="mt-5 text-3xl font-bold leading-tight tracking-normal font-display">Um perfil completo aumenta a clareza da triagem e das oportunidades.</h1>
           </div>
         </div>
       </section>
@@ -64,47 +66,44 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
       <section className="flex min-h-screen items-start justify-center overflow-y-auto px-6 py-8">
         <div className="w-full max-w-2xl">
           <div className="mb-6 flex items-center justify-between gap-4">
-            <Link href="/" className="flex items-center gap-3 font-semibold">
-              <span className="flex size-10 items-center justify-center rounded-md bg-blue-700 text-white">
-                <BriefcaseBusiness aria-hidden="true" size={21} />
-              </span>
-              <span>Portal de Triagem</span>
+            <Link href="/" className="flex items-center gap-3">
+              <PortalEncaixeLogo />
             </Link>
-            <Link href="/login" className="text-sm font-semibold text-blue-700 hover:underline">
+            <Link href="/login" className="btn-secondary py-2 px-4 rounded-xl text-xs sm:text-sm bg-white shadow-sm">
               Entrar
             </Link>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-3xl font-semibold tracking-normal">Crie sua conta</h2>
-            <p className="mt-3 text-sm leading-6 text-slate-600">Escolha o perfil agora para acessar a área correta depois do login.</p>
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_22px_70px_rgba(15,23,42,0.08)] sm:p-8">
+            <h2 className="text-3xl font-extrabold tracking-tight text-blue-750 font-display font-display">Crie sua conta</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-500 font-medium font-sans">Escolha o perfil adequado para acessar a área correta depois do login.</p>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <Link href="/register?type=professional" className={`flex items-start gap-3 rounded-md border p-4 text-left transition ${!isCompany ? "border-blue-700 bg-blue-50 text-blue-950" : "border-slate-200 bg-white text-slate-700 hover:border-blue-200"}`}>
-                <UserRoundCheck aria-hidden="true" className={!isCompany ? "text-blue-700" : "text-slate-500"} size={22} />
+              <Link href="/register?type=professional" className={`flex items-start gap-3 rounded-xl border p-4 text-left transition ${!isCompany ? "border-orange-500 bg-orange-50/50 text-blue-950 shadow-inner" : "border-slate-200 bg-white text-slate-700 hover:border-orange-200"}`}>
+                <UserRoundCheck aria-hidden="true" className={!isCompany ? "text-orange-500" : "text-slate-500"} size={22} />
                 <span>
-                  <strong className="block text-sm">Sou Profissional</strong>
-                  <span className="mt-1 block text-xs leading-5">Perfil, currículo e processos.</span>
+                  <strong className="block text-sm font-bold text-blue-700 font-display">Sou Profissional</strong>
+                  <span className="mt-1 block text-xs leading-5 text-slate-500 font-medium">Perfil, currículo e processos de encaminhamento.</span>
                 </span>
               </Link>
-              <Link href="/register?type=company" className={`flex items-start gap-3 rounded-md border p-4 text-left transition ${isCompany ? "border-blue-700 bg-blue-50 text-blue-950" : "border-slate-200 bg-white text-slate-700 hover:border-blue-200"}`}>
-                <Building2 aria-hidden="true" className={isCompany ? "text-blue-700" : "text-slate-500"} size={22} />
+              <Link href="/register?type=company" className={`flex items-start gap-3 rounded-xl border p-4 text-left transition ${isCompany ? "border-orange-500 bg-orange-50/50 text-blue-950 shadow-inner" : "border-slate-200 bg-white text-slate-700 hover:border-orange-200"}`}>
+                <Building2 aria-hidden="true" className={isCompany ? "text-orange-500" : "text-slate-500"} size={22} />
                 <span>
-                  <strong className="block text-sm">Sou Empresa</strong>
-                  <span className="mt-1 block text-xs leading-5">Demandas e candidatos encaminhados.</span>
+                  <strong className="block text-sm font-bold text-blue-700 font-display">Sou Empresa</strong>
+                  <span className="mt-1 block text-xs leading-5 text-slate-500 font-medium">Cadastro de demandas privadas e candidatos apresentados.</span>
                 </span>
               </Link>
             </div>
 
             <form action={signInWithGoogleAction} className="mt-6">
               <input type="hidden" name="accountType" value={accountType} />
-              <button className="flex w-full items-center justify-center gap-3 rounded-md border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50" type="submit">
+              <button className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3.5 text-sm font-bold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-orange-200 hover:bg-orange-50/50 hover:shadow-md" type="submit">
                 <GoogleIcon />
-                Cadastro com Google como {isCompany ? "Empresa" : "Profissional"}
+                Continuar com Google como {isCompany ? "Empresa" : "Profissional"}
               </button>
             </form>
 
-            <div className="my-6 flex items-center gap-3 text-xs font-semibold uppercase text-slate-400">
+            <div className="my-6 flex items-center gap-3 text-xs font-bold uppercase text-slate-350">
               <span className="h-px flex-1 bg-slate-200" />
               Cadastro com Email e Senha
               <span className="h-px flex-1 bg-slate-200" />
@@ -113,9 +112,9 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
             {isCompany ? <CompanyRegisterForm error={error} /> : <ProfessionalRegisterForm error={error} />}
           </div>
 
-          <div className="mt-5 rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm leading-6 text-blue-950">
-            Depois do cadastro, entre com email/senha ou Google e você será levado direto para sua área.
-            <ArrowRight aria-hidden="true" className="ml-1 inline" size={15} />
+          <div className="mt-5 rounded-2xl border border-[#dce7f0] bg-[#eef3f7] p-5 text-sm leading-6 text-blue-800 font-medium flex items-center gap-3">
+            <span className="flex-1">Depois do cadastro, você poderá completar seu perfil e começar a usar a plataforma.</span>
+            <ArrowRight aria-hidden="true" className="shrink-0 text-orange-500" size={18} />
           </div>
         </div>
       </section>

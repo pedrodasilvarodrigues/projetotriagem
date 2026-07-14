@@ -1,24 +1,22 @@
 import Link from "next/link";
-import { BriefcaseBusiness, LogOut, ShieldCheck } from "lucide-react";
+import { LogOut, ShieldCheck } from "lucide-react";
 import { TermsModal } from "@/components/auth/terms-modal";
+import { PortalEncaixeLogo } from "@/components/app/logo";
 
 export function OnboardingLayout({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
   return (
-    <main id="conteudo" className="min-h-screen bg-slate-50 text-slate-950">
+    <main id="conteudo" className="min-h-screen bg-[#F1F4F8] text-slate-950">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-3 font-semibold">
-            <span className="flex size-10 items-center justify-center rounded-md bg-blue-700 text-white">
-              <BriefcaseBusiness aria-hidden="true" size={21} />
-            </span>
-            <span>Portal de Triagem</span>
+            <PortalEncaixeLogo />
           </Link>
           <div className="flex items-center gap-3">
             <div className="hidden items-center gap-2 text-sm text-slate-600 sm:flex">
               <ShieldCheck aria-hidden="true" size={17} />
               Cadastro protegido por LGPD
             </div>
-            <Link href="/auth/sign-out" className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:text-blue-700">
+            <Link href="/auth/sign-out" className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-orange-200 hover:text-orange-500">
               <LogOut aria-hidden="true" size={16} />
               Sair
             </Link>
@@ -27,8 +25,8 @@ export function OnboardingLayout({ title, description, children }: { title: stri
       </header>
       <section className="mx-auto max-w-6xl px-6 py-10">
         <div className="mb-8 max-w-3xl">
-          <p className="text-sm font-medium text-blue-700">Primeiro acesso</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-normal">{title}</h1>
+          <p className="text-sm font-medium text-orange-500">Primeiro acesso</p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-normal text-blue-700">{title}</h1>
           <p className="mt-3 text-slate-600">{description}</p>
         </div>
         {children}
@@ -41,7 +39,7 @@ export function Field({ label, name, type = "text", required = true }: { label: 
   return (
     <label className="block text-sm font-medium text-slate-800">
       {label}
-      <input name={name} type={type} required={required} className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 focus:border-blue-700" />
+      <input name={name} type={type} required={required} className="mt-1 field-input" />
     </label>
   );
 }

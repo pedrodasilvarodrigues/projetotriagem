@@ -4,6 +4,7 @@ import { ArrowRight, BadgeCheck, BriefcaseBusiness, Building2, CheckCircle2, Loc
 import { signInWithEmailAction, signInWithGoogleAction } from "@/lib/actions/auth";
 import { resolveAuthenticatedEntryPath } from "@/lib/auth/entry";
 import { createServerClient, hasSupabasePublicEnv } from "@/lib/supabase/server";
+import { PortalEncaixeLogo } from "@/components/app/logo";
 
 const errorMessages: Record<string, string> = {
   "sessao-expirada": "Sua sessão expirou. Entre novamente para continuar.",
@@ -69,7 +70,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const message = params.message ? decodeURIComponent(params.message) : null;
 
   return (
-    <main id="conteudo" className="min-h-screen bg-[#eef3f7] text-slate-950">
+    <main id="conteudo" className="min-h-screen bg-[#F1F4F8] text-slate-900">
       <div className="grid min-h-screen lg:grid-cols-[minmax(0,1fr)_minmax(480px,0.72fr)]">
         <section className="relative min-h-[360px] overflow-hidden lg:min-h-screen">
           <img
@@ -78,86 +79,80 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             className="absolute inset-0 h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-slate-950/52" />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.18),rgba(15,23,42,0.72))]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,45,78,0.30),rgba(15,45,78,0.85))]" />
 
           <div className="relative flex min-h-[360px] flex-col justify-between p-6 text-white sm:p-8 lg:min-h-screen lg:p-10">
-            <Link href="/" className="flex w-fit items-center gap-3 font-semibold">
-              <span className="flex size-11 items-center justify-center rounded-md bg-white text-blue-700 shadow-sm">
-                <BriefcaseBusiness aria-hidden="true" size={22} />
-              </span>
-              <span>Portal de Triagem</span>
+            <Link href="/" className="flex w-fit items-center gap-3">
+              <PortalEncaixeLogo lightText />
             </Link>
 
             <div className="max-w-2xl">
-              <p className="inline-flex items-center gap-2 rounded-md bg-white/14 px-3 py-1.5 text-sm font-medium ring-1 ring-white/20">
-                <BadgeCheck aria-hidden="true" size={16} />
+              <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold ring-1 ring-white/20">
+                <BadgeCheck aria-hidden="true" size={14} className="text-orange-400" />
                 Acompanhamento profissional e privado
               </p>
-              <h1 className="mt-5 max-w-2xl text-4xl font-semibold leading-tight tracking-normal lg:text-5xl">
+              <h1 className="mt-5 max-w-2xl text-4xl font-bold leading-tight tracking-normal lg:text-5xl font-display">
                 Entre para acompanhar processos com clareza.
               </h1>
-              <p className="mt-5 max-w-xl text-base leading-7 text-blue-50">
+              <p className="mt-5 max-w-xl text-base leading-7 text-blue-100/90 font-medium">
                 Acesse sua área para visualizar oportunidades, situação da triagem, documentos e próximos passos em uma jornada organizada.
               </p>
 
               <div className="mt-7 grid max-w-2xl gap-3 sm:grid-cols-3">
                 {highlights.map((item) => (
-                  <div key={item.label} className="rounded-lg border border-white/18 bg-white/12 p-4 backdrop-blur">
-                    <strong className="block text-2xl font-semibold tracking-normal">{item.value}</strong>
-                    <span className="mt-1 block text-xs leading-5 text-blue-50">{item.label}</span>
+                  <div key={item.label} className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+                    <strong className="block text-2xl font-extrabold tracking-tight text-white">{item.value}</strong>
+                    <span className="mt-1 block text-xs leading-5 text-slate-300 font-semibold uppercase tracking-wider">{item.label}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="hidden max-w-xl gap-3 text-sm text-blue-50 md:flex">
-              <span className="inline-flex items-center gap-2 rounded-md bg-white/10 px-3 py-2 ring-1 ring-white/15">
-                <ShieldCheck aria-hidden="true" size={16} />
+            <div className="hidden max-w-xl gap-3 text-sm text-slate-300 md:flex">
+              <span className="inline-flex items-center gap-2 rounded-xl bg-white/5 px-3.5 py-2 ring-1 ring-white/10 font-semibold text-xs">
+                <ShieldCheck aria-hidden="true" size={14} className="text-orange-400" />
                 LGPD
               </span>
-              <span className="inline-flex items-center gap-2 rounded-md bg-white/10 px-3 py-2 ring-1 ring-white/15">
-                <UserRoundCheck aria-hidden="true" size={16} />
+              <span className="inline-flex items-center gap-2 rounded-xl bg-white/5 px-3.5 py-2 ring-1 ring-white/10 font-semibold text-xs">
+                <UserRoundCheck aria-hidden="true" size={14} className="text-orange-400" />
                 Perfil validado
               </span>
-              <span className="inline-flex items-center gap-2 rounded-md bg-white/10 px-3 py-2 ring-1 ring-white/15">
-                <Building2 aria-hidden="true" size={16} />
+              <span className="inline-flex items-center gap-2 rounded-xl bg-white/5 px-3.5 py-2 ring-1 ring-white/10 font-semibold text-xs">
+                <Building2 aria-hidden="true" size={14} className="text-orange-400" />
                 Empresas cadastradas
               </span>
             </div>
           </div>
         </section>
 
-        <section className="relative flex items-center justify-center px-4 py-8 sm:px-6 lg:px-10">
+        <section className="relative flex items-center justify-center px-4 py-8 sm:px-6 lg:px-10 bg-[#FAFBFC]">
           <div className="w-full max-w-md">
             <div className="mb-5 flex items-center justify-between gap-4 lg:justify-end">
-              <Link href="/" className="flex items-center gap-3 font-semibold lg:hidden">
-                <span className="flex size-10 items-center justify-center rounded-md bg-blue-700 text-white">
-                  <BriefcaseBusiness aria-hidden="true" size={21} />
-                </span>
-                <span>Portal de Triagem</span>
+              <Link href="/" className="flex items-center gap-3 lg:hidden">
+                <PortalEncaixeLogo />
               </Link>
-              <Link href="/register" className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-700">
+              <Link href="/register" className="btn-secondary py-2 px-4 rounded-xl text-xs sm:text-sm">
                 Criar Conta
               </Link>
             </div>
 
-            <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-[0_22px_70px_rgba(15,23,42,0.13)] sm:p-7">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_22px_70px_rgba(15,23,42,0.08)] sm:p-8">
               <div className="mb-6 flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm font-semibold text-blue-700">Acesso ao portal</p>
-                  <h2 className="mt-2 text-3xl font-semibold tracking-normal">Bem-vindo de volta</h2>
+                  <p className="text-xs font-bold uppercase tracking-wider text-orange-500 font-display">Acesso ao portal</p>
+                  <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-blue-750 font-display">Bem-vindo de volta</h2>
                 </div>
-                <div className="hidden size-12 items-center justify-center rounded-md bg-blue-50 text-blue-700 sm:flex">
+                <div className="hidden size-12 items-center justify-center rounded-xl bg-orange-50 text-orange-500 sm:flex shadow-inner">
                   <LockKeyhole aria-hidden="true" size={23} />
                 </div>
               </div>
-              <p className="text-sm leading-6 text-slate-600">Acompanhe seus processos, oportunidades e encaminhamentos em um ambiente seguro.</p>
+              <p className="text-sm leading-6 text-slate-500 font-medium">Acompanhe seus processos, oportunidades e encaminhamentos em um ambiente seguro.</p>
 
               {error ? (
-                <div className="mt-5 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+                <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 font-medium" role="alert">
                   {errorMessages[error] ?? error}
                   {error === "email-nao-confirmado" ? (
-                    <Link href="/confirm-email" className="mt-2 block font-semibold text-red-800 underline underline-offset-4">
+                    <Link href="/confirm-email" className="mt-2 block font-bold text-red-800 underline underline-offset-4">
                       Liberar acesso agora
                     </Link>
                   ) : null}
@@ -165,10 +160,10 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
               ) : null}
 
               {message ? (
-                <div className="mt-5 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700" role="status">
+                <div className="mt-5 rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700 font-medium" role="status">
                   {messageMap[message] ?? message}
                   {message === "confirme-email" ? (
-                    <Link href="/confirm-email" className="mt-2 block font-semibold text-green-800 underline underline-offset-4">
+                    <Link href="/confirm-email" className="mt-2 block font-bold text-green-800 underline underline-offset-4">
                       Liberar acesso agora
                     </Link>
                   ) : null}
@@ -176,69 +171,69 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
               ) : null}
 
               {!isSupabaseConfigured ? (
-                <div className="mt-5 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800" role="status">
+                <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800" role="status">
                   Configure NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY na Vercel para liberar o acesso.
                 </div>
               ) : null}
 
               <form action={signInWithEmailAction} className="mt-6 space-y-4">
-                <label className="block text-sm font-semibold text-slate-800">
+                <label className="block text-sm font-bold text-slate-800">
                   Email
-                  <span className="mt-2 flex items-center gap-3 rounded-md border border-slate-300 bg-slate-50 px-3 py-3 shadow-inner transition focus-within:border-blue-700 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100">
+                  <span className="mt-2 flex items-center gap-3 rounded-xl border border-slate-300 bg-slate-50 px-3 py-3 shadow-inner transition focus-within:border-orange-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-100">
                     <Mail aria-hidden="true" className="text-slate-400" size={18} />
-                    <input name="email" required type="email" autoComplete="email" placeholder="seu@email.com" className="min-w-0 flex-1 bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400" />
+                    <input name="email" required type="email" autoComplete="email" placeholder="seu@email.com" className="min-w-0 flex-1 bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400 font-medium" />
                   </span>
                 </label>
-                <label className="block text-sm font-semibold text-slate-800">
+                <label className="block text-sm font-bold text-slate-800">
                   Senha
-                  <span className="mt-2 flex items-center gap-3 rounded-md border border-slate-300 bg-slate-50 px-3 py-3 shadow-inner transition focus-within:border-blue-700 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100">
+                  <span className="mt-2 flex items-center gap-3 rounded-xl border border-slate-300 bg-slate-50 px-3 py-3 shadow-inner transition focus-within:border-orange-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-100">
                     <LockKeyhole aria-hidden="true" className="text-slate-400" size={18} />
-                    <input name="password" required type="password" minLength={6} autoComplete="current-password" placeholder="Digite sua senha" className="min-w-0 flex-1 bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400" />
+                    <input name="password" required type="password" minLength={6} autoComplete="current-password" placeholder="Digite sua senha" className="min-w-0 flex-1 bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400 font-medium" />
                   </span>
                 </label>
                 <div className="flex justify-end">
-                  <Link href="/forgot-password" className="text-sm font-semibold text-blue-700 hover:underline">
+                  <Link href="/forgot-password" className="text-xs font-bold text-orange-500 hover:underline">
                     Esqueci minha senha
                   </Link>
                 </div>
-                <button className="group inline-flex w-full items-center justify-center gap-2 rounded-md bg-blue-700 px-4 py-3.5 text-sm font-semibold text-white shadow-[0_14px_32px_rgba(29,78,216,0.28)] transition hover:-translate-y-0.5 hover:bg-blue-800 hover:shadow-[0_18px_42px_rgba(29,78,216,0.34)] disabled:cursor-not-allowed disabled:bg-slate-400 disabled:shadow-none disabled:hover:translate-y-0" type="submit" disabled={!isSupabaseConfigured}>
+                <button className="btn-primary w-full py-3.5 shadow-lg shadow-orange-500/10 flex items-center justify-center gap-2" type="submit" disabled={!isSupabaseConfigured}>
                   Entrar
                   <ArrowRight aria-hidden="true" className="transition group-hover:translate-x-0.5" size={17} />
                 </button>
               </form>
 
-              <div className="my-6 flex items-center gap-3 text-xs font-semibold uppercase text-slate-400">
+              <div className="my-6 flex items-center gap-3 text-xs font-bold uppercase text-slate-350">
                 <span className="h-px flex-1 bg-slate-200" />
                 OU
                 <span className="h-px flex-1 bg-slate-200" />
               </div>
 
               <form action={signInWithGoogleAction}>
-                <button className="group flex w-full items-center justify-center gap-3 rounded-md border border-slate-300 bg-white px-4 py-3.5 text-sm font-semibold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:shadow-md disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 disabled:shadow-none disabled:hover:translate-y-0" type="submit" disabled={!isSupabaseConfigured}>
+                <button className="group flex w-full items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3.5 text-sm font-bold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-orange-200 hover:bg-orange-50/50 hover:shadow-md disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 disabled:shadow-none disabled:hover:translate-y-0" type="submit" disabled={!isSupabaseConfigured}>
                   <GoogleIcon />
                   Continuar com Google
-                  <ArrowRight aria-hidden="true" className="text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-blue-700" size={16} />
+                  <ArrowRight aria-hidden="true" className="text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-orange-500" size={16} />
                 </button>
               </form>
 
-              <div className="mt-6 rounded-lg border border-blue-100 bg-blue-50 p-4">
+              <div className="mt-6 rounded-2xl border border-slate-200 bg-[#F1F4F8]/50 p-5">
                 <div className="flex items-start gap-3">
-                  <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md bg-white text-blue-700 shadow-sm">
+                  <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-500 shadow-inner">
                     <CheckCircle2 aria-hidden="true" size={17} />
                   </span>
                   <div>
-                    <p className="text-sm font-semibold text-slate-950">Ainda não faz parte da comunidade?</p>
-                    <p className="mt-1 text-sm leading-6 text-slate-600">Cadastre-se gratuitamente e entre em uma rede de profissionais e empresas em busca de novas oportunidades.</p>
-                    <Link href="/register" className="mt-4 inline-flex items-center gap-2 rounded-md bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800">
+                    <p className="text-sm font-bold text-blue-750 font-display">Ainda não faz parte da comunidade?</p>
+                    <p className="mt-1.5 text-xs leading-5 text-slate-500 font-semibold">Cadastre-se gratuitamente e entre em uma rede de profissionais e empresas em busca de novas oportunidades.</p>
+                    <Link href="/register" className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#0F2D4E] px-4 py-2.5 text-xs font-bold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-blue-800">
                       Criar Cadastro
-                      <ArrowRight aria-hidden="true" size={16} />
+                      <ArrowRight aria-hidden="true" size={15} />
                     </Link>
                   </div>
                 </div>
               </div>
             </div>
 
-            <p className="mt-5 text-center text-xs leading-5 text-slate-500">
+            <p className="mt-5 text-center text-xs leading-5 text-slate-500 font-medium">
               Acesso protegido por Supabase Auth, consentimento LGPD e regras de permissão por perfil.
             </p>
           </div>

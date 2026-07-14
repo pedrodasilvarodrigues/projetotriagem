@@ -17,13 +17,13 @@ export async function AppShell({ title, eyebrow, children }: { title: string; ey
       : "mx-auto min-w-0 max-w-7xl px-3 py-4 sm:px-5 sm:py-6";
 
   return (
-    <div className="min-h-screen bg-[#eef3f7] text-slate-950">
+    <div className="min-h-screen bg-[#F1F4F8] text-slate-950">
       <LanguageRuntime preferredLanguage={language} />
       <AppNav role={role} preferredLanguage={language} />
       <main id="conteudo" className={mainClassName}>
-        <header className="mb-4 border-l-4 border-[#d6a238] bg-transparent py-2 pl-3 sm:mb-6 sm:pl-4">
-          <p className="text-xs font-bold uppercase tracking-normal text-[#38506f]">{translateUi(eyebrow, language)}</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-normal text-[#18212f] sm:text-3xl">{translateUi(title, language)}</h1>
+        <header className="mb-4 border-l-4 border-[#F2811D] bg-transparent py-2 pl-3 sm:mb-6 sm:pl-4">
+          <p className="text-xs font-bold uppercase tracking-normal text-[#6B7280]">{translateUi(eyebrow, language)}</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-normal text-[#0F2D4E] sm:text-3xl">{translateUi(title, language)}</h1>
         </header>
         <section className="min-w-0">{children}</section>
       </main>

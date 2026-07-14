@@ -1,16 +1,13 @@
 import Link from "next/link";
-import { BriefcaseBusiness } from "lucide-react";
+import { PortalEncaixeLogo } from "@/components/app/logo";
 
 export function PublicPageShell({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
   return (
-    <main id="conteudo" className="min-h-screen bg-[#eef3f7] text-slate-950">
+    <main id="conteudo" className="min-h-screen bg-[#F1F4F8] text-slate-950">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-4">
           <Link href="/" className="flex items-center gap-3 font-semibold">
-            <span className="flex size-10 items-center justify-center rounded-md bg-blue-700 text-white">
-              <BriefcaseBusiness aria-hidden="true" size={20} />
-            </span>
-            Triagem Profissional
+            <PortalEncaixeLogo />
           </Link>
           <nav className="flex gap-4 text-sm font-semibold text-slate-600">
             <Link href="/sobre">Sobre</Link>

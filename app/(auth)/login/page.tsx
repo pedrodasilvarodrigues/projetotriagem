@@ -7,23 +7,23 @@ import { createServerClient, hasSupabasePublicEnv } from "@/lib/supabase/server"
 import { PortalEncaixeLogo } from "@/components/app/logo";
 
 const errorMessages: Record<string, string> = {
-  "sessao-expirada": "Sua sessão expirou. Entre novamente para continuar.",
-  "nao-foi-possivel-iniciar-google": "Não foi possível iniciar o login com Google.",
-  "credenciais-invalidas": "Email ou senha inválidos.",
-  "email-nao-confirmado": "Seu e-mail ainda não foi confirmado.",
-  "conta-nao-cadastrada": "Essa conta ainda não possui cadastro no portal. Crie uma conta escolhendo Profissional ou Empresa.",
-  "link-invalido": "Link inválido ou expirado. Solicite um novo acesso.",
-  "configuracao-supabase-incompleta": "Configuração do Supabase pendente. Adicione as variáveis de ambiente na Vercel para ativar o acesso.",
-  "erro-servidor-login": "Não foi possível concluir o login agora. A equipe técnica já tem registros para investigar.",
-  "erro-autenticacao": "Não foi possível entrar agora. Tente novamente em instantes."
+  "sessao-expirada": "Sua sessão expirou por segurança. Por favor, entre novamente para continuar sua jornada.",
+  "nao-foi-possivel-iniciar-google": "Ops! Não conseguimos conectar sua conta Google no momento. Que tal usar e-mail e senha?",
+  "credenciais-invalidas": "E-mail ou senha incorretos. Que tal tentar de novo ou recuperar sua senha?",
+  "email-nao-confirmado": "Falta pouco! Confirme seu e-mail através do link que enviamos para você.",
+  "conta-nao-cadastrada": "Ainda não encontramos essa conta por aqui. Que tal criar seu cadastro como Profissional ou Empresa?",
+  "link-invalido": "O link de acesso expirou ou não é válido. Peça um novo link para continuar.",
+  "configuracao-supabase-incompleta": "A conexão com a plataforma está sendo ativada. Volte em instantes para acessar.",
+  "erro-servidor-login": "Tivemos um problema técnico ao tentar conectar. Nosso time já está trabalhando para corrigir.",
+  "erro-autenticacao": "Não conseguimos autenticar seu acesso agora. Tente novamente em alguns segundos."
 };
 
 const messageMap: Record<string, string> = {
-  "cadastro-criado": "Cadastro criado. Entre com seu email e senha para acessar.",
-  "email-confirmado": "Email confirmado. Entre com seu email e senha para acessar.",
-  "confirme-email": "Cadastro criado. Confirme seu email e entre para continuar.",
-  "senha-atualizada": "Senha atualizada com sucesso. Entre novamente.",
-  saiu: "Você saiu da sua conta."
+  "cadastro-criado": "Seu cadastro foi criado com sucesso! Agora é só entrar com seus dados.",
+  "email-confirmado": "E-mail confirmado com sucesso! Seja bem-vindo ao portal.",
+  "confirme-email": "Cadastro realizado! Enviamos um link de confirmação para o seu e-mail.",
+  "senha-atualizada": "Sua senha foi atualizada. Agora você pode entrar com a nova senha.",
+  saiu: "Você saiu da sua conta. Até logo!"
 };
 
 export const dynamic = "force-dynamic";
@@ -70,7 +70,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const message = params.message ? decodeURIComponent(params.message) : null;
 
   return (
-    <main id="conteudo" className="min-h-screen bg-[#F1F4F8] text-slate-900">
+    <main id="conteudo" className="min-h-screen bg-[#F1F4F8] text-slate-900 relative">
+      <div className="fixed inset-0 grain-overlay opacity-[0.025] pointer-events-none z-[999]" />
       <div className="grid min-h-screen lg:grid-cols-[minmax(0,1fr)_minmax(480px,0.72fr)]">
         <section className="relative min-h-[360px] overflow-hidden lg:min-h-screen">
           <img
@@ -125,7 +126,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           </div>
         </section>
 
-        <section className="relative flex items-center justify-center px-4 py-8 sm:px-6 lg:px-10 bg-[#FAFBFC]">
+        <section className="relative flex items-center justify-center px-4 py-8 sm:px-6 lg:px-10 bg-[#FAFBFC] auth-split-right">
           <div className="w-full max-w-md">
             <div className="mb-5 flex items-center justify-between gap-4 lg:justify-end">
               <Link href="/" className="flex items-center gap-3 lg:hidden">

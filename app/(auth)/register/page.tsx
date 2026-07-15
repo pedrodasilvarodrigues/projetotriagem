@@ -43,7 +43,8 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
   const isCompany = accountType === "company";
 
   return (
-    <main id="conteudo" className="grid min-h-screen bg-[#F1F4F8] text-slate-900 lg:grid-cols-[minmax(0,0.88fr)_minmax(620px,1fr)]">
+    <main id="conteudo" className="grid min-h-screen bg-[#F1F4F8] text-slate-900 lg:grid-cols-[minmax(0,0.88fr)_minmax(620px,1fr)] relative">
+      <div className="fixed inset-0 grain-overlay opacity-[0.025] pointer-events-none z-[999]" />
       <section className="relative hidden overflow-hidden lg:block">
         <img
           src="https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1500&q=85"
@@ -63,7 +64,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
         </div>
       </section>
 
-      <section className="flex min-h-screen items-start justify-center overflow-y-auto px-6 py-8">
+      <section className="relative flex min-h-screen items-start justify-center overflow-y-auto px-6 py-8 auth-split-right">
         <div className="w-full max-w-2xl">
           <div className="mb-6 flex items-center justify-between gap-4">
             <Link href="/" className="flex items-center gap-3">

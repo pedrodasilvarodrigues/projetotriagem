@@ -645,3 +645,115 @@ span[class*="bg-orange-"] {
   background-image: radial-gradient(circle at 1px 1px, rgba(27, 78, 120, 0.04) 1px, transparent 0);
   background-size: 24px 24px;
 }
+
+/* Enquadramento Autoral Puzzle/Encaixe para Telas de Login e Cadastro */
+@media (min-width: 1024px) {
+  .auth-split-right {
+    position: relative;
+  }
+  .auth-split-right::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -24px;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 96px;
+    background-color: #FAFBFC;
+    border-radius: 48px 0 0 48px;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-right: none;
+    box-shadow: -12px 0 24px rgba(15, 23, 42, 0.04);
+    z-index: 10;
+  }
+}
+
+/* Campos de Formulário Customizados e Foco com Glow Laranja */
+.field-input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+select,
+textarea {
+  border-radius: 0.75rem !important; /* rounded-xl */
+  border: 1px solid rgba(203, 213, 225, 0.8) !important;
+  background-color: #FAFBFC !important;
+  transition: all 0.2s ease-in-out !important;
+  font-family: inherit;
+}
+
+.field-input:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="tel"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+  border-color: #F2811D !important; /* Laranja principal */
+  background-color: #ffffff !important;
+  box-shadow: 0 0 0 4px rgba(242, 129, 29, 0.16) !important;
+  outline: none !important;
+}
+
+/* Estilo Premium de Tabelas e Cabeçalhos nos Dashboards */
+table {
+  border-collapse: separate !important;
+  border-spacing: 0 0.5rem !important;
+  width: 100% !important;
+}
+
+table thead th {
+  font-family: var(--font-display) !important;
+  font-weight: 700 !important;
+  color: #1B4E78 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  font-size: 0.72rem !important;
+  padding: 0.75rem 1rem !important;
+  border-bottom: 2px solid rgba(27, 78, 120, 0.08) !important;
+}
+
+table tbody tr {
+  background-color: #ffffff !important;
+  transition: all 0.2s ease !important;
+}
+
+table tbody tr:hover {
+  background-color: rgba(242, 129, 29, 0.015) !important;
+  transform: scale(1.002) !important;
+}
+
+table tbody td {
+  padding: 1rem !important;
+  border-top: 1px solid rgba(226, 232, 240, 0.5) !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5) !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+}
+
+table tbody td:first-child {
+  border-left: 1px solid rgba(226, 232, 240, 0.5) !important;
+  border-top-left-radius: 0.75rem !important;
+  border-bottom-left-radius: 0.75rem !important;
+}
+
+table tbody td:last-child {
+  border-right: 1px solid rgba(226, 232, 240, 0.5) !important;
+  border-top-right-radius: 0.75rem !important;
+  border-bottom-right-radius: 0.75rem !important;
+}
+
+/* Estados Vazios e Placeholders com Assinatura da Marca */
+td[colSpan],
+p[class*="text-slate-500"][class*="text-sm"]:only-child {
+  padding: 2.5rem 1.5rem !important;
+  background: #FAFBFC !important;
+  border: 2px dashed rgba(27, 78, 120, 0.15) !important;
+  border-radius: 1rem !important;
+  text-align: center !important;
+  color: #6B7280 !important;
+  font-weight: 500 !important;
+}

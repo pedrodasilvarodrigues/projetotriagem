@@ -13,7 +13,7 @@ export type ProfessionalDemandCatalogRow = {
   contract_type: string;
   openings: number;
   created_at: string;
-  company: { trade_name: string; segment: string | null } | { trade_name: string; segment: string | null }[] | null;
+  company: { trade_name: string | null } | { trade_name: string | null }[] | null;
 };
 
 export async function listProfessionalDemands(limit = 120): Promise<ProfessionalDemandCatalogRow[]> {
@@ -22,7 +22,7 @@ export async function listProfessionalDemands(limit = 120): Promise<Professional
   const supabase = hasSupabaseAdminEnv() ? createAdminClient() : await createServerClient();
   const { data, error } = await supabase
     .from("demands")
-    .select("id,name,title,description,city,state,modality,contract_type,openings,created_at,company:companies(trade_name,segment)")
+    .select("id,name,title,description,city,state,modality,contract_type,openings,created_at,company:companies(trade_name)")
     .in("status", ["active", "screening"])
     .is("deleted_at", null)
     .order("created_at", { ascending: false })

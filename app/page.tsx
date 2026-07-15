@@ -24,7 +24,7 @@ async function getPublicHomeData(): Promise<{ stats: PublicStats; companies: Pub
       supabase.from("companies").select("id", { count: "exact", head: true }),
       supabase.from("screening_processes").select("id", { count: "exact", head: true }),
       supabase.from("screening_processes").select("id", { count: "exact", head: true }).in("status", ["forwarded", "hired"]),
-      supabase.from("companies").select("trade_name,legal_name,city,state").order("created_at", { ascending: false }).limit(10)
+      supabase.from("companies").select("trade_name,legal_name,city,state").is("deleted_at", null).in("status", ["approved", "active"]).order("created_at", { ascending: false }).limit(10)
     ]);
 
     return {

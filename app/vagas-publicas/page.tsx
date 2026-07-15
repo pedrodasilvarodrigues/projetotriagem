@@ -13,7 +13,7 @@ type DemandRow = {
   contract_type: string;
   openings: number;
   created_at: string;
-  company: { trade_name: string | null; segment: string | null } | { trade_name: string | null; segment: string | null }[] | null;
+  company: { trade_name: string | null } | { trade_name: string | null }[] | null;
 };
 
 const modalityLabels: Record<string, string> = {
@@ -52,8 +52,9 @@ async function getDemands() {
     const supabase = createAdminClient();
     const { data } = await supabase
       .from("demands")
-      .select("id,title,description,city,state,modality,contract_type,openings,created_at,company:companies(trade_name,segment)")
-      .eq("status", "active")
+      .select("id,title,description,city,state,modality,contract_type,openings,created_at,company:companies(trade_name)")
+      .is("deleted_at", null)
+      .in("status", ["active", "screening"])
       .order("created_at", { ascending: false })
       .limit(80);
     return (data ?? []) as unknown as DemandRow[];
@@ -66,8 +67,7 @@ function areaBuckets(demands: DemandRow[]) {
   const buckets = new Map<string, number>();
 
   demands.forEach((demand) => {
-    const company = one(demand.company);
-    const label = company?.segment || demand.title.split(/\s+/).slice(0, 2).join(" ") || "Oportunidades";
+    const label = demand.title.split(/\s+/).slice(0, 2).join(" ") || "Oportunidades";
     buckets.set(label, (buckets.get(label) ?? 0) + 1);
   });
 
@@ -85,7 +85,7 @@ export default async function PublicJobsPage({ searchParams }: { searchParams: P
   const demands = await getDemands();
   const filtered = demands.filter((demand) => {
     const company = one(demand.company);
-    const matchesQuery = containsText(demand.title, query) || containsText(demand.description, query) || containsText(company?.trade_name, query) || containsText(company?.segment, query);
+    const matchesQuery = containsText(demand.title, query) || containsText(demand.description, query) || containsText(company?.trade_name, query);
     const matchesLocal = !local || normalize(`${demand.city}/${demand.state}`).includes(local) || normalize(demand.city).includes(local) || normalize(demand.state).includes(local);
     const matchesModality = !modality || demand.modality === modality;
     return matchesQuery && matchesLocal && matchesModality;
@@ -161,7 +161,7 @@ export default async function PublicJobsPage({ searchParams }: { searchParams: P
                     <h2 className="text-lg font-semibold text-slate-950">{demand.title}</h2>
                     <p className="mt-2 inline-flex items-center gap-1 text-sm text-slate-600">
                       <Building2 aria-hidden="true" size={14} />
-                      {company?.trade_name ?? "Empresa cadastrada"}{company?.segment ? ` · ${company.segment}` : ""}
+                      {company?.trade_name ?? "Empresa cadastrada"}
                     </p>
                   </div>
                   <span className="rounded-md bg-slate-950 px-2.5 py-1 text-xs font-bold text-white">{demand.openings} vaga(s)</span>

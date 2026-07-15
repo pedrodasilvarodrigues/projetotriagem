@@ -18,6 +18,14 @@ type BrasilApiCnpj = {
   uf?: string;
 };
 
+type ViaCepAddress = {
+  erro?: boolean;
+  logradouro?: string;
+  bairro?: string;
+  localidade?: string;
+  uf?: string;
+};
+
 function digits(value: string) {
   return value.replace(/\D/g, "");
 }
@@ -87,6 +95,31 @@ export function CompanyRegisterForm({ error }: { error?: string }) {
     }
   }
 
+  async function lookupCep(value: string) {
+    const rawCep = digits(value);
+    if (rawCep.length !== 8) return;
+    setStatus("Consultando CEP...");
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${rawCep}/json/`);
+      if (!response.ok) {
+        setStatus("CEP não encontrado. Preencha manualmente.");
+        return;
+      }
+      const data = (await response.json()) as ViaCepAddress;
+      if (data.erro) {
+        setStatus("CEP não encontrado. Preencha manualmente.");
+        return;
+      }
+      setStreet(data.logradouro ?? "");
+      setNeighborhood(data.bairro ?? "");
+      setCity(data.localidade ?? "");
+      setState(data.uf ?? "");
+      setStatus("Endereço preenchido automaticamente pelo CEP.");
+    } catch {
+      setStatus("Não foi possível consultar o CEP. Preencha manualmente.");
+    }
+  }
+
   const inputClass = "mt-2 w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-3 text-sm text-slate-950 outline-none transition focus:border-orange-500 focus:bg-white focus:ring-4 focus:ring-orange-100 placeholder:text-slate-400 font-medium shadow-inner";
 
   return (
@@ -121,7 +154,7 @@ export function CompanyRegisterForm({ error }: { error?: string }) {
         <label className="block text-sm font-bold text-slate-800">Nome Fantasia<input name="tradeName" required value={tradeName} onChange={(event) => setTradeName(event.target.value)} className={inputClass} placeholder="Nome Comercial" /></label>
         <label className="block text-sm font-bold text-slate-800">Telefone<input name="phone" required value={phone} onChange={(event) => setPhone(maskPhone(event.target.value))} className={inputClass} placeholder="(00) 00000-0000" /></label>
         <label className="block text-sm font-bold text-slate-800">Email Corporativo (opcional)<input name="corporateEmail" type="email" value={corporateEmail} onChange={(event) => setCorporateEmail(event.target.value)} placeholder="Opcional" className={inputClass} /></label>
-        <label className="block text-sm font-bold text-slate-800">CEP<input name="cep" required value={cep} onChange={(event) => setCep(maskCep(event.target.value))} className={inputClass} placeholder="00000-000" /></label>
+        <label className="block text-sm font-bold text-slate-800">CEP<input name="cep" required value={cep} onBlur={(event) => lookupCep(event.target.value)} onChange={(event) => setCep(maskCep(event.target.value))} className={inputClass} placeholder="00000-000" /></label>
         <label className="block text-sm font-bold text-slate-800 lg:col-span-2">Endereço<input name="street" required value={street} onChange={(event) => setStreet(event.target.value)} className={inputClass} placeholder="Rua / Avenida..." /></label>
         <label className="block text-sm font-bold text-slate-800">Número<input name="addressNumber" required value={number} onChange={(event) => setNumber(event.target.value)} className={inputClass} placeholder="Nº" /></label>
         <label className="block text-sm font-bold text-slate-800">Bairro<input name="neighborhood" required value={neighborhood} onChange={(event) => setNeighborhood(event.target.value)} className={inputClass} placeholder="Bairro" /></label>

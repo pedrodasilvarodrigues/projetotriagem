@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "8mb"
     }
+  },
+  turbopack: {
+    root: process.cwd()
   }
 };
 

@@ -5,7 +5,13 @@ async function getCompanies() {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) return [];
   try {
     const supabase = createAdminClient();
-    const { data } = await supabase.from("companies").select("id,trade_name,city,state,segment,description").eq("status", "approved").order("created_at", { ascending: false }).limit(12);
+    const { data } = await supabase
+      .from("companies")
+      .select("id,trade_name,legal_name,city,state,status")
+      .is("deleted_at", null)
+      .in("status", ["approved", "active"])
+      .order("created_at", { ascending: false })
+      .limit(12);
     return data ?? [];
   } catch {
     return [];
@@ -20,9 +26,9 @@ export default async function PartnerCompaniesPage() {
       <div className="grid gap-4 md:grid-cols-3">
         {companies.map((company) => (
           <article key={company.id} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="font-semibold">{company.trade_name}</h2>
-            <p className="mt-2 text-sm text-slate-600">{company.city}/{company.state} · {company.segment ?? "Segmento em validação"}</p>
-            <p className="mt-3 text-sm leading-6 text-slate-600">{company.description ?? "Empresa parceira da plataforma."}</p>
+            <h2 className="font-semibold">{company.trade_name || company.legal_name || "Empresa parceira"}</h2>
+            <p className="mt-2 text-sm text-slate-600">{[company.city, company.state].filter(Boolean).join("/") || "Brasil"}</p>
+            <p className="mt-3 text-sm leading-6 text-slate-600">Empresa cadastrada e aprovada para registrar demandas e receber profissionais encaminhados pela plataforma.</p>
           </article>
         ))}
         {companies.length === 0 ? <p className="rounded-lg border border-slate-200 bg-white p-5 text-sm text-slate-600">Nenhuma empresa parceira pública no momento.</p> : null}

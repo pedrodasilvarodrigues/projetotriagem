@@ -22,11 +22,11 @@ type DemandRow = {
   contract_type: string;
   openings: number;
   created_at: string;
-  company: { trade_name: string; segment: string | null } | { trade_name: string; segment: string | null }[] | null;
+  company: { trade_name: string | null } | { trade_name: string | null }[] | null;
 };
 
 type PreferredCityRow = { city: string; state: string };
-type CompanySummary = { trade_name: string; segment: string | null };
+type CompanySummary = { trade_name: string };
 
 const modalityLabels: Record<string, string> = {
   presencial: "Presencial",
@@ -133,8 +133,7 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
         containsText(demand.name, query) ||
         containsText(demand.title, query) ||
         containsText(demand.description, query) ||
-        containsText(company?.trade_name, query) ||
-        containsText(company?.segment, query);
+        containsText(company?.trade_name, query);
       const matchesLocal = !local || normalize(`${demand.city}/${demand.state}`).includes(local) || normalize(demand.city).includes(local) || normalize(demand.state).includes(local);
       const matchesModality = !modality || demand.modality === modality;
       return matchesQuery && matchesLocal && matchesModality;
@@ -146,7 +145,7 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
       allDemands
         .map((demand) => one(demand.company))
         .filter((company): company is CompanySummary => Boolean(company?.trade_name))
-        .map((company) => [company.trade_name, company])
+        .map((company) => [company.trade_name, { trade_name: company.trade_name }])
     ).values()
   ).slice(0, 8);
 
@@ -292,7 +291,7 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
             {activeCompanies.map((company) => (
               <article key={company.trade_name} className="border border-slate-200 bg-slate-50 p-4">
                 <p className="text-sm font-semibold text-slate-950">{company.trade_name}</p>
-                <p className="mt-1 text-sm text-slate-600">{company.segment ?? "Segmento em definicao"}</p>
+                <p className="mt-1 text-sm text-slate-600">Empresa com demanda aberta</p>
               </article>
             ))}
             {activeCompanies.length === 0 ? <p className="text-sm text-slate-500">Nenhuma empresa com demanda ativa no momento.</p> : null}
@@ -321,7 +320,7 @@ export default async function ProfessionalHomePage({ searchParams }: { searchPar
                       <h3 className="text-base font-semibold text-slate-950">{demand.title}</h3>
                       <p className="mt-1 inline-flex items-center gap-1 text-sm text-slate-600">
                         <Building2 aria-hidden="true" size={14} />
-                        {company?.trade_name ?? "Empresa cadastrada"}{company?.segment ? ` · ${company.segment}` : ""}
+                        {company?.trade_name ?? "Empresa cadastrada"}
                       </p>
                     </div>
                     <span className="rounded-md bg-blue-700 px-2.5 py-1 text-xs font-bold text-white">{score}% aderente</span>

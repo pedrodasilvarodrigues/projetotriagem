@@ -14,7 +14,7 @@ type DemandRow = {
   contract_type: string;
   openings: number;
   created_at: string;
-  company: { trade_name: string; segment: string | null } | { trade_name: string; segment: string | null }[] | null;
+  company: { trade_name: string | null } | { trade_name: string | null }[] | null;
 };
 
 function one<T>(value: T | T[] | null) {
@@ -64,8 +64,7 @@ export default async function ProfessionalSearchDemandsPage({
       containsText(demand.name, query) ||
       containsText(demand.title, query) ||
       containsText(demand.description, query) ||
-      containsText(company?.trade_name, query) ||
-      containsText(company?.segment, query);
+      containsText(company?.trade_name, query);
     const matchesLocal =
       !local ||
       normalize(`${demand.city}/${demand.state}`).includes(local) ||
@@ -144,7 +143,6 @@ export default async function ProfessionalSearchDemandsPage({
                       <p className="mt-1 inline-flex items-center gap-1 text-sm text-slate-600">
                         <Building2 aria-hidden="true" size={14} />
                         {company?.trade_name ?? "Empresa cadastrada"}
-                        {company?.segment ? ` · ${company.segment}` : ""}
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-600">

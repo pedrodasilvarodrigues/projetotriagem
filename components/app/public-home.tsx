@@ -728,9 +728,9 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
               </div>
               <div className="flex flex-col gap-3 col-span-2 sm:col-span-1">
                 <span className="text-xs font-bold uppercase tracking-widest text-[#F2811D]">Legal</span>
-                <a href="#" className="text-sm text-slate-400 hover:text-white transition">Termos de Uso</a>
-                <a href="#" className="text-sm text-slate-400 hover:text-white transition">Privacidade</a>
-                <a href="#" className="text-sm text-slate-400 hover:text-white transition">LGPD</a>
+                <Link href="/termos-de-uso" className="text-sm text-slate-400 hover:text-white transition">Termos de Uso</Link>
+                <Link href="/privacidade" className="text-sm text-slate-400 hover:text-white transition">Privacidade</Link>
+                <Link href="/lgpd" className="text-sm text-slate-400 hover:text-white transition">LGPD</Link>
               </div>
             </nav>
           </div>

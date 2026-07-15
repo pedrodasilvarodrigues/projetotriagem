@@ -1,10 +1,24 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 export function TermsModal({ label = "Ver Termos" }: { label?: string }) {
   const [open, setOpen] = useState(false);
   const titleId = useId();
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    closeButtonRef.current?.focus();
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
 
   return (
     <>
@@ -12,11 +26,19 @@ export function TermsModal({ label = "Ver Termos" }: { label?: string }) {
         {label}
       </button>
       {open ? (
-        <div aria-labelledby={titleId} aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4" role="dialog">
+        <div
+          aria-labelledby={titleId}
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4"
+          role="dialog"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setOpen(false);
+          }}
+        >
           <div className="max-h-[82vh] w-full max-w-3xl overflow-hidden rounded-lg bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
               <h2 id={titleId} className="text-lg font-semibold text-slate-950">Termos de Uso, Privacidade e LGPD</h2>
-              <button aria-label="Fechar termos" className="rounded-md border border-slate-300 px-3 py-1 text-sm" type="button" onClick={() => setOpen(false)}>
+              <button ref={closeButtonRef} aria-label="Fechar termos" className="rounded-md border border-slate-300 px-3 py-1 text-sm" type="button" onClick={() => setOpen(false)}>
                 Fechar
               </button>
             </div>

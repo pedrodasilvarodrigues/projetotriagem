@@ -68,7 +68,7 @@ export default async function AdminHomePage() {
       title: "Apresentacoes realizadas",
       value: presentations.count,
       detail: "Profissionais encaminhados para empresas",
-      href: "/admin/professionals#apresentar"
+      href: "/admin/demands#apresentar"
     },
     {
       title: "Contratacoes registradas",

@@ -28,6 +28,7 @@ import {
   type LucideIcon
 } from "lucide-react";
 import { PortalEncaixeLogo } from "@/components/app/logo";
+import { PublicHeader } from "@/components/app/public-header";
 
 export type PublicCompany = {
   name: string;
@@ -368,20 +369,9 @@ function InfoCard({ title, text, icon: Icon, delayClass = "" }: { title: string;
 }
 
 export function PublicHome({ stats, companies }: { stats: PublicStats; companies: PublicCompany[] }) {
-  const [scrolled, setScrolled] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
   const companyList = companies.length > 0 ? companies : fallbackCompanies;
   const marqueeItems = useMemo(() => [...companyList, ...companyList], [companyList]);
-
-  useEffect(() => {
-    function onScroll() {
-      setScrolled(window.scrollY > 8);
-    }
-
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     const hasSeen = sessionStorage.getItem("hasSeenSplash");
@@ -435,30 +425,7 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
 
       {showIntro && <PortalEncaixeIntro onComplete={handleIntroComplete} />}
 
-      {/* Header institucional */}
-      <header className={`fixed inset-x-0 top-0 z-50 h-20 border-b transition-all duration-300 ${scrolled ? "border-slate-200/80 bg-white/90 backdrop-blur-md shadow-sm" : "border-transparent bg-white/40 backdrop-blur-sm"}`}>
-        <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-3">
-            <PortalEncaixeLogo />
-          </Link>
-          <nav aria-label="Navegação institucional" className="hidden items-center gap-7 text-sm font-semibold text-slate-500 lg:flex">
-            <a className="transition hover:text-blue-700" href="#inicio">Início</a>
-            <Link className="transition hover:text-blue-700" href="/sobre">Sobre</Link>
-            <Link className="transition hover:text-blue-700" href="/como-funciona">Como Funciona</Link>
-            <Link className="transition hover:text-blue-700" href="/vagas-publicas">Vagas Públicas</Link>
-            <Link className="transition hover:text-blue-700" href="/empresas-parceiras">Empresas Parceiras</Link>
-            <a className="transition hover:text-blue-700" href="#contato">Contato</a>
-          </nav>
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="btn-secondary py-2 px-4 rounded-xl text-xs sm:text-sm bg-white shadow-sm">
-              Entrar
-            </Link>
-            <Link href="/register" className="btn-primary py-2 px-4 rounded-xl text-xs sm:text-sm shadow-md animate-pulse-glow">
-              Criar Conta
-            </Link>
-          </div>
-        </div>
-      </header>
+      <PublicHeader />
 
       {/* Hero Section */}
       <section id="inicio" className="relative bg-gradient-to-b from-white to-[#F1F4F8] pt-32 pb-20 md:pt-40 md:pb-28">
@@ -724,7 +691,7 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
                 <span className="text-xs font-bold uppercase tracking-widest text-[#F2811D]">Empresa</span>
                 <Link href="/login" className="text-sm text-slate-400 hover:text-white transition">Entrar</Link>
                 <Link href="/register" className="text-sm text-slate-400 hover:text-white transition">Cadastrar</Link>
-                <a href="#contato" className="text-sm text-slate-400 hover:text-white transition">Contato</a>
+                <Link href="/contato" className="text-sm text-slate-400 hover:text-white transition">Contato</Link>
               </div>
               <div className="flex flex-col gap-3 col-span-2 sm:col-span-1">
                 <span className="text-xs font-bold uppercase tracking-widest text-[#F2811D]">Legal</span>

@@ -5,6 +5,12 @@ Portal de Triagem Profissional
 Plataforma de recrutamento e triagem profissional que conecta profissionais e empresas por meio de cadastro, banco de talentos, demandas, compatibilidade e encaminhamento qualificado.
 
 # Concluido
+- Páginas públicas pós-análise do vídeo refinadas para conversão:
+  - Criado header público único em `components/app/public-header.tsx`, usado na home e nas páginas internas para manter o mesmo menu visual ao navegar por Sobre, Como funciona, Vagas públicas e Contato.
+  - Criada rota `/contato` com orientação para profissional, empresa e usuários já cadastrados.
+  - Página `/sobre` ganhou conteúdo institucional mais forte, pilares do portal, explicação do ecossistema e CTA para cadastro de currículo.
+  - Página `/como-funciona` virou uma linha de processo completa, explicando cadastro, banco de talentos, demandas, triagem e encaminhamento.
+  - Página `/vagas-publicas` foi redesenhada com métricas, filtros mais claros, cards de vaga premium, áreas com oportunidades e CTA recorrente para cadastrar currículo.
 - Auditoria aprofundada de seguranca/UX tratada em 15/07/2026:
   - Criada migration `20260715000100_harden_company_candidate_rls.sql` para remover leitura ampla de `professionals` por contas empresa.
   - Empresas agora so podem ler profissionais apresentados formalmente ou vinculados a processos visiveis da propria empresa.
@@ -128,6 +134,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 
 # Observacoes
 - As chaves sensiveis do Supabase devem continuar fora do GitHub e ser configuradas em ambiente local/Vercel.
+- Validação das páginas públicas refinadas: `npm run lint` passou e `npm exec next build -- --webpack` passou, gerando 76 rotas incluindo `/contato`.
 - Validacoes da auditoria de 15/07/2026: `npm run lint` passou apos o bloco de seguranca; build passou apos o bloco de seguranca; `npm run lint` e `npm exec next build -- --webpack` passaram apos o bloco de UX. O Next.js 16.2.7 iniciou o build como Turbopack mesmo com a flag `--webpack`.
 - O item da auditoria sobre duplicacao de `demandScore` em `public-home.tsx` nao foi alterado porque o codigo atual nao contem essa duplicacao; a funcao existe apenas na area profissional.
 - As correcoes de perfil/curriculo passaram em `npm run lint` e no build de producao do Next.js 16.2.7.

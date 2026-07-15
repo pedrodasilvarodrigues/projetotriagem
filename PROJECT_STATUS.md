@@ -5,6 +5,19 @@ Portal de Triagem Profissional
 Plataforma de recrutamento e triagem profissional que conecta profissionais e empresas por meio de cadastro, banco de talentos, demandas, compatibilidade e encaminhamento qualificado.
 
 # Concluido
+- Migrations `20260715000100_harden_company_candidate_rls.sql`, `20260715000200_add_courses_training_module.sql` e `20260715172757_harden_course_function_privileges.sql` aplicadas no projeto Supabase de produção `znmlgfllkwtcyvrpmwbt`.
+- Módulo de Cursos validado no banco remoto: seis tabelas com RLS ativa, privilégios mínimos da Data API, RPC de prova restrita a profissionais autenticados, funções internas sem execução pública e nenhuma advertência do advisor relacionada ao módulo.
+- Módulo de Cursos/Treinamento interno implementado:
+  - Criada migration `20260715000200_add_courses_training_module.sql` com tabelas `courses`, `course_quiz_questions`, `course_quiz_options`, `course_attempts`, `course_attempt_answers` e `professional_certifications`.
+  - RLS do módulo de cursos separa permissões: admin gerencia cursos/provas; profissionais leem cursos publicados e tentativas próprias; empresas não acessam curso/prova.
+  - Profissionais não recebem o campo `is_correct`; opções da prova são entregues por RPC sem gabarito e correção/envio é feito pela RPC `submit_course_attempt`.
+  - Banco bloqueia terceira tentativa por trigger e gera certificação automaticamente quando a nota é maior ou igual a 70%.
+  - Compatibilidade passou a considerar bônus de certificação por tags relevantes, com constantes isoladas e teto máximo para não passar de 100%.
+  - Admin ganhou CRUD de cursos em `/admin/courses`, formulário com vídeo, tags, status e construtor de prova.
+  - Admin ganhou tela `/admin/courses/[id]` para editar curso, preservar prova quando já há tentativas e visualizar resultados detalhados questão a questão.
+  - Profissional ganhou aba `/professional/courses`, lista de cursos publicados, status pessoal, vídeo, aviso de 2 tentativas e prova de múltipla escolha.
+  - Certificações aprovadas aparecem no currículo profissional em "Certificações do Portal Encaixe".
+  - Na tela `/admin/demands`, o admin vê bônus de cursos na compatibilidade e consegue expandir cursos relevantes do candidato com nota e respostas da prova.
 - Páginas públicas pós-análise do vídeo refinadas para conversão:
   - Criado header público único em `components/app/public-header.tsx`, usado na home e nas páginas internas para manter o mesmo menu visual ao navegar por Sobre, Como funciona, Vagas públicas e Contato.
   - Criada rota `/contato` com orientação para profissional, empresa e usuários já cadastrados.
@@ -116,7 +129,6 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Fallback no proxy para redirecionar `/?code=...` para `/auth/callback` quando o Supabase retornar o codigo na raiz do dominio correto.
 
 # Pendente
-- Aplicar no Supabase de producao a nova migration `20260715000100_harden_company_candidate_rls.sql`; o conector Supabase disponivel nesta sessao nao listou o projeto citado em `AUTH_SETUP.md` (`znmlgfllkwtcyvrpmwbt`), e os projetos visiveis nao possuem as tabelas do Portal.
 - Persistir as escolhas de modelo/cor do CV no banco, caso a personalizacao precise ser reutilizada em downloads futuros.
 - Configurar SMTP personalizado e credenciais Google OAuth no painel Supabase/Google usando AUTH_SETUP.md.
 - Trocar o Site URL do Supabase para `https://projetotriagem.vercel.app` e configurar dominio customizado de Auth se quiser remover `.supabase.co` da tela do Google.
@@ -133,7 +145,9 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Evoluir os filtros de vagas para salvar pesquisas e alertas por email quando SMTP estiver pronto.
 
 # Observacoes
+- Validação final do módulo de Cursos em produção: `npm run lint` e `npm run build -- --webpack` passaram; o Supabase Database Advisor não retornou alertas do módulo após o endurecimento.
 - As chaves sensiveis do Supabase devem continuar fora do GitHub e ser configuradas em ambiente local/Vercel.
+- Validações do módulo de Cursos: `npm run lint` e `npm exec next build -- --webpack` passaram após schema/RLS, após CRUD/admin, após fluxo profissional e após integração de compatibilidade/currículo.
 - Validação das páginas públicas refinadas: `npm run lint` passou e `npm exec next build -- --webpack` passou, gerando 76 rotas incluindo `/contato`.
 - Validacoes da auditoria de 15/07/2026: `npm run lint` passou apos o bloco de seguranca; build passou apos o bloco de seguranca; `npm run lint` e `npm exec next build -- --webpack` passaram apos o bloco de UX. O Next.js 16.2.7 iniciou o build como Turbopack mesmo com a flag `--webpack`.
 - O item da auditoria sobre duplicacao de `demandScore` em `public-home.tsx` nao foi alterado porque o codigo atual nao contem essa duplicacao; a funcao existe apenas na area profissional.

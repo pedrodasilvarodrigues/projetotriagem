@@ -15,6 +15,7 @@ export type ProfessionalScoringInput = {
   educationLevel: EducationLevel;
   courses: string[];
   certifications: string[];
+  certificationSkillTags?: string[];
   technicalSkills: string[];
   city: string;
   state: string;
@@ -44,6 +45,17 @@ function matchPercent(required: string[], owned: string[]) {
   return normalizedRequired.filter((item) => ownedSet.has(item)).length / normalizedRequired.length;
 }
 
+const CERTIFICATION_BONUS_PER_MATCH = 20;
+const CERTIFICATION_BONUS_CAP = 30;
+
+function certificationBonus(demand: DemandScoringInput, professional: ProfessionalScoringInput) {
+  const demandTags = normalizeList([...demand.requiredCourses, ...demand.requiredCertifications, ...demand.requiredTechnicalSkills]);
+  if (demandTags.length === 0) return 0;
+  const ownedTags = new Set(normalizeList(professional.certificationSkillTags ?? []));
+  const matches = demandTags.filter((tag) => ownedTags.has(tag)).length;
+  return Math.min(CERTIFICATION_BONUS_CAP, matches * CERTIFICATION_BONUS_PER_MATCH);
+}
+
 export function calculateCompatibilityScore(demand: DemandScoringInput, professional: ProfessionalScoringInput) {
   const minimumRank = educationRank[demand.educationMinimum];
   const professionalRank = educationRank[professional.educationLevel];
@@ -56,5 +68,6 @@ export function calculateCompatibilityScore(demand: DemandScoringInput, professi
   const location = sameCity ? 1 : sameState ? 0.6 : demand.modality === "remoto" ? 0.8 : 0;
   const availability = professional.availableInDays === 0 ? 1 : Math.max(0, 1 - professional.availableInDays / 60);
 
-  return Math.round((education * 20 + experience * 25 + coursesAndCerts * 20 + technicalSkills * 20 + location * 10 + availability * 5) * 100) / 100;
+  const baseScore = Math.round((education * 20 + experience * 25 + coursesAndCerts * 20 + technicalSkills * 20 + location * 10 + availability * 5) * 100) / 100;
+  return Math.min(100, baseScore + certificationBonus(demand, professional));
 }

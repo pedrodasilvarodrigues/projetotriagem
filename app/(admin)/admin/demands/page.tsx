@@ -15,6 +15,8 @@ type DemandRow = {
   minimum_experience_months: number;
   education_minimum: string;
   technical_skills: string[] | null;
+  required_courses: string[] | null;
+  required_certifications: string[] | null;
   internal_notes: string | null;
   company: { trade_name: string } | { trade_name: string }[] | null;
 };
@@ -28,6 +30,7 @@ type CandidateScore = {
   experience_score: number | null;
   technical_score: number | null;
   location_score: number | null;
+  certification_bonus_score?: number | null;
   professional:
     | {
         id: string;
@@ -61,6 +64,27 @@ type ProcessRow = {
   status: string;
 };
 
+type CertificationRow = {
+  id: string;
+  course_id: string;
+  professional_id: string;
+  attempt_id: string | null;
+  score: number;
+  approved_at: string;
+  course: { title: string; category: string; skill_tags: string[] | null } | { title: string; category: string; skill_tags: string[] | null }[] | null;
+};
+
+type AttemptAnswerRow = {
+  attempt_id: string;
+  question_id: string;
+  selected_option_id: string | null;
+  correct_option_id: string | null;
+  is_correct: boolean;
+};
+
+type QuestionRow = { id: string; prompt: string };
+type OptionRow = { id: string; option_text: string };
+
 function one<T>(value: T | T[] | null) {
   return Array.isArray(value) ? value[0] : value;
 }
@@ -85,26 +109,38 @@ function statusLabel(status?: string) {
   return status ? labels[status] ?? status : null;
 }
 
+function normalize(value?: string | null) {
+  return (value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
 export default async function AdminDemandsPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string; message?: string; error?: string }> }) {
   const params = await searchParams;
   const supabase = await createServerClient();
   let query = supabase
     .from("demands")
-    .select("id,title,description,openings,status,city,state,salary_min,salary_max,minimum_experience_months,education_minimum,technical_skills,internal_notes,company:companies(trade_name)")
+    .select("id,title,description,openings,status,city,state,salary_min,salary_max,minimum_experience_months,education_minimum,technical_skills,required_courses,required_certifications,internal_notes,company:companies(trade_name)")
     .order("created_at", { ascending: false })
     .limit(80);
 
   if (params.status) query = query.eq("status", params.status);
   if (params.q) query = query.or(`title.ilike.%${params.q}%,description.ilike.%${params.q}%,city.ilike.%${params.q}%`);
 
-  const [{ data: demands }, { data: processes }, { data: scores }] = await Promise.all([
+  const [{ data: demands }, { data: processes }, { data: scores }, { data: certifications }, { data: attemptAnswers }, { data: quizQuestions }, { data: quizOptions }] = await Promise.all([
     query,
     supabase.from("screening_processes").select("id,demand_id,professional_id,status").limit(1200),
     supabase
       .from("compatibility_scores")
-      .select("id,demand_id,professional_id,total_score,education_score,experience_score,technical_score,location_score,professional:professionals(id,full_name,email,phone,desired_role,city,state,status,deleted_at)")
+      .select("id,demand_id,professional_id,total_score,education_score,experience_score,technical_score,location_score,certification_bonus_score,professional:professionals(id,full_name,email,phone,desired_role,city,state,status,deleted_at)")
       .order("total_score", { ascending: false })
-      .limit(2000)
+      .limit(2000),
+    supabase.from("professional_certifications").select("id,course_id,professional_id,attempt_id,score,approved_at,course:courses(title,category,skill_tags)").limit(2000),
+    supabase.from("course_attempt_answers").select("attempt_id,question_id,selected_option_id,correct_option_id,is_correct").limit(5000),
+    supabase.from("course_quiz_questions").select("id,prompt").limit(5000),
+    supabase.from("course_quiz_options").select("id,option_text").limit(10000)
   ]);
 
   const { data: professionalsWithoutScoreFallback } = await supabase
@@ -115,6 +151,23 @@ export default async function AdminDemandsPage({ searchParams }: { searchParams:
     .neq("status", "rejected")
     .order("updated_at", { ascending: false })
     .limit(300);
+
+  const certificationsByProfessional = new Map<string, CertificationRow[]>();
+  ((certifications ?? []) as unknown as CertificationRow[]).forEach((certification) => {
+    const current = certificationsByProfessional.get(certification.professional_id) ?? [];
+    current.push(certification);
+    certificationsByProfessional.set(certification.professional_id, current);
+  });
+
+  const answersByAttempt = new Map<string, AttemptAnswerRow[]>();
+  ((attemptAnswers ?? []) as AttemptAnswerRow[]).forEach((answer) => {
+    const current = answersByAttempt.get(answer.attempt_id) ?? [];
+    current.push(answer);
+    answersByAttempt.set(answer.attempt_id, current);
+  });
+
+  const questionById = new Map(((quizQuestions ?? []) as QuestionRow[]).map((question) => [question.id, question]));
+  const optionById = new Map(((quizOptions ?? []) as OptionRow[]).map((option) => [option.id, option]));
 
   return (
     <AppShell eyebrow="Administrador" title="Demandas">
@@ -166,9 +219,11 @@ export default async function AdminDemandsPage({ searchParams }: { searchParams:
                 experience_score: null,
                 technical_score: null,
                 location_score: null,
+                certification_bonus_score: null,
                 professional
               } satisfies CandidateScore));
             const demandScores = [...scoredCandidates, ...fallbackCandidates].slice(0, 100);
+            const demandTags = new Set([...(demand.technical_skills ?? []), ...(demand.required_courses ?? []), ...(demand.required_certifications ?? [])].map((tag) => normalize(tag)));
 
             return (
               <article key={demand.id} className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
@@ -217,6 +272,10 @@ export default async function AdminDemandsPage({ searchParams }: { searchParams:
                           const currentStatus = statusLabel(currentProcess?.status);
                           const redirectTo = `/admin/demands#apresentar`;
                           const hasScore = score.total_score !== null;
+                          const relevantCertifications = (certificationsByProfessional.get(professional.id) ?? []).filter((certification) => {
+                            const course = one(certification.course);
+                            return (course?.skill_tags ?? []).some((tag) => demandTags.has(normalize(tag)));
+                          });
 
                           return (
                             <div key={`${demand.id}-${professional.id}`} className="grid gap-3 rounded border border-slate-200 bg-white p-3 md:grid-cols-[minmax(0,1fr)_120px_220px] md:items-center">
@@ -226,6 +285,37 @@ export default async function AdminDemandsPage({ searchParams }: { searchParams:
                                 <p className="text-xs text-slate-500">{professional.desired_role ?? "Cargo não informado"} · {professional.city ?? "-"}/{professional.state ?? "-"}</p>
                                 <p className="text-xs text-slate-500">{professional.email ?? "Email não informado"} · {professional.phone ?? "Telefone não informado"}</p>
                                 {currentStatus ? <p className="mt-2 text-xs font-semibold text-blue-700">Já está {currentStatus} nesta demanda.</p> : null}
+                                {relevantCertifications.length > 0 ? (
+                                  <details className="mt-3 rounded-xl border border-green-200 bg-green-50 p-3">
+                                    <summary className="cursor-pointer text-xs font-bold text-green-800">
+                                      {professional.full_name} concluiu {relevantCertifications.length} curso(s) relevante(s)
+                                    </summary>
+                                    <div className="mt-3 space-y-3">
+                                      {relevantCertifications.map((certification) => {
+                                        const course = one(certification.course);
+                                        const answers = certification.attempt_id ? answersByAttempt.get(certification.attempt_id) ?? [] : [];
+                                        return (
+                                          <div key={certification.id} className="rounded-lg bg-white p-3 text-xs text-slate-700">
+                                            <p className="font-bold text-[#0F2D4E]">{course?.title ?? "Curso concluído"} — aprovado com {Number(certification.score).toFixed(0)}%</p>
+                                            <p className="mt-1 text-slate-500">Área: {course?.category ?? "-"} · {new Date(certification.approved_at).toLocaleDateString("pt-BR")}</p>
+                                            {answers.length > 0 ? (
+                                              <div className="mt-2 grid gap-2">
+                                                {answers.map((answer) => (
+                                                  <div key={`${certification.id}-${answer.question_id}`} className="rounded bg-slate-50 p-2">
+                                                    <p className="font-semibold">{questionById.get(answer.question_id)?.prompt ?? "Pergunta"}</p>
+                                                    <p>Escolhida: {optionById.get(answer.selected_option_id ?? "")?.option_text ?? "Sem resposta"}</p>
+                                                    <p>Correta: {optionById.get(answer.correct_option_id ?? "")?.option_text ?? "Não identificada"}</p>
+                                                    <p className={answer.is_correct ? "font-bold text-green-700" : "font-bold text-red-700"}>{answer.is_correct ? "Acertou" : "Errou"}</p>
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            ) : null}
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </details>
+                                ) : null}
                               </div>
                               <div>
                                 <strong className="block text-2xl text-[#18212f]">{hasScore ? `${Number(score.total_score).toFixed(0)}%` : "Pendente"}</strong>
@@ -233,6 +323,7 @@ export default async function AdminDemandsPage({ searchParams }: { searchParams:
                                 <p className="mt-1 text-[0.7rem] text-slate-500">
                                   {hasScore ? `Téc. ${Number(score.technical_score).toFixed(0)} · Exp. ${Number(score.experience_score).toFixed(0)} · Local ${Number(score.location_score).toFixed(0)}` : "Sem pontuação calculada ainda"}
                                 </p>
+                                {Number(score.certification_bonus_score ?? 0) > 0 ? <p className="mt-1 text-[0.7rem] font-bold text-green-700">Bônus cursos: +{Number(score.certification_bonus_score).toFixed(0)}</p> : null}
                               </div>
                               <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-1">
                                 <form action={routeProfessionalToDemandAction}>

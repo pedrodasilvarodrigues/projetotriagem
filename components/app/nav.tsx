@@ -72,6 +72,7 @@ const navItems = {
       { href: "/professional/search-demands", label: "Buscar demandas", icon: Search },
       { href: "/professional/profile", label: "Perfil", icon: UserRoundCog },
       { href: "/professional/resume", label: "Currículo", icon: FileText },
+      { href: "/professional/courses", label: "Cursos", icon: GraduationCap },
       { href: "/professional/screening-status", label: "Situação da Triagem", icon: ClipboardCheck },
       { href: "/professional/referrals", label: "Encaminhamentos", icon: BriefcaseBusiness },
       { href: "/professional/notifications", label: "Notificações", icon: Bell },

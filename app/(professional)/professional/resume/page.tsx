@@ -21,6 +21,7 @@ import { createServerClient } from "@/lib/supabase/server";
 
 type VersionRow = { id: string; version: number; storage_path: string; generated_at: string };
 type CourseRow = { id: string; name: string; institution: string | null; workload_hours: number | null; completed_at: string | null };
+type PortalCertificationRow = { id: string; score: number; approved_at: string; course: { title: string; category: string; workload_hours: number; skill_tags: string[] | null } | { title: string; category: string; workload_hours: number; skill_tags: string[] | null }[] | null };
 type ExperienceRow = { id: string; company_name: string; role_title: string; description: string; started_at: string; ended_at: string | null; is_current: boolean };
 type EducationRow = { id: string; level: string; institution: string; course_name: string; completed_at: string | null };
 type LanguageRow = { id: string; language_name: string; proficiency: string };
@@ -86,6 +87,10 @@ function splitName(fullName?: string | null) {
   };
 }
 
+function one<T>(value: T | T[] | null) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
 export default async function ProfessionalResumePage({ searchParams }: { searchParams: Promise<{ error?: string; message?: string }> }) {
   const params = await searchParams;
   const supabase = await createServerClient();
@@ -97,17 +102,18 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
     .maybeSingle();
   const { data: resume } = professional?.id ? await supabase.from("resumes").select("id,active_version_id").eq("professional_id", professional.id).maybeSingle() : { data: null };
 
-  const [{ data: versions }, { data: courses }, { data: experiences }, { data: educations }, { data: languages }, { data: skills }, { data: settings }] = professional?.id
+  const [{ data: versions }, { data: courses }, { data: portalCertifications }, { data: experiences }, { data: educations }, { data: languages }, { data: skills }, { data: settings }] = professional?.id
     ? await Promise.all([
         resume?.id ? supabase.from("resume_versions").select("id,version,storage_path,generated_at").eq("resume_id", resume.id).order("version", { ascending: false }) : Promise.resolve({ data: [] }),
         supabase.from("professional_courses").select("id,name,institution,workload_hours,completed_at").eq("professional_id", professional.id).order("created_at", { ascending: false }),
+        supabase.from("professional_certifications").select("id,score,approved_at,course:courses(title,category,workload_hours,skill_tags)").eq("professional_id", professional.id).order("approved_at", { ascending: false }),
         supabase.from("professional_experiences").select("id,company_name,role_title,description,started_at,ended_at,is_current").eq("professional_id", professional.id).order("started_at", { ascending: false }),
         supabase.from("professional_educations").select("id,level,institution,course_name,completed_at").eq("professional_id", professional.id).order("created_at", { ascending: false }),
         supabase.from("professional_languages").select("id,language_name,proficiency").eq("professional_id", professional.id).order("created_at", { ascending: false }),
         supabase.from("professional_skills").select("id,name,skill_type,proficiency").eq("professional_id", professional.id).order("created_at", { ascending: false }),
         supabase.from("user_settings").select("email_notifications,opportunity_alerts,profile_visible,allow_recruiter_contact,show_salary_expectation").eq("user_id", userData.user?.id).maybeSingle()
       ])
-    : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: null }];
+    : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: null }];
 
   const activeVersion = ((versions ?? []) as VersionRow[]).find((version) => version.id === resume?.active_version_id) ?? ((versions ?? []) as VersionRow[])[0];
   const { data: documentUrl } = activeVersion?.storage_path ? await supabase.storage.from("curriculums").createSignedUrl(activeVersion.storage_path, 60 * 60) : { data: null };
@@ -125,7 +131,7 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
     { label: "Objetivo e resumo", done: Boolean(professional?.desired_role && professional?.summary), href: "#objetivo" },
     { label: "Histórico acadêmico", done: (educations ?? []).length > 0, href: "#formacao" },
     { label: "Experiências", done: (experiences ?? []).length > 0, href: "#experiencias" },
-    { label: "Cursos", done: (courses ?? []).length > 0, href: "#cursos" },
+    { label: "Cursos", done: (courses ?? []).length > 0 || (portalCertifications ?? []).length > 0, href: "#cursos" },
     { label: "Idiomas", done: (languages ?? []).length > 0, href: "#idiomas" },
     { label: "Habilidades", done: (skills ?? []).length > 0, href: "#habilidades" },
     { label: "Documento anexado", done: Boolean(activeVersion), href: "#documento" }
@@ -301,6 +307,26 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
 
           <section id="cursos" className="scroll-mt-72 border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">Cursos e qualificações</h2>
+            {((portalCertifications ?? []) as unknown as PortalCertificationRow[]).length > 0 ? (
+              <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 p-4">
+                <div className="flex items-center gap-2 text-green-800">
+                  <ShieldCheck aria-hidden="true" size={18} />
+                  <h3 className="font-semibold">Certificações do Portal Encaixe</h3>
+                </div>
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  {((portalCertifications ?? []) as unknown as PortalCertificationRow[]).map((certification) => {
+                    const course = one(certification.course);
+                    return (
+                      <article key={certification.id} className="rounded-xl bg-white p-4 text-sm">
+                        <h4 className="font-semibold text-slate-950">{course?.title ?? "Curso certificado"}</h4>
+                        <p className="mt-1 text-slate-600">{course?.category ?? "Área não informada"} · {course?.workload_hours ?? "-"}h</p>
+                        <p className="mt-2 text-xs font-bold text-green-700">Aprovado com {Number(certification.score).toFixed(0)}% em {new Date(certification.approved_at).toLocaleDateString("pt-BR")}</p>
+                      </article>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
             <div className="mt-5 grid gap-3 md:grid-cols-2">
               {((courses ?? []) as CourseRow[]).map((course) => (
                 <article key={course.id} className="border border-slate-200 bg-slate-50 p-4">

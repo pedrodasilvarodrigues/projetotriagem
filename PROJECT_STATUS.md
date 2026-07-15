@@ -5,6 +5,14 @@ Portal de Triagem Profissional
 Plataforma de recrutamento e triagem profissional que conecta profissionais e empresas por meio de cadastro, banco de talentos, demandas, compatibilidade e encaminhamento qualificado.
 
 # Concluido
+- Auditoria aprofundada de seguranca/UX tratada em 15/07/2026:
+  - Criada migration `20260715000100_harden_company_candidate_rls.sql` para remover leitura ampla de `professionals` por contas empresa.
+  - Empresas agora so podem ler profissionais apresentados formalmente ou vinculados a processos visiveis da propria empresa.
+  - RLS de `screening_processes` foi endurecida para ocultar registros em status `waiting` de empresas, protegendo a fila reserva no banco e nao apenas na interface.
+  - RLS de `process_history` tambem foi ajustada para nao vazar historico de processos da fila reserva para empresas.
+  - Protecao contra autoatribuicao de papel `admin` via metadados editaveis foi reaplicada defensivamente na migration mais nova.
+  - Inputs nativos de upload, checkboxes e campos de data receberam acabamento visual consistente com a identidade azul-marinho/laranja.
+  - Menus horizontais rolantes das areas Profissional/Empresa e subgrupos do curriculo receberam indicador visual de rolagem por fade/scrollbar estilizada.
 - Correcoes funcionais pos-vistoria aplicadas: links legais reais, empresas parceiras sem colunas inexistentes, vagas publicas/profissionais sem dependencia de `companies.segment`, atalho correto de apresentacoes no admin, modal de termos com ESC/clique externo, troca de senha bloqueada sem sessao valida e CEP automatico no cadastro empresarial.
 - Redesign visual completo e polimento da UX aplicados para a identidade do Portal Encaixe:
   - Definida nova paleta de cores (Azul-marinho `#0F2D4E`, Laranja `#F2811D`, etc.) e tipografia (*Poppins* e *Plus Jakarta Sans*) no globals.css.
@@ -102,7 +110,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Fallback no proxy para redirecionar `/?code=...` para `/auth/callback` quando o Supabase retornar o codigo na raiz do dominio correto.
 
 # Pendente
-- Aplicar a migration `20260618012733_harden_auth_role_metadata.sql` no Supabase de producao junto com o proximo deploy.
+- Aplicar no Supabase de producao a nova migration `20260715000100_harden_company_candidate_rls.sql`; o conector Supabase disponivel nesta sessao nao listou o projeto citado em `AUTH_SETUP.md` (`znmlgfllkwtcyvrpmwbt`), e os projetos visiveis nao possuem as tabelas do Portal.
 - Persistir as escolhas de modelo/cor do CV no banco, caso a personalizacao precise ser reutilizada em downloads futuros.
 - Configurar SMTP personalizado e credenciais Google OAuth no painel Supabase/Google usando AUTH_SETUP.md.
 - Trocar o Site URL do Supabase para `https://projetotriagem.vercel.app` e configurar dominio customizado de Auth se quiser remover `.supabase.co` da tela do Google.
@@ -120,6 +128,8 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 
 # Observacoes
 - As chaves sensiveis do Supabase devem continuar fora do GitHub e ser configuradas em ambiente local/Vercel.
+- Validacoes da auditoria de 15/07/2026: `npm run lint` passou apos o bloco de seguranca; build passou apos o bloco de seguranca; `npm run lint` e `npm exec next build -- --webpack` passaram apos o bloco de UX. O Next.js 16.2.7 iniciou o build como Turbopack mesmo com a flag `--webpack`.
+- O item da auditoria sobre duplicacao de `demandScore` em `public-home.tsx` nao foi alterado porque o codigo atual nao contem essa duplicacao; a funcao existe apenas na area profissional.
 - As correcoes de perfil/curriculo passaram em `npm run lint` e no build de producao do Next.js 16.2.7.
 - A falha de salvar perfil/curriculo foi rastreada para `ERROR 42P17: infinite recursion detected in policy for relation "professionals"`; o SQL corretivo foi versionado, aplicado no banco remoto e validado simulando o usuario profissional afetado.
 - A confirmacao por email nao e mais exigida para novos cadastros por email/senha; recuperacao de senha ainda depende de Supabase Auth ou Resend configurado.

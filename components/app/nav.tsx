@@ -237,7 +237,7 @@ export function AppNav({ role, preferredLanguage }: { role: AppRole; preferredLa
         </div>
 
         <div className={`${isCollapsed ? "hidden" : "mt-4"}`}>
-          <nav aria-label={`Menu ${translated.title}`} className="flex max-w-full gap-1 overflow-x-auto border border-white/15 bg-white/8 p-1.5 rounded-xl">
+          <nav aria-label={`Menu ${translated.title}`} className="scroll-fade-x flex max-w-full gap-1 overflow-x-auto border border-white/15 bg-white/8 p-1.5 rounded-xl">
             {nav.items.map((item) => {
               const isActive = pathname === item.href || (item.href !== nav.items[0].href && pathname.startsWith(`${item.href}/`));
 

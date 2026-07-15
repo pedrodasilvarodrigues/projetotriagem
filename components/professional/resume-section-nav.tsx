@@ -13,7 +13,7 @@ export function ResumeSectionNav({ sections }: ResumeSectionNavProps) {
   return (
     <div className="sticky top-[142px] z-30 border border-slate-200 bg-white/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/90">
       <div className="flex items-center gap-3 px-4 py-3">
-        <nav className={`${collapsed ? "hidden" : "flex"} min-w-0 flex-1 gap-2 overflow-x-auto`} aria-label="Subgrupos do currículo">
+        <nav className={`${collapsed ? "hidden" : "scroll-fade-x flex"} min-w-0 flex-1 gap-2 overflow-x-auto`} aria-label="Subgrupos do currículo">
           {sections.map(([href, label]) => (
             <a
               key={href}

@@ -15,6 +15,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
   - Implementado sistema de Scroll Reveal (IntersectionObserver) para carregamento gradual das seções e cards da Landing Page ao rolar a página.
   - Inseridas transições de rota suaves de slide/fade-in (AppShell) ao navegar pelos menus dos dashboards.
   - Refatorados formulários de cadastro de Profissional e Empresa para usar os novos inputs arredondados da marca e feedback de botão ao submeter.
+  - Elevada a qualidade de todos os cards da aplicação (públicos e internos) com cantos arredondados super suaves (`rounded-2xl`), sombras difusas em camadas, realce de borda no hover, borda superior laranja nos cards de métricas, tipografia display e badges de status arredondados.
 - PDF de memoria tecnica para continuidade no Claude criado em `output/pdf/memoria-projeto-triagem-claude.pdf`, com arquitetura, rotas, fluxos criticos, integracoes, comandos e pendencias do Projeto Triagem.
 - Ambientes separados para profissional, empresa e administrador.
 - Login, cadastro, onboarding e protecao de acesso por perfil.

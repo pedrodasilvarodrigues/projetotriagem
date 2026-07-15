@@ -440,3 +440,91 @@ a.bg-white {
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite linear;
 }
+
+/* Card Redesign & Premium Styling Overrides */
+article.rounded-lg,
+section.rounded-lg,
+aside.rounded-lg,
+form.rounded-lg,
+div.rounded-lg.border.bg-white,
+div.rounded-lg.border.bg-slate-50,
+button.rounded-lg.border.bg-white {
+  border-radius: 1rem !important; /* rounded-2xl */
+  background-color: #ffffff !important;
+  border: 1px solid rgba(226, 232, 240, 0.85) !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.02), 0 2px 4px rgba(15, 23, 42, 0.01) !important;
+  transition: all 0.28s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hover for interactive/clickable cards */
+article.rounded-lg[class*="hover:"],
+section.rounded-lg[class*="hover:"],
+a.rounded-lg,
+button.rounded-lg:not([disabled]),
+div.rounded-lg.border.bg-white[class*="hover:"] {
+  &:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08) !important;
+    border-color: rgba(242, 129, 29, 0.3) !important;
+  }
+}
+
+/* Specific inner background for slate-50 cards if we want to keep some contrast */
+.bg-slate-50 {
+  background-color: #FAFBFC !important;
+}
+
+/* Borda superior colorida em cards de destaque / métricas / estatísticas */
+.grid.md\:grid-cols-3 article,
+.grid.sm\:grid-cols-2.xl\:grid-cols-3 article,
+.grid.sm\:grid-cols-2.xl\:grid-cols-3 a,
+.grid.sm\:grid-cols-2.md\:grid-cols-4 > div,
+article:has(strong.text-3xl) {
+  border-top: 4px solid #F2811D !important;
+}
+
+/* Text elements styling within cards */
+article.rounded-lg p.text-xs,
+a.rounded-lg p.text-xs,
+article.rounded-lg span.text-xs {
+  color: #F2811D !important; /* Laranja da marca para etiquetas curtas */
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+article.rounded-lg strong,
+a.rounded-lg strong {
+  font-family: var(--font-display) !important;
+  color: #0F2D4E !important; /* Navy */
+  font-weight: 800 !important;
+}
+
+/* Badges de Status (ativo, pendente, arquivado, etc.) */
+.badge-status,
+span[class*="bg-green-"],
+span[class*="bg-blue-"],
+span[class*="bg-yellow-"],
+span[class*="bg-orange-"] {
+  border-radius: 0.75rem !important; /* rounded-xl */
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  font-size: 0.75rem !important;
+  letter-spacing: 0.02em !important;
+  padding: 0.35rem 0.75rem !important;
+}
+
+/* Skeleton loader shimmers */
+.skeleton-shimmer {
+  border-radius: 1rem !important;
+  background: linear-gradient(
+    90deg,
+    #F1F4F8 25%,
+    #E2E8F0 37%,
+    #F1F4F8 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}

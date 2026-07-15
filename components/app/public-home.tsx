@@ -15,8 +15,12 @@ import {
   LockKeyhole,
   Mail,
   MapPin,
+  Search,
   SearchCheck,
   ShieldCheck,
+  SlidersHorizontal,
+  Sparkles,
+  Target,
   TrendingUp,
   UserRoundCheck,
   Cog,
@@ -112,60 +116,137 @@ function initials(name: string) {
     .toUpperCase();
 }
 
+function EncaixeDivider() {
+  return (
+    <div className="flex items-center justify-center gap-2 my-14 opacity-50 select-none reveal-on-scroll">
+      <div className="h-px w-24 bg-gradient-to-r from-transparent to-[#1B4E78]" />
+      <div className="size-2 rounded-full border border-[#1B4E78]/60 bg-white" />
+      <div className="size-5 rounded-full border border-orange-500 flex items-center justify-center bg-white shadow-sm">
+        <div className="size-2 rounded-full bg-[#1B4E78] animate-[spin_8s_linear_infinite]" />
+      </div>
+      <div className="size-2 rounded-full border border-[#1B4E78]/60 bg-white" />
+      <div className="h-px w-24 bg-gradient-to-l from-transparent to-[#1B4E78]" />
+    </div>
+  );
+}
+
 function PortalEncaixeIntro({ onComplete }: { onComplete: () => void }) {
   const [lettersVisible, setLettersVisible] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
+  const [showLogo, setShowLogo] = useState(false);
+  const [showFlash, setShowFlash] = useState(false);
+
+  const prefersReduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" || e.key === "Enter") {
-        handleSkip();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
+    if (prefersReduced) {
+      const timer = setTimeout(() => {
+        setFadeOut(true);
+      }, 2300);
+
+      const endTimer = setTimeout(() => {
+        onComplete();
+      }, 2800);
+
+      return () => {
+        clearTimeout(timer);
+        clearTimeout(endTimer);
+      };
+    }
+
+    const flashTimer = setTimeout(() => {
+      setShowFlash(true);
+    }, 1800);
+
+    const logoTimer = setTimeout(() => {
+      setShowLogo(true);
+    }, 1800);
 
     const letterTimer = setTimeout(() => {
       setLettersVisible(true);
-    }, 400);
+    }, 2000);
 
     const completeTimer = setTimeout(() => {
-      handleSkip();
-    }, 2500);
+      setFadeOut(true);
+    }, 3200);
+
+    const endTimer = setTimeout(() => {
+      onComplete();
+    }, 3700);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      clearTimeout(flashTimer);
+      clearTimeout(logoTimer);
       clearTimeout(letterTimer);
       clearTimeout(completeTimer);
+      clearTimeout(endTimer);
     };
-  }, [fadeOut]);
-
-  const handleSkip = () => {
-    if (fadeOut) return;
-    setFadeOut(true);
-    setTimeout(() => {
-      onComplete();
-    }, 500);
-  };
+  }, [onComplete, prefersReduced]);
 
   const title = "PORTAL ENCAIXE";
 
+  if (prefersReduced) {
+    return (
+      <div className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#05101e] text-[#FAFBFC] transition-opacity duration-500 ${fadeOut ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
+        <div className="flex flex-col items-center gap-6 text-center select-none animate-[fade-in_0.8s_ease_forwards]">
+          <div className="relative flex size-24 items-center justify-center rounded-2xl bg-gradient-to-br from-[#1B4E78] to-[#0F2D4E] text-[#FAFBFC] border border-white/10">
+            <Cog className="absolute size-20 text-[#F2811D]/35" />
+            <Handshake className="relative size-12 text-[#FAFBFC]" />
+          </div>
+          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-widest text-white mt-4">PORTAL ENCAIXE</h1>
+          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#F2811D] mt-2">conectando você ao profissional certo</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div 
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0F2D4E] text-[#FAFBFC] transition-opacity duration-500 ${fadeOut ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#05101e] text-[#FAFBFC] transition-opacity duration-500 ${fadeOut ? "opacity-0 pointer-events-none" : "opacity-100"}`}
       role="dialog"
       aria-modal="true"
       aria-label="Introdução do Portal Encaixe"
     >
-      <div className="flex flex-col items-center gap-6 text-center select-none">
-        {/* Animated Icon */}
-        <div className="relative flex size-24 items-center justify-center rounded-2xl bg-gradient-to-br from-[#1B4E78] to-[#0F2D4E] text-[#FAFBFC] shadow-2xl border border-white/10 overflow-hidden">
-          {/* Animated gear/cog: spins rapidly, then slows down to a stop */}
-          <Cog className="absolute size-20 text-[#F2811D]/35 animate-[spin_3s_cubic-bezier(0.25,1,0.5,1)_infinite]" />
-          {/* Handshake: scales up in stagger */}
-          <Handshake className="relative size-12 text-[#FAFBFC] animate-scale-in" style={{ animationDelay: "300ms" }} />
+      <div className="absolute inset-0 bg-[#05101e] grain-overlay opacity-[0.06] pointer-events-none" />
+
+      <div className="relative flex flex-col items-center gap-6 text-center select-none w-full max-w-lg px-6">
+        <div className="relative flex h-40 w-full items-center justify-center overflow-visible">
+          <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible z-10" viewBox="0 0 400 160">
+            <path 
+              d="M 50 80 Q 200 140 350 80" 
+              fill="none" 
+              stroke="#F2811D" 
+              strokeWidth="3.5"
+              strokeLinecap="round"
+              strokeDasharray="800"
+              strokeDashoffset="800"
+              className="animate-trace-draw"
+              style={{ animationDelay: "200ms" }}
+            />
+          </svg>
+
+          <div 
+            className="absolute size-8 rounded-full bg-gradient-to-r from-blue-400 to-[#1B4E78] shadow-[0_0_24px_rgba(59,130,246,0.6)] animate-orb-left"
+            style={{ animationDelay: "400ms" }}
+          />
+
+          <div 
+            className="absolute size-8 rounded-full bg-gradient-to-r from-[#F2811D] to-[#F5A24D] shadow-[0_0_24px_rgba(242,129,29,0.6)] animate-orb-right"
+            style={{ animationDelay: "400ms" }}
+          />
+
+          {showFlash && (
+            <div className="absolute size-24 bg-gradient-to-r from-orange-400 to-[#F2811D] rounded-full animate-flash-glow z-20 pointer-events-none" />
+          )}
+
+          {showLogo && (
+            <div className="relative flex size-24 items-center justify-center rounded-2xl bg-gradient-to-br from-[#1B4E78] to-[#0F2D4E] text-[#FAFBFC] shadow-2xl border border-white/10 overflow-hidden animate-logo-pop z-30">
+              <Cog className="absolute size-20 text-[#F2811D]/35 animate-[spin_5s_linear_infinite]" />
+              <Handshake className="relative size-12 text-[#FAFBFC]" />
+            </div>
+          )}
         </div>
 
-        {/* Text staggered letter-by-letter */}
         <div className="mt-4 flex flex-col items-center">
           <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-widest text-white flex gap-[2px]">
             {title.split("").map((char, i) => (
@@ -173,7 +254,7 @@ function PortalEncaixeIntro({ onComplete }: { onComplete: () => void }) {
                 key={i} 
                 className={`inline-block transition-all duration-300 transform ${lettersVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
                 style={{ 
-                  transitionDelay: `${i * 50}ms`,
+                  transitionDelay: `${i * 45}ms`,
                   marginRight: char === " " ? "8px" : "0"
                 }}
               >
@@ -181,18 +262,11 @@ function PortalEncaixeIntro({ onComplete }: { onComplete: () => void }) {
               </span>
             ))}
           </h1>
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#F2811D] mt-2 animate-fade-in-up" style={{ animationDelay: "1100ms" }}>
-            Conectando você ao profissional certo
+          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#F2811D] mt-2 opacity-0 animate-fade-in-up" style={{ animationDelay: "2500ms" }}>
+            conectando você ao profissional certo
           </span>
         </div>
       </div>
-
-      <button 
-        onClick={handleSkip}
-        className="absolute bottom-10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-400 border border-slate-700/60 rounded-xl hover:text-white hover:border-slate-500 transition duration-200 cursor-pointer"
-      >
-        Pular Introdução (Esc)
-      </button>
     </div>
   );
 }
@@ -309,7 +383,6 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Intro loader session check
   useEffect(() => {
     const hasSeen = sessionStorage.getItem("hasSeenSplash");
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -326,7 +399,6 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
     document.documentElement.style.overflow = "";
   };
 
-  // Scroll reveal setup
   useEffect(() => {
     if (showIntro) return;
     
@@ -357,7 +429,10 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
   }, [showIntro]);
 
   return (
-    <main id="conteudo" className="min-h-screen bg-[#FAFBFC] text-slate-900 font-sans">
+    <main id="conteudo" className="min-h-screen bg-[#FAFBFC] text-slate-900 font-sans relative overflow-x-hidden">
+      {/* Cinematic noise film overlay */}
+      <div className="fixed inset-0 grain-overlay opacity-[0.025] pointer-events-none z-[999]" />
+
       {showIntro && <PortalEncaixeIntro onComplete={handleIntroComplete} />}
 
       {/* Header institucional */}
@@ -375,7 +450,7 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
             <a className="transition hover:text-blue-700" href="#contato">Contato</a>
           </nav>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="btn-secondary py-2 px-4 rounded-xl text-xs sm:text-sm">
+            <Link href="/login" className="btn-secondary py-2 px-4 rounded-xl text-xs sm:text-sm bg-white shadow-sm">
               Entrar
             </Link>
             <Link href="/register" className="btn-primary py-2 px-4 rounded-xl text-xs sm:text-sm shadow-md animate-pulse-glow">
@@ -386,7 +461,7 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
       </header>
 
       {/* Hero Section */}
-      <section id="inicio" className="relative overflow-hidden bg-gradient-to-b from-white to-[#F1F4F8] pt-32 pb-20 md:pt-40 md:pb-28">
+      <section id="inicio" className="relative bg-gradient-to-b from-white to-[#F1F4F8] pt-32 pb-20 md:pt-40 md:pb-28">
         <div className="absolute inset-0 opacity-40 pointer-events-none overflow-hidden">
           <div className="absolute top-1/4 right-[10%] size-96 rounded-full bg-orange-200/50 blur-3xl animate-float-slow" />
           <div className="absolute bottom-10 left-[5%] size-80 rounded-full bg-blue-200/40 blur-3xl animate-float-slow animate-delay-200" />
@@ -397,7 +472,7 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
               <TrendingUp aria-hidden="true" size={14} />
               Oportunidades e carreiras em sintonia
             </p>
-            <h1 className="mt-6 font-display text-4xl font-extrabold leading-tight tracking-tight text-blue-700 sm:text-6xl animate-fade-in-up animate-delay-100">
+            <h1 className="mt-6 font-display text-4xl font-extrabold leading-tight tracking-tight text-blue-750 sm:text-6xl animate-fade-in-up animate-delay-100">
               Conectando você ao <span className="text-orange-500">profissional certo</span>.
             </h1>
             <p className="mt-6 max-w-xl text-base leading-8 text-slate-500 font-medium animate-fade-in-up animate-delay-200">
@@ -439,7 +514,7 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
                     {initials(company.name)}
                   </div>
                   <div className="min-w-0">
-                    <h3 className="truncate text-sm font-bold text-blue-700">{company.name}</h3>
+                    <h3 className="truncate text-sm font-bold text-blue-750">{company.name}</h3>
                     <p className="mt-1 flex items-center gap-1 text-xs text-slate-500 font-medium">
                       <MapPin aria-hidden="true" size={13} className="text-orange-500" />
                       {company.city}
@@ -463,12 +538,14 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
         </div>
       </section>
 
+      <EncaixeDivider />
+
       {/* Como funciona */}
-      <section id="como-funciona" className="border-y border-slate-100 bg-[#F1F4F8] py-20">
+      <section id="como-funciona" className="border-y border-slate-100 bg-[#F1F4F8] py-20 bg-connectors">
         <div className="mx-auto max-w-7xl px-6">
           <div className="max-w-3xl reveal-on-scroll">
             <p className="text-xs font-bold uppercase tracking-wider text-orange-500">Como funciona</p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-blue-700 font-display">Uma jornada clara entre cadastro, análise e contratação.</h2>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-blue-750 font-display font-display">Uma jornada clara entre cadastro, análise e contratação.</h2>
           </div>
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {steps.map((step, index) => (
@@ -481,7 +558,7 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
                   <span className="text-sm font-extrabold text-orange-500">0{index + 1}</span>
                 </div>
                 <p className="mt-5 text-[10px] font-bold uppercase tracking-wider text-slate-400">Etapa {index + 1}</p>
-                <h3 className="mt-1 text-lg font-bold text-blue-700 font-display">{step.title}</h3>
+                <h3 className="mt-1 text-lg font-bold text-blue-750 font-display">{step.title}</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-500 font-medium">{step.text}</p>
               </article>
             ))}
@@ -489,12 +566,14 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
         </div>
       </section>
 
+      <EncaixeDivider />
+
       {/* Benefícios profissionais */}
       <section id="profissionais" className="py-20">
         <div className="mx-auto max-w-7xl px-6">
           <div className="max-w-3xl reveal-on-scroll">
             <p className="text-xs font-bold uppercase tracking-wider text-orange-500">Para Profissionais</p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-blue-700 font-display">Organize sua presença profissional em um único lugar.</h2>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-blue-750 font-display">Organize sua presença profissional em um único lugar.</h2>
           </div>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {professionalBenefits.map((benefit, idx) => (
@@ -504,12 +583,14 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
         </div>
       </section>
 
+      <EncaixeDivider />
+
       {/* Benefícios empresas */}
-      <section id="empresas" className="bg-[#F1F4F8] py-20">
+      <section id="empresas" className="bg-[#F1F4F8] py-20 bg-connectors">
         <div className="mx-auto max-w-7xl px-6">
           <div className="max-w-3xl reveal-on-scroll">
             <p className="text-xs font-bold uppercase tracking-wider text-orange-500">Para Empresas</p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-blue-700 font-display">Demandas privadas com triagem qualificada e segura.</h2>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-blue-750 font-display">Demandas privadas com triagem qualificada e segura.</h2>
           </div>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {companyBenefits.map((benefit, idx) => (
@@ -519,12 +600,14 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
         </div>
       </section>
 
+      <EncaixeDivider />
+
       {/* Histórias de sucesso / depoimentos */}
       <section className="py-20">
         <div className="mx-auto max-w-7xl px-6">
           <div className="max-w-3xl reveal-on-scroll">
             <p className="text-xs font-bold uppercase tracking-wider text-orange-500">Casos de Sucesso</p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-blue-700 font-display">Pessoas e empresas que vivenciaram uma triagem mais objetiva.</h2>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-blue-750 font-display">Pessoas e empresas que vivenciaram uma triagem mais objetiva.</h2>
           </div>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {testimonials.map((testimonial, idx) => (
@@ -535,7 +618,7 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
                     {initials(testimonial.name)}
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-blue-700 font-display">{testimonial.name}</h3>
+                    <h3 className="text-sm font-bold text-blue-750 font-display">{testimonial.name}</h3>
                     <p className="text-xs text-slate-400 font-semibold">{testimonial.role}</p>
                   </div>
                 </div>
@@ -546,11 +629,11 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
       </section>
 
       {/* Diferenciais */}
-      <section className="border-t border-slate-100 bg-[#F1F4F8] py-20">
+      <section className="border-t border-slate-100 bg-[#F1F4F8] py-20 bg-connectors">
         <div className="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[0.8fr_1.2fr] items-center">
           <div className="reveal-on-scroll">
             <p className="text-xs font-bold uppercase tracking-wider text-orange-500">Diferenciais</p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-blue-700 font-display">O que torna a nossa triagem mais confiável.</h2>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-blue-750 font-display">O que torna a nossa triagem mais confiável.</h2>
             <p className="mt-4 leading-7 text-slate-500 font-medium">Combinamos cadastro padronizado de currículos, regras inteligentes de compatibilidade e triagem com avaliação humana para evitar o desgaste de currículos em vitrines públicas.</p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2">
@@ -571,7 +654,7 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
             <div className="mb-5 flex size-12 items-center justify-center rounded-xl bg-white/10 text-orange-400 shadow-inner">
               <LockKeyhole aria-hidden="true" size={24} />
             </div>
-            <h2 className="text-3xl font-bold tracking-tight font-display">Seus dados sempre protegidos</h2>
+            <h2 className="text-3xl font-bold tracking-tight font-display font-display">Seus dados sempre protegidos</h2>
             <p className="mt-4 max-w-xl leading-8 text-blue-100/90 font-medium">
               Todo o tratamento de dados no Portal Encaixe segue rigorosamente a LGPD. O profissional mantém controle total sobre seus dados e consentimentos.
             </p>
@@ -591,7 +674,7 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
       <section className="py-20">
         <div className="mx-auto max-w-4xl px-6">
           <p className="reveal-on-scroll text-xs font-bold uppercase tracking-wider text-orange-500 text-center">FAQ</p>
-          <h2 className="reveal-on-scroll mt-2 text-3xl font-bold tracking-tight text-blue-700 text-center font-display">Perguntas Frequentes</h2>
+          <h2 className="reveal-on-scroll mt-2 text-3xl font-bold tracking-tight text-blue-750 text-center font-display font-display">Perguntas Frequentes</h2>
           <div className="reveal-on-scroll mt-10 divide-y divide-slate-100 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
             {faq.map(([question, answer]) => (
               <details key={question} className="group p-5 transition-all duration-300 hover:bg-slate-50/50">
@@ -611,7 +694,7 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
         <div className="mx-auto max-w-7xl px-6">
           <div className="reveal-on-scroll rounded-3xl bg-gradient-to-br from-[#0F2D4E] to-[#1B4E78] p-8 md:p-12 shadow-xl text-white flex flex-col md:flex-row md:items-center md:justify-between gap-8">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight font-display">Pronto para dar o próximo passo?</h2>
+              <h2 className="text-3xl font-bold tracking-tight font-display font-display">Pronto para dar o próximo passo?</h2>
               <p className="mt-2 text-sm text-blue-200 max-w-md font-medium">Faça seu cadastro agora mesmo, estruture seu currículo e conecte-se com as melhores empresas.</p>
             </div>
             <Link href="/register" className="btn-primary py-4 px-6 rounded-xl flex items-center gap-2 shadow-lg shadow-orange-500/25 self-start md:self-auto text-sm hover:scale-[1.04] transition-all animate-pulse-glow">

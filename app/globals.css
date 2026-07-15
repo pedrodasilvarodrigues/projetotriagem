@@ -52,6 +52,103 @@
   --animate-float-slow: float-slow 8s ease-in-out infinite alternate;
   --animate-shimmer: shimmer 2.5s infinite linear;
   
+  --animate-trace-draw: trace-draw 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  --animate-orb-left: orb-left 1.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  --animate-orb-right: orb-right 1.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  --animate-logo-pop: logo-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  --animate-flash-glow: flash-glow 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+
+  @keyframes trace-draw {
+    0% {
+      stroke-dashoffset: 800;
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      stroke-dashoffset: 0;
+      opacity: 0;
+    }
+  }
+
+  @keyframes orb-left {
+    0% {
+      transform: translate(-200px, 0) scale(0);
+      opacity: 0;
+    }
+    20% {
+      opacity: 1;
+      transform: translate(-150px, -20px) scale(1);
+    }
+    85% {
+      transform: translate(-10px, 0) scale(1.1);
+      opacity: 1;
+      filter: blur(8px);
+    }
+    100% {
+      transform: translate(0, 0) scale(0);
+      opacity: 0;
+      filter: blur(0);
+    }
+  }
+
+  @keyframes orb-right {
+    0% {
+      transform: translate(200px, 0) scale(0);
+      opacity: 0;
+    }
+    20% {
+      opacity: 1;
+      transform: translate(150px, 20px) scale(1);
+    }
+    85% {
+      transform: translate(10px, 0) scale(1.1);
+      opacity: 1;
+      filter: blur(8px);
+    }
+    100% {
+      transform: translate(0, 0) scale(0);
+      opacity: 0;
+      filter: blur(0);
+    }
+  }
+
+  @keyframes logo-pop {
+    0% {
+      transform: scale(0.5) rotate(-10deg);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.15) rotate(3deg);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1) rotate(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes flash-glow {
+    0% {
+      transform: scale(0.2);
+      opacity: 0;
+      filter: blur(2px);
+    }
+    30% {
+      opacity: 0.8;
+      filter: blur(6px);
+    }
+    100% {
+      transform: scale(2.2);
+      opacity: 0;
+      filter: blur(20px);
+    }
+  }
+  
   @keyframes fade-in-up {
     from {
       opacity: 0;
@@ -527,4 +624,24 @@ span[class*="bg-orange-"] {
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite linear;
+}
+
+/* Película de Grão Analógico Noise */
+.grain-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  content: "";
+  opacity: 0.022;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Padrão de Grade de Conectores */
+.bg-connectors {
+  background-image: radial-gradient(circle at 1px 1px, rgba(27, 78, 120, 0.04) 1px, transparent 0);
+  background-size: 24px 24px;
 }

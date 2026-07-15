@@ -17,7 +17,8 @@ export async function AppShell({ title, eyebrow, children }: { title: string; ey
       : "mx-auto min-w-0 max-w-7xl px-3 py-4 sm:px-5 sm:py-6";
 
   return (
-    <div className="min-h-screen bg-[#F1F4F8] text-slate-950">
+    <div className="min-h-screen bg-[#F1F4F8] text-slate-950 relative overflow-x-hidden">
+      <div className="fixed inset-0 grain-overlay opacity-[0.025] pointer-events-none z-[999]" />
       <LanguageRuntime preferredLanguage={language} />
       <AppNav role={role} preferredLanguage={language} />
       <main id="conteudo" className={mainClassName}>

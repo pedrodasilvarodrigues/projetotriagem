@@ -11,7 +11,8 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
   - Redesenhada a Landing Page pública (public-home.tsx) com nova seção Hero clara, botões e cards com elevação.
   - Atualizadas as telas de autenticação (login, register, forgot-password, update-password, confirm-email) com layouts modernos e cores da nova marca.
   - Ajustadas as barras de navegação (nav.tsx), cabeçalhos e cascas gerais do sistema (shell.tsx).
-  - Adicionadas animações interativas e fluidas (splash screen com sessionStorage e pular com Esc, efeito Tilt 3D com acompanhamento do cursor do mouse no desktop, e efeito flutuante nos backgrounds).
+  - Adicionada introdução cinematográfica (mini-filme de 3s sem opção de skip) com traço luminoso laranja de busca, fusão de orbs (azul/laranja), flash de encaixe, logo pop-up com spring/bounce e suporte a prefers-reduced-motion.
+  - Implementado sistema de grão analógico (`.grain-overlay`) em todas as telas (públicas e dashboards) e divisores de encaixe geométricos (`EncaixeDivider`) para desclichêizar a identidade do portal.
   - Implementado sistema de Scroll Reveal (IntersectionObserver) para carregamento gradual das seções e cards da Landing Page ao rolar a página.
   - Inseridas transições de rota suaves de slide/fade-in (AppShell) ao navegar pelos menus dos dashboards.
   - Refatorados formulários de cadastro de Profissional e Empresa para usar os novos inputs arredondados da marca e feedback de botão ao submeter.

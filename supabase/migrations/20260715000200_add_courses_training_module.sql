@@ -433,18 +433,18 @@ begin
     raise exception 'professional_profile_required';
   end if;
 
-  select count(*), coalesce(max(attempt_number), 0) + 1
+  select count(*), coalesce(max(ca.attempt_number), 0) + 1
   into existing_attempts, next_attempt
-  from public.course_attempts
-  where course_id = target_course_id
-    and professional_id = target_professional_id;
+  from public.course_attempts ca
+  where ca.course_id = target_course_id
+    and ca.professional_id = target_professional_id;
 
   if exists (
     select 1
-    from public.course_attempts
-    where course_id = target_course_id
-      and professional_id = target_professional_id
-      and approved is true
+    from public.course_attempts ca
+    where ca.course_id = target_course_id
+      and ca.professional_id = target_professional_id
+      and ca.approved is true
   ) then
     raise exception 'course_already_approved';
   end if;
@@ -455,8 +455,8 @@ begin
 
   select count(*)
   into total_questions
-  from public.course_quiz_questions
-  where course_id = target_course_id;
+  from public.course_quiz_questions q
+  where q.course_id = target_course_id;
 
   if total_questions <= 0 then
     raise exception 'course_quiz_unavailable';

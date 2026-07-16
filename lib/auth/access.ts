@@ -3,7 +3,7 @@ import { resolveAuthenticatedEntryPath } from "@/lib/auth/entry";
 import { defaultRouteForRole } from "@/lib/auth/routes";
 import { createServerClient } from "@/lib/supabase/server";
 
-export type AppRole = "admin" | "company" | "professional";
+export type AppRole = "admin" | "company" | "professional" | "client";
 export { defaultRouteForRole };
 
 export async function getCurrentRole() {
@@ -20,6 +20,7 @@ export async function getCurrentRole() {
 
   if (entryPath === "/admin") return "admin";
   if (entryPath === "/company") return "company";
+  if (entryPath === "/client") return "client";
   return "professional";
 }
 
@@ -35,5 +36,6 @@ export function roleFromEyebrow(eyebrow: string): AppRole | undefined {
   if (eyebrow === "Administrador") return "admin";
   if (eyebrow === "Empresa") return "company";
   if (eyebrow === "Profissional") return "professional";
+  if (eyebrow === "Cliente") return "client";
   return undefined;
 }

@@ -4,24 +4,20 @@ type SupabaseLike = {
   from: (table: string) => any;
 };
 
-type AppRole = "company" | "professional";
+type AppRole = "company" | "professional" | "client";
 
-function onboardingRouteForRole(role: "company" | "professional") {
-  return role === "company" ? "/onboarding/company" : "/onboarding/professional";
-}
-
-async function persistRole(supabase: SupabaseLike, userId: string, role: "company" | "professional", nextPath = defaultRouteForRole(role)) {
+async function persistRole(supabase: SupabaseLike, userId: string, role: AppRole, nextPath = defaultRouteForRole(role)) {
   await supabase.from("user_roles").upsert({ user_id: userId, role });
   return nextPath;
 }
 
-function metadataRole(userMetadata?: Record<string, unknown>, preferredRole?: "company" | "professional" | null): AppRole | null {
+function metadataRole(userMetadata?: Record<string, unknown>, preferredRole?: AppRole | null): AppRole | null {
   if (preferredRole) return preferredRole;
 
   const rawRole = userMetadata?.role;
   // user_metadata is controlled by the user. It may guide onboarding, but it
   // must never grant an administrative role.
-  if (rawRole === "company" || rawRole === "professional") {
+  if (rawRole === "company" || rawRole === "professional" || rawRole === "client") {
     return rawRole;
   }
 
@@ -32,12 +28,13 @@ export async function resolveAuthenticatedEntryPath(
   supabase: SupabaseLike,
   userId: string,
   userMetadata?: Record<string, unknown>,
-  preferredRole?: "company" | "professional" | null
+  preferredRole?: AppRole | null
 ) {
-  const [{ data: roleRecord }, { data: company }, { data: professional }] = await Promise.all([
+  const [{ data: roleRecord }, { data: company }, { data: professional }, { data: client }] = await Promise.all([
     supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle(),
     supabase.from("companies").select("id").eq("owner_id", userId).maybeSingle(),
-    supabase.from("professionals").select("id").eq("user_id", userId).maybeSingle()
+    supabase.from("professionals").select("id").eq("user_id", userId).maybeSingle(),
+    supabase.from("client_profiles").select("id").eq("user_id", userId).maybeSingle()
   ]);
   const savedRole = roleRecord?.role;
 
@@ -55,12 +52,17 @@ export async function resolveAuthenticatedEntryPath(
     return defaultRouteForRole("professional");
   }
 
-  if (savedRole === "company" || savedRole === "professional") {
+  if (client) {
+    if (savedRole !== "client") await supabase.from("user_roles").upsert({ user_id: userId, role: "client" });
+    return defaultRouteForRole("client");
+  }
+
+  if (savedRole === "company" || savedRole === "professional" || savedRole === "client") {
     return defaultRouteForRole(savedRole);
   }
 
   const inferredRole = metadataRole(userMetadata, preferredRole);
-  if (inferredRole === "company" || inferredRole === "professional") {
+  if (inferredRole === "company" || inferredRole === "professional" || inferredRole === "client") {
     return persistRole(supabase, userId, inferredRole, defaultRouteForRole(inferredRole));
   }
 

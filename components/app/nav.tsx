@@ -24,6 +24,9 @@ import {
   UserRoundCheck,
   UserRoundCog,
   UserRoundSearch,
+  MessagesSquare,
+  Store,
+  Tags,
   X,
   type LucideIcon
 } from "lucide-react";
@@ -47,6 +50,9 @@ const navItems = {
       { href: "/admin/settings", label: "Configurações", icon: Settings },
       { href: "/admin/trainings", label: "Treinamentos", icon: ShieldCheck },
       { href: "/admin/institutions", label: "Instituições", icon: Landmark },
+      { href: "/admin/service-providers", label: "Prestadores", icon: Store },
+      { href: "/admin/service-categories", label: "Categorias de serviços", icon: Tags },
+      { href: "/admin/marketplace-reports", label: "Denúncias do marketplace", icon: ShieldCheck },
       { href: "/admin/integrations", label: "Integrações", icon: Plug }
     ]
   },
@@ -73,10 +79,21 @@ const navItems = {
       { href: "/professional/profile", label: "Perfil", icon: UserRoundCog },
       { href: "/professional/resume", label: "Currículo", icon: FileText },
       { href: "/professional/courses", label: "Cursos", icon: GraduationCap },
+      { href: "/professional/services", label: "Meus serviços", icon: Store },
       { href: "/professional/screening-status", label: "Situação da Triagem", icon: ClipboardCheck },
       { href: "/professional/referrals", label: "Encaminhamentos", icon: BriefcaseBusiness },
       { href: "/professional/notifications", label: "Notificações", icon: Bell },
       { href: "/professional/settings", label: "Configurações", icon: Settings }
+    ]
+  },
+  client: {
+    title: "Cliente",
+    subtitle: "Prestadores, solicitações e conversas",
+    items: [
+      { href: "/client", label: "Minha área", icon: LayoutGrid },
+      { href: "/services", label: "Buscar prestadores", icon: Search },
+      { href: "/client/requests", label: "Solicitações", icon: ClipboardCheck },
+      { href: "/client/conversations", label: "Conversas", icon: MessagesSquare }
     ]
   }
 } satisfies Record<AppRole, { title: string; subtitle: string; items: Array<{ href: string; label: string; icon: LucideIcon }> }>;

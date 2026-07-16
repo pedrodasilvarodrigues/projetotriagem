@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get("code");
   const next = requestUrl.searchParams.get("next");
   const signupRoleParam = requestUrl.searchParams.get("signupRole");
-  const signupRole = signupRoleParam === "professional" || signupRoleParam === "company" ? signupRoleParam : null;
+  const signupRole = signupRoleParam === "professional" || signupRoleParam === "company" || signupRoleParam === "client" ? signupRoleParam : null;
   const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : null;
   let supabase: Awaited<ReturnType<typeof createServerClient>>;
 

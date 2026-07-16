@@ -4,6 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 function defaultRouteForRole(role?: string | null) {
   if (role === "admin") return "/admin/administration";
   if (role === "company") return "/company/demands";
+  if (role === "client") return "/client";
   return "/professional/profile";
 }
 
@@ -34,7 +35,7 @@ export async function proxy(request: NextRequest) {
   }
 
   let response = NextResponse.next({ request });
-  const protectedArea = path.startsWith("/admin") || path.startsWith("/company") || path.startsWith("/professional") || path.startsWith("/onboarding");
+  const protectedArea = path.startsWith("/admin") || path.startsWith("/company") || path.startsWith("/professional") || path.startsWith("/client") || path.startsWith("/marketplace") || path.startsWith("/onboarding");
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -101,6 +102,8 @@ export async function proxy(request: NextRequest) {
     if (path.startsWith("/admin") && role !== "admin") return NextResponse.redirect(new URL("/acesso-negado", request.url));
     if (path.startsWith("/company") && role !== "company") return NextResponse.redirect(new URL("/acesso-negado", request.url));
     if (path.startsWith("/professional") && role !== "professional") return NextResponse.redirect(new URL("/acesso-negado", request.url));
+    if (path.startsWith("/client") && role !== "client") return NextResponse.redirect(new URL("/acesso-negado", request.url));
+    if (path.startsWith("/marketplace") && role !== "client" && role !== "professional" && role !== "admin") return NextResponse.redirect(new URL("/acesso-negado", request.url));
   }
 
   return response;

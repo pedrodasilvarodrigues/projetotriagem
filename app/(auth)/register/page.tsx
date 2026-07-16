@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, Building2, CheckCircle2, UserRoundCheck } from "lucide-react";
+import { ArrowRight, Building2, CheckCircle2, ShoppingBag, UserRoundCheck } from "lucide-react";
+import { ClientRegisterForm } from "@/components/auth/client-register-form";
 import { CompanyRegisterForm } from "@/components/auth/company-register-form";
 import { ProfessionalRegisterForm } from "@/components/auth/professional-register-form";
 import { signInWithGoogleAction } from "@/lib/actions/auth";
@@ -39,8 +40,9 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
 
   const params = await searchParams;
   const error = params.error ? decodeURIComponent(params.error) : undefined;
-  const accountType = params.type === "company" ? "company" : "professional";
+  const accountType = params.type === "company" ? "company" : params.type === "client" ? "client" : "professional";
   const isCompany = accountType === "company";
+  const isClient = accountType === "client";
 
   return (
     <main id="conteudo" className="grid min-h-screen bg-[#F1F4F8] text-slate-900 lg:grid-cols-[minmax(0,0.88fr)_minmax(620px,1fr)] relative">
@@ -79,7 +81,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
             <h2 className="text-3xl font-extrabold tracking-tight text-blue-750 font-display font-display">Crie sua conta</h2>
             <p className="mt-2 text-sm leading-6 text-slate-500 font-medium font-sans">Escolha o perfil adequado para acessar a área correta depois do login.</p>
 
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
               <Link href="/register?type=professional" className={`flex items-start gap-3 rounded-xl border p-4 text-left transition ${!isCompany ? "border-orange-500 bg-orange-50/50 text-blue-950 shadow-inner" : "border-slate-200 bg-white text-slate-700 hover:border-orange-200"}`}>
                 <UserRoundCheck aria-hidden="true" className={!isCompany ? "text-orange-500" : "text-slate-500"} size={22} />
                 <span>
@@ -94,13 +96,17 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
                   <span className="mt-1 block text-xs leading-5 text-slate-500 font-medium">Cadastro de demandas privadas e candidatos apresentados.</span>
                 </span>
               </Link>
+              <Link href="/register?type=client" className={`flex items-start gap-3 rounded-xl border p-4 text-left transition ${isClient ? "border-orange-500 bg-orange-50/50 text-blue-950 shadow-inner" : "border-slate-200 bg-white text-slate-700 hover:border-orange-200"}`}>
+                <ShoppingBag aria-hidden="true" className={isClient ? "text-orange-500" : "text-slate-500"} size={22} />
+                <span><strong className="block text-sm font-bold text-blue-700 font-display">Sou Cliente</strong><span className="mt-1 block text-xs leading-5 text-slate-500 font-medium">Encontre e contrate prestadores.</span></span>
+              </Link>
             </div>
 
             <form action={signInWithGoogleAction} className="mt-6">
               <input type="hidden" name="accountType" value={accountType} />
               <button className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3.5 text-sm font-bold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-orange-200 hover:bg-orange-50/50 hover:shadow-md" type="submit">
                 <GoogleIcon />
-                Continuar com Google como {isCompany ? "Empresa" : "Profissional"}
+                Continuar com Google como {isCompany ? "Empresa" : isClient ? "Cliente" : "Profissional"}
               </button>
             </form>
 
@@ -110,7 +116,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
               <span className="h-px flex-1 bg-slate-200" />
             </div>
 
-            {isCompany ? <CompanyRegisterForm error={error} /> : <ProfessionalRegisterForm error={error} />}
+            {isCompany ? <CompanyRegisterForm error={error} /> : isClient ? <ClientRegisterForm error={error} /> : <ProfessionalRegisterForm error={error} />}
           </div>
 
           <div className="mt-5 rounded-2xl border border-[#dce7f0] bg-[#eef3f7] p-5 text-sm leading-6 text-blue-800 font-medium flex items-center gap-3">

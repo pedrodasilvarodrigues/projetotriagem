@@ -129,6 +129,9 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Fallback no proxy para redirecionar `/?code=...` para `/auth/callback` quando o Supabase retornar o codigo na raiz do dominio correto.
 
 # Pendente
+- Marketplace: integrar provedor de geocodificacao para ordenar por distancia real; o schema ja possui latitude/longitude e raio para receber essa evolucao.
+- Marketplace: ativar notificacoes externas por e-mail conforme volume e regras anti-spam; notificacoes internas e Realtime ja estao implementados.
+- Marketplace: a integracao financeira permanece deliberadamente fora do escopo ate a definicao do modelo de monetizacao.
 - Persistir as escolhas de modelo/cor do CV no banco, caso a personalizacao precise ser reutilizada em downloads futuros.
 - Configurar SMTP personalizado e credenciais Google OAuth no painel Supabase/Google usando AUTH_SETUP.md.
 - Trocar o Site URL do Supabase para `https://projetotriagem.vercel.app` e configurar dominio customizado de Auth se quiser remover `.supabase.co` da tela do Google.
@@ -145,6 +148,10 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Evoluir os filtros de vagas para salvar pesquisas e alertas por email quando SMTP estiver pronto.
 
 # Observacoes
+- Marketplace de prestadores implementado em 15/07/2026 com papel de cliente, capacidades independentes do profissional, cadastro/aprovacao de prestador, categorias hierarquicas, busca publica, perfil publico, portfolio moderado, chat Realtime, solicitacoes com maquina de estados, conclusao bilateral, avaliacoes verificadas, denuncias, suspensao e historico de moderacao.
+- Schema versionado nas migrations `20260715181740_add_client_role.sql`, `20260715181800_marketplace_services_module.sql` e `20260715210000_harden_marketplace_workflow.sql`; dados pessoais e autenticacao continuam unificados, sem duplicar a conta profissional.
+- A seguranca do marketplace impede autoaprovacao de portfolio, escrita direta em solicitacoes e conclusao unilateral; mensagens e conversas nao podem ser adulteradas por updates diretos do cliente.
+- O lint remoto do PostgreSQL encontrou e corrigiu a ambiguidade de `attempt_number` na funcao de envio de prova dos cursos, preservando o limite de duas tentativas.
 - Validação final do módulo de Cursos em produção: `npm run lint` e `npm run build -- --webpack` passaram; o Supabase Database Advisor não retornou alertas do módulo após o endurecimento.
 - As chaves sensiveis do Supabase devem continuar fora do GitHub e ser configuradas em ambiente local/Vercel.
 - Validações do módulo de Cursos: `npm run lint` e `npm exec next build -- --webpack` passaram após schema/RLS, após CRUD/admin, após fluxo profissional e após integração de compatibilidade/currículo.

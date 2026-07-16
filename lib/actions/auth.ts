@@ -71,6 +71,15 @@ const companyRegistrationSchema = emailPasswordSchema.extend({
 
 type CompanyRegistration = z.infer<typeof companyRegistrationSchema>;
 
+const clientRegistrationSchema = emailPasswordSchema.extend({
+  fullName: z.string().trim().min(3),
+  phone: z.string().refine(isValidBrazilianPhone, "telefone-invalido"),
+  city: z.string().trim().min(2),
+  state: z.string().trim().length(2),
+  terms: z.literal("on"),
+  privacy: z.literal("on")
+});
+
 function normalizeOrigin(value?: string | null) {
   if (!value) return null;
   const withProtocol = value.startsWith("http://") || value.startsWith("https://") ? value : `https://${value}`;
@@ -346,7 +355,7 @@ export async function signInWithGoogleAction(formData?: FormData) {
     const supabase = await createServerClient();
     const origin = await getAuthRedirectOrigin();
     const accountType = formData instanceof FormData ? String(formData.get("accountType") ?? "") : "";
-    const signupRole = accountType === "professional" || accountType === "company" ? accountType : "";
+    const signupRole = accountType === "professional" || accountType === "company" || accountType === "client" ? accountType : "";
     const callbackUrl = new URL(`${origin}/auth/callback`);
     if (signupRole) callbackUrl.searchParams.set("signupRole", signupRole);
 
@@ -517,6 +526,37 @@ export async function registerCompanyWithEmailAction(formData: FormData) {
 
   await saveCompanySignup(admin, createdUser.user.id, data);
 
+  redirect("/login?message=cadastro-criado");
+}
+
+export async function registerClientWithEmailAction(formData: FormData) {
+  const parsed = clientRegistrationSchema.safeParse({
+    fullName: formData.get("fullName"), phone: formData.get("phone"),
+    city: formData.get("city"), state: formData.get("state"),
+    email: formData.get("email"), password: formData.get("password"),
+    terms: formData.get("terms"), privacy: formData.get("privacy")
+  });
+  if (!parsed.success) redirect("/register?type=client&error=dados-invalidos");
+  if (!canUseAdminClient()) redirect("/register?type=client&error=configuracao-supabase-incompleta");
+  const data = parsed.data;
+  const admin = createAdminClient();
+  const { data: createdUser, error } = await admin.auth.admin.createUser({
+    email: data.email, password: data.password, email_confirm: true,
+    user_metadata: { full_name: data.fullName, role: "client" }
+  });
+  if (error || !createdUser.user) redirect(`/register?type=client&error=${signupErrorCode(error)}`);
+  const userId = createdUser.user.id;
+  const { ipAddress, userAgent } = await getRequestMeta();
+  const [{ error: profileError }, { error: clientError }, { error: roleError }] = await Promise.all([
+    admin.from("profiles").upsert({ id: userId, full_name: data.fullName, email: data.email, phone: onlyDigits(data.phone), status: "active" }),
+    admin.from("client_profiles").upsert({ user_id: userId, city: data.city, state: data.state.toUpperCase() }),
+    admin.from("user_roles").upsert({ user_id: userId, role: "client" })
+  ]);
+  if (profileError || clientError || roleError) {
+    await admin.auth.admin.deleteUser(userId);
+    redirect("/register?type=client&error=nao-foi-possivel-criar-conta");
+  }
+  await admin.from("consent_records").insert({ user_id: userId, terms_version: "2026-06-03", privacy_version: "2026-06-03", ip_address: ipAddress, user_agent: userAgent });
   redirect("/login?message=cadastro-criado");
 }
 

@@ -87,6 +87,7 @@ const userSettingsSchema = z.object({
   profileVisible: z.boolean(),
   allowRecruiterContact: z.boolean(),
   showSalaryExpectation: z.boolean(),
+  serviceMarketplaceEnabled: z.boolean(),
   preferredLanguage: z.enum(["pt-BR", "en-US", "es-ES"]).default("pt-BR"),
   redirectTo: z.string().optional()
 });
@@ -549,6 +550,7 @@ export async function updateUserSettingsAction(formData: FormData) {
     profileVisible: formData.get("profileVisible") === "on",
     allowRecruiterContact: formData.get("allowRecruiterContact") === "on",
     showSalaryExpectation: formData.get("showSalaryExpectation") === "on",
+    serviceMarketplaceEnabled: formData.get("serviceMarketplaceEnabled") === "on",
     preferredLanguage: formData.get("preferredLanguage") ?? "pt-BR",
     redirectTo: formData.get("redirectTo")
   });
@@ -566,6 +568,7 @@ export async function updateUserSettingsAction(formData: FormData) {
     profile_visible: parsed.data.profileVisible,
     allow_recruiter_contact: parsed.data.allowRecruiterContact,
     show_salary_expectation: parsed.data.showSalaryExpectation,
+    service_marketplace_enabled: parsed.data.serviceMarketplaceEnabled,
     preferred_language: parsed.data.preferredLanguage
   });
 
@@ -575,6 +578,7 @@ export async function updateUserSettingsAction(formData: FormData) {
       : "/professional/settings";
   revalidatePath("/professional/settings");
   revalidatePath("/professional/resume");
+  revalidatePath("/professional", "layout");
   revalidatePath("/company/settings");
   revalidatePath("/company");
   redirect(`${redirectTo}?message=configuracoes-atualizadas`);

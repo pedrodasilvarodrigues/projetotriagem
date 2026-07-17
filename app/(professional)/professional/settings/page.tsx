@@ -11,7 +11,7 @@ export default async function ProfessionalSettingsPage({ searchParams }: { searc
   const supabase = await createServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const [{ data: settings }, { data: profile }] = await Promise.all([
-    supabase.from("user_settings").select("email_notifications,opportunity_alerts,profile_visible,allow_recruiter_contact,show_salary_expectation,preferred_language").eq("user_id", userData.user?.id).maybeSingle(),
+    supabase.from("user_settings").select("email_notifications,opportunity_alerts,profile_visible,allow_recruiter_contact,show_salary_expectation,preferred_language,service_marketplace_enabled").eq("user_id", userData.user?.id).maybeSingle(),
     supabase.from("profiles").select("full_name,email,phone").eq("id", userData.user?.id).maybeSingle()
   ]);
 
@@ -21,7 +21,8 @@ export default async function ProfessionalSettingsPage({ searchParams }: { searc
     profile_visible: settings?.profile_visible ?? true,
     allow_recruiter_contact: settings?.allow_recruiter_contact ?? true,
     show_salary_expectation: settings?.show_salary_expectation ?? false,
-    preferred_language: settings?.preferred_language ?? "pt-BR"
+    preferred_language: settings?.preferred_language ?? "pt-BR",
+    service_marketplace_enabled: settings?.service_marketplace_enabled ?? true
   };
 
   return (

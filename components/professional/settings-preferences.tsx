@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bell, ChevronDown, Languages, ShieldCheck } from "lucide-react";
+import { Bell, ChevronDown, Languages, ShieldCheck, Store } from "lucide-react";
 
 type SettingsPreferencesProps = {
   prefs: {
@@ -11,6 +11,7 @@ type SettingsPreferencesProps = {
     allow_recruiter_contact: boolean;
     show_salary_expectation: boolean;
     preferred_language?: string;
+    service_marketplace_enabled?: boolean;
   };
   labels?: Partial<{
     notificationsTitle: string;
@@ -163,6 +164,14 @@ export function SettingsPreferences({ prefs, labels }: SettingsPreferencesProps)
 
   return (
     <div className="grid gap-4">
+      {typeof prefs.service_marketplace_enabled === "boolean" ? <section className="border border-slate-200 bg-slate-50 p-4">
+        <div className="mb-3 flex items-start gap-3">
+          <Store aria-hidden="true" className="mt-0.5 text-[#F2811D]" size={21} />
+          <div><h2 className="font-semibold text-[#0F2D4E]">Prestadores de serviços</h2><p className="mt-1 text-sm leading-6 text-slate-600">Você decide se deseja visualizar e utilizar a área de prestadores na sua conta profissional.</p></div>
+        </div>
+        <ToggleOption name="serviceMarketplaceEnabled" title="Exibir prestadores de serviços" description="Ao desativar, o feed, Meus serviços, conversas e notificações de serviços deixam de aparecer somente para você." defaultChecked={prefs.service_marketplace_enabled} />
+      </section> : null}
+
       <section>
         <PanelButton id="notifications" title={copy.notificationsTitle} description={copy.notificationsDescription} icon={Bell} />
         <div className={`${openPanel === "notifications" ? "grid" : "hidden"} gap-3 border-x border-b border-slate-200 bg-slate-50 p-4 md:grid-cols-2`}>

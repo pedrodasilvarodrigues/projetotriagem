@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth/access";
-import { COURSE_MAX_ATTEMPTS } from "@/lib/courses/config";
 import { createServerClient } from "@/lib/supabase/server";
 
 const courseSchema = z.object({
@@ -97,7 +96,6 @@ export async function saveCourseAction(formData: FormData) {
     } else {
       revalidatePath("/admin/courses");
       revalidatePath(`/admin/courses/${courseId}`);
-      revalidatePath("/professional/courses");
       redirect(`${redirectTo}?message=curso-atualizado`);
     }
   } else {
@@ -132,7 +130,6 @@ export async function saveCourseAction(formData: FormData) {
 
   revalidatePath("/admin/courses");
   revalidatePath(`/admin/courses/${courseId}`);
-  revalidatePath("/professional/courses");
   redirect(courseId ? `/admin/courses/${courseId}?message=curso-salvo` : "/admin/courses?message=curso-salvo");
 }
 
@@ -151,50 +148,5 @@ export async function deleteCourseAction(formData: FormData) {
 
   if (result.error) redirect(`/admin/courses?error=${encodeURIComponent(result.error.message)}`);
   revalidatePath("/admin/courses");
-  revalidatePath("/professional/courses");
   redirect(`/admin/courses?message=${hasAttempts ? "curso-arquivado" : "curso-excluido"}`);
-}
-
-export async function submitCourseAttemptAction(formData: FormData) {
-  await requireRole("professional");
-  const courseId = String(formData.get("courseId") ?? "");
-  if (!courseId) redirect("/professional/courses?error=curso-invalido");
-
-  const supabase = await createServerClient();
-  const selectedAnswers = [...formData.entries()]
-    .filter(([key]) => key.startsWith("question_"))
-    .map(([key, value]) => ({
-      questionId: key.replace("question_", ""),
-      optionId: String(value)
-    }));
-
-  const { data: result, error } = await supabase
-    .rpc("submit_course_attempt", {
-      target_course_id: courseId,
-      selected_answers: selectedAnswers
-    })
-    .single();
-
-  if (error || !result) redirect(`/professional/courses/${courseId}?error=${encodeURIComponent(error?.message ?? "tentativa-nao-criada")}`);
-  const attemptResult = result as { approved: boolean; attempt_number: number };
-
-  revalidatePath("/professional/courses");
-  revalidatePath(`/professional/courses/${courseId}`);
-  revalidatePath("/professional/resume");
-  redirect(`/professional/courses/${courseId}?message=${attemptResult.approved ? "aprovado" : attemptResult.attempt_number >= COURSE_MAX_ATTEMPTS ? "reprovado-final" : "reprovado-tentar-novamente"}`);
-}
-
-export async function recordCourseVideoProgressAction(input: { courseId: string; positionSeconds: number; durationSeconds: number }) {
-  await requireRole("professional");
-  const parsed = z.object({ courseId: z.string().uuid(), positionSeconds: z.number().nonnegative(), durationSeconds: z.number().positive() }).safeParse(input);
-  if (!parsed.success) throw new Error("Progresso de vídeo inválido.");
-  const supabase = await createServerClient();
-  const { data, error } = await supabase.rpc("record_course_video_progress", {
-    target_course_id: parsed.data.courseId,
-    target_position_seconds: parsed.data.positionSeconds,
-    target_duration_seconds: parsed.data.durationSeconds
-  });
-  if (error) throw new Error(error.message);
-  revalidatePath(`/professional/courses/${parsed.data.courseId}`);
-  return Number(data ?? 0);
 }

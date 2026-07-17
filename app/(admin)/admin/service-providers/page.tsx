@@ -2,12 +2,15 @@ import { CheckCircle2, Clock3, ShieldAlert, XCircle } from "lucide-react";
 import { AppShell } from "@/components/app/shell";
 import { moderatePortfolioAction, moderateProviderAction } from "@/lib/actions/marketplace";
 import { createServerClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { isMarketplaceEnabled } from "@/lib/features";
 
 export const dynamic = "force-dynamic";
 const input = "rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#F2811D]";
 export default async function AdminServiceProvidersPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string; error?: string }> }) {
   const params = await searchParams;
   const supabase = await createServerClient();
+  if (!await isMarketplaceEnabled()) redirect("/admin/settings?message=marketplace-desativado");
   let query = supabase.from("service_provider_profiles").select("*,professionals(full_name,email,user_id)").order("submitted_at", { ascending: false });
   if (params.status) query = query.eq("status", params.status);
   const { data } = await query;

@@ -2,12 +2,15 @@ import { Search, SlidersHorizontal, Store } from "lucide-react";
 import { AppShell } from "@/components/app/shell";
 import { ProviderCard, type ProviderSummary } from "@/components/marketplace/provider-card";
 import { createServerClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { isMarketplaceEnabled } from "@/lib/features";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProfessionalHomePage({ searchParams }: { searchParams: Promise<{ q?: string; category?: string; city?: string; mode?: string; rating?: string }> }) {
   const params = await searchParams;
   const supabase = await createServerClient();
+  if (!await isMarketplaceEnabled()) redirect("/professional/profile");
   const [{ data: providers }, { data: categories }] = await Promise.all([
     supabase.rpc("search_service_providers", {
       search_text: params.q || null,

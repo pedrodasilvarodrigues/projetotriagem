@@ -5,6 +5,8 @@ Portal de Triagem Profissional
 Plataforma de recrutamento e triagem profissional que conecta profissionais e empresas por meio de cadastro, banco de talentos, demandas, compatibilidade e encaminhamento qualificado.
 
 # Concluido
+- Cursos agora aparecem somente na área administrativa; páginas e envio de tentativas do profissional foram removidos.
+- Configuração global do marketplace adicionada ao painel administrativo, com bloqueio de menus, rotas, RPCs, RLS e gravações quando desativada.
 - Migrations `20260715000100_harden_company_candidate_rls.sql`, `20260715000200_add_courses_training_module.sql` e `20260715172757_harden_course_function_privileges.sql` aplicadas no projeto Supabase de produção `znmlgfllkwtcyvrpmwbt`.
 - Módulo de Cursos validado no banco remoto: seis tabelas com RLS ativa, privilégios mínimos da Data API, RPC de prova restrita a profissionais autenticados, funções internas sem execução pública e nenhuma advertência do advisor relacionada ao módulo.
 - Módulo de Cursos/Treinamento interno implementado:

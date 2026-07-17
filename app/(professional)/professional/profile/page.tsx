@@ -5,6 +5,7 @@ import { updateProfessionalProfileAction } from "@/lib/actions/workspace";
 import { saveProviderProfileAction, setServiceOfferingAction } from "@/lib/actions/marketplace";
 import { createServerClient } from "@/lib/supabase/server";
 import { statusLabel } from "@/lib/status-labels";
+import { isMarketplaceEnabled } from "@/lib/features";
 
 type CityOption = { city: string; state: string };
 
@@ -29,6 +30,7 @@ const profileErrorMessages: Record<string, string> = {
 export default async function ProfessionalProfilePage({ searchParams }: { searchParams: Promise<{ error?: string; message?: string; offerServices?: string }> }) {
   const params = await searchParams;
   const supabase = await createServerClient();
+  const marketplaceEnabled = await isMarketplaceEnabled();
   const { data: userData } = await supabase.auth.getUser();
   if (userData.user) await ensureProfessionalPublicProfile(userData.user);
   const [{ data: professional }, { data: profile }, { data: demandCities }] = await Promise.all([
@@ -63,7 +65,7 @@ export default async function ProfessionalProfilePage({ searchParams }: { search
   };
 
   const { data: preferredCities } = professional?.id ? await supabase.from("professional_preferred_cities").select("city,state").eq("professional_id", professional.id) : { data: [] };
-  const [{ data: capability }, { data: provider }, { data: serviceCategories }] = professional?.id ? await Promise.all([
+  const [{ data: capability }, { data: provider }, { data: serviceCategories }] = marketplaceEnabled && professional?.id ? await Promise.all([
     supabase.from("professional_capabilities").select("provides_services").eq("professional_id", professional.id).maybeSingle(),
     supabase.from("service_provider_profiles").select("*").eq("professional_id", professional.id).maybeSingle(),
     supabase.from("service_categories").select("id,name,parent_id").eq("is_active", true).order("display_order").order("name")
@@ -130,14 +132,16 @@ export default async function ProfessionalProfilePage({ searchParams }: { search
           </section>
           <button className="mt-5 rounded-md bg-blue-700 px-5 py-3 text-sm font-semibold text-white" type="submit">Salvar perfil</button>
         </form>
-        <aside className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+        {marketplaceEnabled ? <aside className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="font-semibold">Situação cadastral</h2>
           <p className="mt-3 rounded-md bg-slate-50 p-3 text-sm">{statusLabel(profileData.status)}</p>
           <p className="mt-3 text-sm leading-6 text-slate-600">Esses dados alimentam o motor de compatibilidade, a triagem e os encaminhamentos.</p>
           <div className="mt-5 border-t border-slate-200 pt-5"><h2 className="font-semibold text-[#0F2D4E]">Oferecer serviços</h2><p className="mt-2 text-sm leading-6 text-slate-600">Ative para enviar seu perfil comercial à aprovação do administrador.</p><form action={setServiceOfferingAction} className="mt-4"><label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl bg-slate-50 p-3 text-sm font-bold"><span>{capability?.provides_services ? "Ativado" : "Desativado"}</span><input type="checkbox" name="enabled" defaultChecked={Boolean(capability?.provides_services)} className="size-5 accent-[#F2811D]" /><button className="rounded-lg bg-[#0F2D4E] px-3 py-2 text-xs text-white">Aplicar</button></label></form>{provider && <p className="mt-3 rounded-lg bg-blue-50 p-3 text-xs font-semibold text-[#0F2D4E]">Status: {provider.status === "approved" ? "Aprovado" : provider.status === "pending" ? "Em análise" : provider.status === "rejected" ? `Reprovado: ${provider.rejection_reason ?? "revise os dados"}` : provider.status === "suspended" ? `Suspenso: ${provider.suspension_reason ?? "consulte o suporte"}` : "Não ativado"}</p>}</div>
-        </aside>
+        </aside> : null}
       </div>
+      {marketplaceEnabled ? <>
       {capability?.provides_services || params.offerServices === "1" ? <details open={params.offerServices === "1" || !provider} className="mt-6 rounded-2xl border border-orange-200 bg-white p-5 shadow-sm"><summary className="cursor-pointer text-lg font-bold text-[#0F2D4E]">Cadastro de prestador de serviços</summary><p className="mt-2 text-sm text-slate-600">Preencha os dados abaixo. O perfil só entra na busca depois da aprovação administrativa.</p><form action={saveProviderProfileAction} className="mt-5 grid gap-4 md:grid-cols-2"><label className="text-sm font-semibold">Título profissional<input name="professionalTitle" required minLength={3} defaultValue={provider?.professional_title ?? ""} className="field-input mt-2" /></label><label className="text-sm font-semibold">Especialidades<input name="specialties" defaultValue={provider?.specialties?.join(", ") ?? ""} className="field-input mt-2" placeholder="Separe por vírgulas" /></label><label className="text-sm font-semibold md:col-span-2">Descrição dos serviços<textarea name="serviceDescription" required minLength={20} defaultValue={provider?.service_description ?? ""} className="field-input mt-2 min-h-28" /></label><label className="text-sm font-semibold">Modalidade<select name="serviceMode" defaultValue={provider?.service_mode ?? "in_person"} className="field-input mt-2"><option value="in_person">Presencial</option><option value="remote">Remoto</option><option value="both">Presencial e remoto</option></select></label><label className="text-sm font-semibold">Preço<select name="pricingModel" defaultValue={provider?.pricing_model ?? "negotiable"} className="field-input mt-2"><option value="fixed">Fixo</option><option value="hourly">Por hora</option><option value="quote">Orçamento</option><option value="negotiable">A combinar</option></select></label><label className="text-sm font-semibold">Valor inicial opcional<input name="startingPrice" type="number" min="0" step="0.01" defaultValue={provider?.starting_price ?? ""} className="field-input mt-2" /></label><label className="text-sm font-semibold">Disponibilidade opcional<input name="availability" defaultValue={provider?.availability ?? ""} className="field-input mt-2" /></label><fieldset className="md:col-span-2"><legend className="text-sm font-bold">Categorias e subcategorias</legend><div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{serviceCategories?.map((category) => <label key={category.id} className="flex items-center gap-2 rounded-xl border border-slate-200 p-3 text-sm"><input type="checkbox" name="categoryIds" value={category.id} defaultChecked={selectedServiceCategories.has(category.id)} />{category.name}</label>)}</div></fieldset><label className="text-sm font-semibold">Cidade<input name="city" required defaultValue={serviceArea?.city ?? professional?.city ?? ""} className="field-input mt-2" /></label><label className="text-sm font-semibold">UF<input name="state" required maxLength={2} defaultValue={serviceArea?.state ?? professional?.state ?? ""} className="field-input mt-2" /></label><label className="text-sm font-semibold">Região atendida<input name="regionName" defaultValue={serviceArea?.region_name ?? ""} className="field-input mt-2" /></label><label className="text-sm font-semibold">Raio (km)<input name="radiusKm" type="number" min={1} max={500} defaultValue={serviceArea?.radius_km ?? 20} className="field-input mt-2" /></label><label className="text-sm font-semibold md:col-span-2">Experiência<textarea name="experienceDescription" defaultValue={provider?.experience_description ?? ""} className="field-input mt-2 min-h-24" /></label><button className="rounded-xl bg-[#F2811D] px-5 py-3 font-bold text-white md:col-span-2">Salvar e enviar para aprovação</button></form></details> : null}
+      </> : null}
     </AppShell>
   );
 }

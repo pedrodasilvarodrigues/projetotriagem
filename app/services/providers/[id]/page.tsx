@@ -4,6 +4,7 @@ import { PublicPageShell } from "@/components/app/public-page-shell";
 import { startConversationAction } from "@/lib/actions/marketplace";
 import { createAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
 import { createServerClient, hasSupabasePublicEnv } from "@/lib/supabase/server";
+import { isMarketplaceEnabled } from "@/lib/features";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,7 @@ export default async function ProviderPublicPage({ params }: { params: Promise<{
   const { id } = await params;
   if (!hasSupabasePublicEnv()) notFound();
   const supabase = await createServerClient();
+  if (!await isMarketplaceEnabled()) notFound();
   const admin = hasSupabaseAdminEnv() ? createAdminClient() : null;
   const { data } = await supabase.rpc("get_service_provider_public", { target_provider_id: id });
   const provider = data?.[0];

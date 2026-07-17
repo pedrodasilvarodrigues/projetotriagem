@@ -35,7 +35,9 @@ import { signOutAction } from "@/lib/actions/auth";
 import { type AppLanguage, translateUi } from "@/lib/i18n/ui";
 import { PortalEncaixeLogo } from "@/components/app/logo";
 
-const navItems = {
+type NavigationConfig = { title: string; subtitle: string; items: Array<{ href: string; label: string; icon: LucideIcon }> };
+
+const navItems: Record<AppRole, NavigationConfig> = {
   admin: {
     title: "Administração",
     subtitle: "Operação, triagem e acompanhamento",
@@ -78,7 +80,6 @@ const navItems = {
       { href: "/professional/search-demands", label: "Buscar demandas", icon: Search },
       { href: "/professional/profile", label: "Perfil", icon: UserRoundCog },
       { href: "/professional/resume", label: "Currículo", icon: FileText },
-      { href: "/professional/courses", label: "Cursos", icon: GraduationCap },
       { href: "/professional/services", label: "Meus serviços", icon: Store },
       { href: "/professional/service-conversations", label: "Conversas de serviços", icon: MessagesSquare },
       { href: "/professional/screening-status", label: "Situação da Triagem", icon: ClipboardCheck },
@@ -98,10 +99,29 @@ const navItems = {
       { href: "/client/notifications", label: "Notificações", icon: Bell }
     ]
   }
-} satisfies Record<AppRole, { title: string; subtitle: string; items: Array<{ href: string; label: string; icon: LucideIcon }> }>;
+};
 
-export function AppNav({ role, preferredLanguage }: { role: AppRole; preferredLanguage: AppLanguage }) {
-  const nav = navItems[role];
+const marketplaceRoutes = [
+  "/services",
+  "/client",
+  "/professional/services",
+  "/professional/service-conversations",
+  "/admin/service-providers",
+  "/admin/service-categories",
+  "/admin/marketplace-reports"
+];
+
+export function AppNav({ role, preferredLanguage, marketplaceEnabled }: { role: AppRole; preferredLanguage: AppLanguage; marketplaceEnabled: boolean }) {
+  const baseNav = navItems[role];
+  const nav = useMemo(() => ({
+    ...baseNav,
+    items: marketplaceEnabled
+      ? baseNav.items
+      : baseNav.items.filter((item) => {
+          if (role === "professional" && item.href === "/professional") return false;
+          return !marketplaceRoutes.some((route) => item.href === route || item.href.startsWith(`${route}/`));
+        })
+  }), [baseNav, marketplaceEnabled, role]);
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
@@ -241,7 +261,7 @@ export function AppNav({ role, preferredLanguage }: { role: AppRole; preferredLa
     <header className="sticky top-0 z-40 border-b-4 border-[#F2811D] bg-[#0F2D4E] text-white shadow-[0_10px_30px_rgba(15,23,42,0.18)]">
       <div className="mx-auto max-w-7xl px-3 py-3 sm:px-5">
         <div className="flex items-center justify-between gap-3">
-          <Link href={nav.items[0].href} className="flex min-w-0 flex-1 items-center gap-3">
+          <Link href={nav.items[0]?.href ?? "/"} className="flex min-w-0 flex-1 items-center gap-3">
             <PortalEncaixeLogo />
           </Link>
           <button

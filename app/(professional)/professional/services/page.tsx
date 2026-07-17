@@ -3,6 +3,8 @@ import { AlertCircle, CheckCircle2, Clock3, ImagePlus, MessageSquare, ShieldAler
 import { AppShell } from "@/components/app/shell";
 import { saveProviderProfileAction, uploadPortfolioAction } from "@/lib/actions/marketplace";
 import { createServerClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { isMarketplaceEnabled } from "@/lib/features";
 
 export const dynamic = "force-dynamic";
 const input = "mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm outline-none focus:border-[#F2811D] focus:ring-4 focus:ring-orange-100";
@@ -13,6 +15,7 @@ const statusInfo: Record<string, { label: string; className: string; icon: typeo
 export default async function ProfessionalServicesPage({ searchParams }: { searchParams: Promise<{ error?: string; success?: string }> }) {
   const params = await searchParams;
   const supabase = await createServerClient();
+  if (!await isMarketplaceEnabled()) redirect("/professional/profile");
   const { data: userData } = await supabase.auth.getUser();
   const { data: professional } = await supabase.from("professionals").select("id,city,state").eq("user_id", userData.user?.id).maybeSingle();
   const { data: capability } = professional ? await supabase.from("professional_capabilities").select("provides_services").eq("professional_id", professional.id).maybeSingle() : { data: null };

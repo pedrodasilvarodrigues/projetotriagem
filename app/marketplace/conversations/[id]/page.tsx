@@ -1,10 +1,11 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { AlertTriangle, ClipboardPlus, Flag } from "lucide-react";
 import { AppShell } from "@/components/app/shell";
 import { ChatPanel } from "@/components/marketplace/chat-panel";
 import { confirmServiceCompletionAction, createServiceRequestAction, createServiceReviewAction, reportMarketplaceAction, transitionServiceRequestAction } from "@/lib/actions/marketplace";
 import { getCurrentRole } from "@/lib/auth/access";
 import { createServerClient } from "@/lib/supabase/server";
+import { isMarketplaceEnabled } from "@/lib/features";
 
 export const dynamic = "force-dynamic";
 const input = "mt-1.5 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#F2811D]";
@@ -16,6 +17,7 @@ export default async function MarketplaceConversationPage({ params, searchParams
   const role = await getCurrentRole();
   const eyebrow = role === "client" ? "Cliente" : role === "admin" ? "Administrador" : "Profissional";
   const supabase = await createServerClient();
+  if (!await isMarketplaceEnabled()) redirect(role === "admin" ? "/admin/settings" : role === "professional" ? "/professional/profile" : "/");
   const { data: userData } = await supabase.auth.getUser();
   const [{ data: conversation }, { data: messages }, { data: requests }] = await Promise.all([
     supabase.from("marketplace_conversations").select("id,status,provider_id,client_id,requester_user_id").eq("id", id).maybeSingle(),

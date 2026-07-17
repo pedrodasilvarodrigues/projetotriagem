@@ -3,13 +3,17 @@ import { LanguageRuntime } from "@/components/app/language-runtime";
 import { requireRole, roleFromEyebrow } from "@/lib/auth/access";
 import { createServerClient } from "@/lib/supabase/server";
 import { type AppLanguage, translateUi } from "@/lib/i18n/ui";
+import { isMarketplaceEnabled } from "@/lib/features";
 
 export async function AppShell({ title, eyebrow, children }: { title: string; eyebrow: string; children: React.ReactNode }) {
   const expectedRole = roleFromEyebrow(eyebrow);
   const role = expectedRole ? await requireRole(expectedRole) : "professional";
   const supabase = await createServerClient();
   const { data: userData } = await supabase.auth.getUser();
-  const { data: settings } = await supabase.from("user_settings").select("preferred_language").eq("user_id", userData.user?.id).maybeSingle();
+  const [{ data: settings }, marketplaceEnabled] = await Promise.all([
+    supabase.from("user_settings").select("preferred_language").eq("user_id", userData.user?.id).maybeSingle(),
+    isMarketplaceEnabled()
+  ]);
   const language = (settings?.preferred_language ?? "pt-BR") as AppLanguage;
   const mainClassName =
     role === "admin"
@@ -20,7 +24,7 @@ export async function AppShell({ title, eyebrow, children }: { title: string; ey
     <div className="min-h-screen bg-[#F1F4F8] text-slate-950 relative overflow-x-hidden">
       <div className="fixed inset-0 grain-overlay opacity-[0.025] pointer-events-none z-[999]" />
       <LanguageRuntime preferredLanguage={language} />
-      <AppNav role={role} preferredLanguage={language} />
+      <AppNav role={role} preferredLanguage={language} marketplaceEnabled={marketplaceEnabled} />
       <main id="conteudo" className={mainClassName}>
         <header className="mb-4 border-l-4 border-[#F2811D] bg-transparent py-2 pl-3 sm:mb-6 sm:pl-4 animate-fade-in-up">
           <p className="text-xs font-bold uppercase tracking-normal text-[#6B7280]">{translateUi(eyebrow, language)}</p>

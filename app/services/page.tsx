@@ -3,6 +3,8 @@ import { PublicPageShell } from "@/components/app/public-page-shell";
 import { ProviderCard, type ProviderSummary } from "@/components/marketplace/provider-card";
 import { createAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
 import { createServerClient, hasSupabasePublicEnv } from "@/lib/supabase/server";
+import { notFound } from "next/navigation";
+import { isMarketplaceEnabled } from "@/lib/features";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +14,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
   let categories: Array<{ id: string; name: string; parent_id: string | null }> = [];
   if (hasSupabasePublicEnv()) {
     const supabase = await createServerClient();
+    if (!await isMarketplaceEnabled()) notFound();
     const catalogClient = hasSupabaseAdminEnv() ? createAdminClient() : supabase;
     const [providerResult, categoryResult] = await Promise.all([
       supabase.rpc("search_service_providers", { search_text: params.q || null, target_category: params.category || null, target_city: params.city || null, target_mode: params.mode || null, minimum_rating: params.rating ? Number(params.rating) : null, result_limit: 36, result_offset: 0 }),

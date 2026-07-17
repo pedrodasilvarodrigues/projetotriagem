@@ -2,11 +2,14 @@ import Link from "next/link";
 import { MessageSquare } from "lucide-react";
 import { AppShell } from "@/components/app/shell";
 import { createServerClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { isMarketplaceEnabled } from "@/lib/features";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProfessionalServiceConversationsPage() {
   const supabase = await createServerClient();
+  if (!await isMarketplaceEnabled()) redirect("/professional/profile");
   const { data: userData } = await supabase.auth.getUser();
   const { data: professional } = await supabase.from("professionals").select("id").eq("user_id", userData.user?.id).maybeSingle();
   const { data: provider } = professional ? await supabase.from("service_provider_profiles").select("id").eq("professional_id", professional.id).maybeSingle() : { data: null };

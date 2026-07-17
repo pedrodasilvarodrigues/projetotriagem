@@ -5,6 +5,8 @@ import { signInWithEmailAction, signInWithGoogleAction } from "@/lib/actions/aut
 import { resolveAuthenticatedEntryPath } from "@/lib/auth/entry";
 import { createServerClient, hasSupabasePublicEnv } from "@/lib/supabase/server";
 import { PortalEncaixeLogo } from "@/components/app/logo";
+import { AuthSubmitButton } from "@/components/auth/auth-submit-button";
+import { AuthVisualPanel } from "@/components/auth/auth-visual-panel";
 
 const errorMessages: Record<string, string> = {
   "sessao-expirada": "Sua sessão expirou por segurança. Por favor, entre novamente para continuar sua jornada.",
@@ -73,7 +75,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     <main id="conteudo" className="min-h-screen bg-[#F1F4F8] text-slate-900 relative">
       <div className="fixed inset-0 grain-overlay opacity-[0.025] pointer-events-none z-[999]" />
       <div className="grid min-h-screen lg:grid-cols-[minmax(0,1fr)_minmax(480px,0.72fr)]">
-        <section className="relative min-h-[360px] overflow-hidden lg:min-h-screen">
+        <AuthVisualPanel mode="login" />
+        <section className="hidden">
           <img
             src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1800&q=88"
             alt="Equipe profissional conversando em ambiente corporativo"
@@ -137,13 +140,13 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
               </Link>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_22px_70px_rgba(15,23,42,0.08)] sm:p-8">
+            <div className="auth-form-card rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_22px_70px_rgba(15,23,42,0.08)] sm:p-8">
               <div className="mb-6 flex items-center justify-between gap-4">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-orange-500 font-display">Acesso ao portal</p>
                   <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-blue-750 font-display">Bem-vindo de volta</h2>
                 </div>
-                <div className="hidden size-12 items-center justify-center rounded-xl bg-orange-50 text-orange-500 sm:flex shadow-inner">
+                <div className="auth-lock-pulse hidden size-12 items-center justify-center rounded-xl bg-orange-50 text-orange-500 sm:flex shadow-inner">
                   <LockKeyhole aria-hidden="true" size={23} />
                 </div>
               </div>
@@ -197,10 +200,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
                     Esqueci minha senha
                   </Link>
                 </div>
-                <button className="btn-primary w-full py-3.5 shadow-lg shadow-orange-500/10 flex items-center justify-center gap-2" type="submit" disabled={!isSupabaseConfigured}>
-                  Entrar
-                  <ArrowRight aria-hidden="true" className="transition group-hover:translate-x-0.5" size={17} />
-                </button>
+                <AuthSubmitButton disabled={!isSupabaseConfigured}>Entrar</AuthSubmitButton>
               </form>
 
               <div className="my-6 flex items-center gap-3 text-xs font-bold uppercase text-slate-350">
@@ -210,7 +210,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
               </div>
 
               <form action={signInWithGoogleAction}>
-                <button className="group flex w-full items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3.5 text-sm font-bold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-orange-200 hover:bg-orange-50/50 hover:shadow-md disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 disabled:shadow-none disabled:hover:translate-y-0" type="submit" disabled={!isSupabaseConfigured}>
+                <button className="auth-google-button group flex w-full items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3.5 text-sm font-bold text-slate-700 shadow-sm transition disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 disabled:shadow-none disabled:hover:translate-y-0" type="submit" disabled={!isSupabaseConfigured}>
                   <GoogleIcon />
                   Continuar com Google
                   <ArrowRight aria-hidden="true" className="text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-orange-500" size={16} />

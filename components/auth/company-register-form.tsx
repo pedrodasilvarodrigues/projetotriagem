@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
+import { LoadingGear } from "@/components/app/loading-gear";
 import { ConsentFields } from "@/components/auth/onboarding-layout";
 import { registerCompanyWithEmailAction } from "@/lib/actions/auth";
 
@@ -174,7 +175,7 @@ export function CompanyRegisterForm({ error }: { error?: string }) {
       <ConsentFields />
 
       <button disabled={submitting} className="btn-primary w-full py-3.5 shadow-lg shadow-orange-500/10 flex items-center justify-center gap-2 cursor-pointer" type="submit">
-        {submitting ? <Loader2 aria-hidden="true" className="animate-spin" size={17} /> : null}
+        {submitting ? <LoadingGear compact label="Criando cadastro" /> : null}
         Criar cadastro empresarial
       </button>
     </form>

@@ -150,6 +150,8 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Evoluir os filtros de vagas para salvar pesquisas e alertas por email quando SMTP estiver pronto.
 
 # Observacoes
+- Camada de movimento implementada em 17/07/2026: loading de pÃ¡gina centralizado com engrenagem da marca, transiÃ§Ã£o de encaixe entre rotas internas, intro cinematogrÃ¡fica com duraÃ§Ã£o total de 5 segundos uma vez por sessÃ£o e experiÃªncia reduzida estÃ¡tica para `prefers-reduced-motion`.
+- Login e cadastro compartilham a nova composiÃ§Ã£o visual baseada no asset fornecido pelo produto, com gradiente respirando, fluxo luminoso, profundidade, contagem progressiva, badges em sequÃªncia, entrada do formulÃ¡rio, foco animado, shimmer no CTA, elevaÃ§Ã£o do Google e engrenagem compacta durante envios. Nenhuma regra de autenticaÃ§Ã£o foi alterada.
 - Adequacao de producao de 16/07/2026: Cursos agora registra no Supabase o progresso real do video e libera prova apenas a partir de 90%; links aceitos sao YouTube ou video direto MP4/WEBM/OGG. A validacao tambem existe no banco antes de inserir tentativa.
 - O modulo de Cursos mantem CRUD e construtor de prova admin, limite de duas tentativas no banco, nota minima centralizada em 70%, certificacao automatica, bonus de +20 por curso relevante com teto de +30, resultados detalhados para o admin e selo sem nota para empresas.
 - Marketplace alinhado ao MVP: Cliente e Profissional podem iniciar chat como solicitantes; Empresa permanece sem acesso. A conversa usa `requester_user_id`, preservando os dados anteriores e sem criar conta de cliente duplicada para profissionais.

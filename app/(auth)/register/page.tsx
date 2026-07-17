@@ -8,6 +8,7 @@ import { signInWithGoogleAction } from "@/lib/actions/auth";
 import { resolveAuthenticatedEntryPath } from "@/lib/auth/entry";
 import { createServerClient } from "@/lib/supabase/server";
 import { PortalEncaixeLogo } from "@/components/app/logo";
+import { AuthVisualPanel } from "@/components/auth/auth-visual-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -47,7 +48,8 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
   return (
     <main id="conteudo" className="grid min-h-screen bg-[#F1F4F8] text-slate-900 lg:grid-cols-[minmax(0,0.88fr)_minmax(620px,1fr)] relative">
       <div className="fixed inset-0 grain-overlay opacity-[0.025] pointer-events-none z-[999]" />
-      <section className="relative hidden overflow-hidden lg:block">
+      <AuthVisualPanel mode="register" />
+      <section className="hidden">
         <img
           src="https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1500&q=85"
           alt="Reunião profissional para contratação"
@@ -77,7 +79,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
             </Link>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_22px_70px_rgba(15,23,42,0.08)] sm:p-8">
+          <div className="auth-form-card rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_22px_70px_rgba(15,23,42,0.08)] sm:p-8">
             <h2 className="text-3xl font-extrabold tracking-tight text-blue-750 font-display font-display">Crie sua conta</h2>
             <p className="mt-2 text-sm leading-6 text-slate-500 font-medium font-sans">Escolha o perfil adequado para acessar a área correta depois do login.</p>
 
@@ -104,7 +106,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
 
             <form action={signInWithGoogleAction} className="mt-6">
               <input type="hidden" name="accountType" value={accountType} />
-              <button className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3.5 text-sm font-bold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-orange-200 hover:bg-orange-50/50 hover:shadow-md" type="submit">
+              <button className="auth-google-button flex w-full items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3.5 text-sm font-bold text-slate-700 shadow-sm transition" type="submit">
                 <GoogleIcon />
                 Continuar com Google como {isCompany ? "Empresa" : isClient ? "Cliente" : "Profissional"}
               </button>

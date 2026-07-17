@@ -143,11 +143,11 @@ function PortalEncaixeIntro({ onComplete }: { onComplete: () => void }) {
     if (prefersReduced) {
       const timer = setTimeout(() => {
         setFadeOut(true);
-      }, 2300);
+      }, 900);
 
       const endTimer = setTimeout(() => {
         onComplete();
-      }, 2800);
+      }, 1400);
 
       return () => {
         clearTimeout(timer);
@@ -157,23 +157,23 @@ function PortalEncaixeIntro({ onComplete }: { onComplete: () => void }) {
 
     const flashTimer = setTimeout(() => {
       setShowFlash(true);
-    }, 1800);
+    }, 2700);
 
     const logoTimer = setTimeout(() => {
       setShowLogo(true);
-    }, 1800);
+    }, 2700);
 
     const letterTimer = setTimeout(() => {
       setLettersVisible(true);
-    }, 2000);
+    }, 3250);
 
     const completeTimer = setTimeout(() => {
       setFadeOut(true);
-    }, 3200);
+    }, 4500);
 
     const endTimer = setTimeout(() => {
       onComplete();
-    }, 3700);
+    }, 5000);
 
     return () => {
       clearTimeout(flashTimer);
@@ -222,18 +222,18 @@ function PortalEncaixeIntro({ onComplete }: { onComplete: () => void }) {
               strokeDasharray="800"
               strokeDashoffset="800"
               className="animate-trace-draw"
-              style={{ animationDelay: "200ms" }}
+              style={{ animationDelay: "350ms", animationDuration: "2200ms" }}
             />
           </svg>
 
           <div 
             className="absolute size-8 rounded-full bg-gradient-to-r from-blue-400 to-[#1B4E78] shadow-[0_0_24px_rgba(59,130,246,0.6)] animate-orb-left"
-            style={{ animationDelay: "400ms" }}
+            style={{ animationDelay: "650ms", animationDuration: "2050ms" }}
           />
 
           <div 
             className="absolute size-8 rounded-full bg-gradient-to-r from-[#F2811D] to-[#F5A24D] shadow-[0_0_24px_rgba(242,129,29,0.6)] animate-orb-right"
-            style={{ animationDelay: "400ms" }}
+            style={{ animationDelay: "650ms", animationDuration: "2050ms" }}
           />
 
           {showFlash && (
@@ -263,7 +263,7 @@ function PortalEncaixeIntro({ onComplete }: { onComplete: () => void }) {
               </span>
             ))}
           </h1>
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#F2811D] mt-2 opacity-0 animate-fade-in-up" style={{ animationDelay: "2500ms" }}>
+          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#F2811D] mt-2 opacity-0 animate-fade-in-up" style={{ animationDelay: "3650ms" }}>
             conectando você ao profissional certo
           </span>
         </div>
@@ -375,9 +375,7 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
 
   useEffect(() => {
     const hasSeen = sessionStorage.getItem("hasSeenSplash");
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (!hasSeen && !prefersReducedMotion) {
+    if (!hasSeen) {
       setShowIntro(true);
       document.documentElement.style.overflow = "hidden";
     }

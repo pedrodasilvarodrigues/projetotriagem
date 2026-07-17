@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { LoadingGear } from "@/components/app/loading-gear";
 import { registerClientWithEmailAction } from "@/lib/actions/auth";
 
 const inputClass = "mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm outline-none transition focus:border-[#F2811D] focus:ring-4 focus:ring-orange-100";
@@ -19,6 +20,6 @@ export function ClientRegisterForm({ error }: { error?: string }) {
     </div>
     <label className="flex gap-3 text-sm text-slate-600"><input name="terms" type="checkbox" required />Aceito os Termos de Uso.</label>
     <label className="flex gap-3 text-sm text-slate-600"><input name="privacy" type="checkbox" required />Li e aceito a Política de Privacidade.</label>
-    <button disabled={submitting} className="w-full rounded-xl bg-[#F2811D] px-5 py-3.5 font-bold text-white transition hover:bg-[#dd7010] disabled:opacity-60">{submitting ? "Criando conta..." : "Criar conta de cliente"}</button>
+    <button disabled={submitting} className="btn-primary auth-primary-button w-full px-5 py-3.5 font-bold text-white disabled:opacity-60">{submitting ? <><LoadingGear compact label="Criando conta" /> Criando conta...</> : "Criar conta de cliente"}</button>
   </form>;
 }

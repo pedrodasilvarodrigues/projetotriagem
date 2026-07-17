@@ -148,6 +148,14 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Evoluir os filtros de vagas para salvar pesquisas e alertas por email quando SMTP estiver pronto.
 
 # Observacoes
+- Adequacao de producao de 16/07/2026: Cursos agora registra no Supabase o progresso real do video e libera prova apenas a partir de 90%; links aceitos sao YouTube ou video direto MP4/WEBM/OGG. A validacao tambem existe no banco antes de inserir tentativa.
+- O modulo de Cursos mantem CRUD e construtor de prova admin, limite de duas tentativas no banco, nota minima centralizada em 70%, certificacao automatica, bonus de +20 por curso relevante com teto de +30, resultados detalhados para o admin e selo sem nota para empresas.
+- Marketplace alinhado ao MVP: Cliente e Profissional podem iniciar chat como solicitantes; Empresa permanece sem acesso. A conversa usa `requester_user_id`, preservando os dados anteriores e sem criar conta de cliente duplicada para profissionais.
+- A pagina profissional `Minha Area` passou a ser exclusivamente o feed de prestadores aprovados. Curriculo, demandas, triagem e encaminhamentos permanecem nas abas dedicadas.
+- O switch `Oferecer servicos` foi integrado ao Perfil profissional; desativar preserva dados e remove o prestador da busca, ativar abre o cadastro e envia o perfil para aprovacao.
+- Avaliacoes do marketplace seguem a decisao de MVP e sao liberadas apos existir conversa, limitadas a uma por conversa/avaliador. A media e a quantidade sao recalculadas por trigger.
+- Chat de servicos possui Realtime, leitura, notificacao interna e envio transacional por Resend quando as credenciais de producao estao configuradas; denuncias continuam vinculadas ao painel administrativo de moderacao e suspensao.
+- Migrations desta adequacao: `20260716103000_align_courses_and_marketplace_mvp.sql` e `20260716110000_fix_marketplace_requester_role.sql`, aplicadas no Supabase remoto. `supabase db lint --linked --level warning` retornou zero erros.
 - Marketplace de prestadores implementado em 15/07/2026 com papel de cliente, capacidades independentes do profissional, cadastro/aprovacao de prestador, categorias hierarquicas, busca publica, perfil publico, portfolio moderado, chat Realtime, solicitacoes com maquina de estados, conclusao bilateral, avaliacoes verificadas, denuncias, suspensao e historico de moderacao.
 - Schema versionado nas migrations `20260715181740_add_client_role.sql`, `20260715181800_marketplace_services_module.sql` e `20260715210000_harden_marketplace_workflow.sql`; dados pessoais e autenticacao continuam unificados, sem duplicar a conta profissional.
 - A seguranca do marketplace impede autoaprovacao de portfolio, escrita direta em solicitacoes e conclusao unilateral; mensagens e conversas nao podem ser adulteradas por updates diretos do cliente.

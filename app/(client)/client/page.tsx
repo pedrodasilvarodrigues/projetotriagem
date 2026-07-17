@@ -13,7 +13,7 @@ export default async function ClientPage({ searchParams }: { searchParams: Promi
   const { data: userData } = await supabase.auth.getUser();
   const { data: profile } = await supabase.from("client_profiles").select("*").eq("user_id", userData.user?.id).maybeSingle();
   const [{ count: conversations }, { count: requests }] = profile ? await Promise.all([
-    supabase.from("marketplace_conversations").select("id", { count: "exact", head: true }).eq("client_id", profile.id),
+    supabase.from("marketplace_conversations").select("id", { count: "exact", head: true }).eq("requester_user_id", userData.user?.id),
     supabase.from("service_requests").select("id", { count: "exact", head: true }).eq("client_id", profile.id)
   ]) : [{ count: 0 }, { count: 0 }];
   return <AppShell eyebrow="Cliente" title="Encontre o serviço certo">

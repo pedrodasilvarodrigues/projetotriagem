@@ -14,7 +14,7 @@ const courseSchema = z.object({
   category: z.string().trim().min(2),
   workloadHours: z.coerce.number().int().min(1),
   skillTags: z.string().optional(),
-  videoUrl: z.string().trim().min(8),
+  videoUrl: z.string().trim().url().refine((value) => /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)[\w-]{6,}/i.test(value) || /\.(mp4|webm|ogg)(\?.*)?$/i.test(value), "video-nao-suportado"),
   status: z.enum(["draft", "published", "archived"])
 });
 
@@ -182,4 +182,19 @@ export async function submitCourseAttemptAction(formData: FormData) {
   revalidatePath(`/professional/courses/${courseId}`);
   revalidatePath("/professional/resume");
   redirect(`/professional/courses/${courseId}?message=${attemptResult.approved ? "aprovado" : attemptResult.attempt_number >= COURSE_MAX_ATTEMPTS ? "reprovado-final" : "reprovado-tentar-novamente"}`);
+}
+
+export async function recordCourseVideoProgressAction(input: { courseId: string; positionSeconds: number; durationSeconds: number }) {
+  await requireRole("professional");
+  const parsed = z.object({ courseId: z.string().uuid(), positionSeconds: z.number().nonnegative(), durationSeconds: z.number().positive() }).safeParse(input);
+  if (!parsed.success) throw new Error("Progresso de vídeo inválido.");
+  const supabase = await createServerClient();
+  const { data, error } = await supabase.rpc("record_course_video_progress", {
+    target_course_id: parsed.data.courseId,
+    target_position_seconds: parsed.data.positionSeconds,
+    target_duration_seconds: parsed.data.durationSeconds
+  });
+  if (error) throw new Error(error.message);
+  revalidatePath(`/professional/courses/${parsed.data.courseId}`);
+  return Number(data ?? 0);
 }

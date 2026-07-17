@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { PlayCircle, ShieldCheck } from "lucide-react";
-import { submitCourseAttemptAction } from "@/lib/actions/courses";
-import { COURSE_MAX_ATTEMPTS } from "@/lib/courses/config";
+import { recordCourseVideoProgressAction, submitCourseAttemptAction } from "@/lib/actions/courses";
+import { COURSE_MAX_ATTEMPTS, COURSE_VIDEO_COMPLETION_PERCENT } from "@/lib/courses/config";
 
 type QuizRow = {
   question_id: string;
@@ -20,14 +21,68 @@ type CourseQuizPanelProps = {
   quizRows: QuizRow[];
   attemptsUsed: number;
   approved: boolean;
+  initialProgress: number;
 };
 
 function isDirectVideo(url: string) {
   return /\.(mp4|webm|ogg)(\?.*)?$/i.test(url);
 }
 
-export function CourseQuizPanel({ courseId, videoUrl, quizRows, attemptsUsed, approved }: CourseQuizPanelProps) {
-  const [videoReady, setVideoReady] = useState(false);
+function youtubeId(url: string) {
+  const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{6,})/i);
+  return match?.[1] ?? null;
+}
+
+export function CourseQuizPanel({ courseId, videoUrl, quizRows, attemptsUsed, approved, initialProgress }: CourseQuizPanelProps) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [progress, setProgress] = useState(initialProgress);
+  const lastSent = useRef(initialProgress);
+  const playerElementId = `course-video-${courseId}`;
+  const videoReady = progress >= COURSE_VIDEO_COMPLETION_PERCENT;
+  const ytId = youtubeId(videoUrl);
+
+  function persistProgress(position: number, duration: number, force = false) {
+    if (!duration || duration <= 0) return;
+    const next = Math.min(100, (position / duration) * 100);
+    setProgress((current) => Math.max(current, next));
+    if (!force && next - lastSent.current < 5) return;
+    lastSent.current = next;
+    startTransition(async () => {
+      const saved = await recordCourseVideoProgressAction({ courseId, positionSeconds: position, durationSeconds: duration });
+      setProgress((current) => Math.max(current, saved));
+      if (saved >= COURSE_VIDEO_COMPLETION_PERCENT) router.refresh();
+    });
+  }
+
+  useEffect(() => {
+    if (!ytId || videoReady) return;
+    let interval: ReturnType<typeof setInterval> | undefined;
+    let player: { getCurrentTime(): number; getDuration(): number; destroy(): void } | undefined;
+    const setup = () => {
+      const YT = (window as unknown as { YT?: { Player: new (id: string, config: object) => typeof player } }).YT;
+      if (!YT?.Player) return;
+      player = new YT.Player(playerElementId, {
+        videoId: ytId,
+        playerVars: { rel: 0 },
+        events: { onStateChange: (event: { data: number }) => {
+          if (event.data === 1 && !interval) interval = setInterval(() => player && persistProgress(player.getCurrentTime(), player.getDuration()), 5000);
+          if (event.data === 0 && player) persistProgress(player.getDuration(), player.getDuration(), true);
+          if (event.data !== 1 && interval) { clearInterval(interval); interval = undefined; }
+        } }
+      });
+    };
+    const existing = document.querySelector<HTMLScriptElement>('script[src="https://www.youtube.com/iframe_api"]');
+    if ((window as unknown as { YT?: unknown }).YT) setup();
+    else {
+      if (!existing) { const script = document.createElement("script"); script.src = "https://www.youtube.com/iframe_api"; document.head.appendChild(script); }
+      const previous = (window as unknown as { onYouTubeIframeAPIReady?: () => void }).onYouTubeIframeAPIReady;
+      (window as unknown as { onYouTubeIframeAPIReady?: () => void }).onYouTubeIframeAPIReady = () => { previous?.(); setup(); };
+    }
+    return () => { if (interval) clearInterval(interval); player?.destroy(); };
+  // Persist callback intentionally uses the current course identity only.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courseId, ytId, videoReady]);
   const groupedQuestions = useMemo(() => {
     const map = new Map<string, { id: string; prompt: string; position: number; options: Array<{ id: string; text: string; position: number }> }>();
     quizRows.forEach((row) => {
@@ -53,16 +108,14 @@ export function CourseQuizPanel({ courseId, videoUrl, quizRows, attemptsUsed, ap
         </div>
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-950">
           {isDirectVideo(videoUrl) ? (
-            <video src={videoUrl} controls className="aspect-video w-full" onEnded={() => setVideoReady(true)} />
+            <video src={videoUrl} controls className="aspect-video w-full" onTimeUpdate={(event) => persistProgress(event.currentTarget.currentTime, event.currentTarget.duration)} onEnded={(event) => persistProgress(event.currentTarget.duration, event.currentTarget.duration, true)} />
+          ) : ytId ? (
+            <div id={playerElementId} className="aspect-video w-full" />
           ) : (
-            <iframe src={videoUrl} title="Vídeo do curso" className="aspect-video w-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+            <p className="p-8 text-center text-sm text-white">Formato de vídeo não compatível. Informe um link direto MP4/WEBM/OGG ou YouTube.</p>
           )}
         </div>
-        {!isDirectVideo(videoUrl) ? (
-          <button type="button" onClick={() => setVideoReady(true)} className="mt-4 rounded-xl bg-[#0F2D4E] px-4 py-2 text-sm font-semibold text-white">
-            Confirmo que assisti ao vídeo
-          </button>
-        ) : null}
+        <div className="mt-4"><div className="flex justify-between text-xs font-semibold text-slate-600"><span>Progresso validado</span><span>{Math.floor(progress)}%</span></div><div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200"><span className="block h-full bg-[#F2811D] transition-all" style={{ width: `${Math.min(100, progress)}%` }} /></div>{isPending ? <p className="mt-2 text-xs text-slate-500">Salvando progresso…</p> : null}</div>
       </section>
 
       <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
@@ -100,7 +153,7 @@ export function CourseQuizPanel({ courseId, videoUrl, quizRows, attemptsUsed, ap
             <button disabled={!canAnswer} className="btn-primary rounded-xl px-5 py-3 text-sm disabled:opacity-50" type="submit">
               Enviar tentativa {attemptsUsed + 1}
             </button>
-            {!videoReady ? <p className="text-sm text-slate-500">Assista ao vídeo e confirme a conclusão para liberar a prova.</p> : null}
+            {!videoReady ? <p className="text-sm text-slate-500">Assista a pelo menos {COURSE_VIDEO_COMPLETION_PERCENT}% do vídeo para liberar a prova.</p> : null}
           </form>
         )}
       </section>

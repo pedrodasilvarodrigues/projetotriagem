@@ -80,6 +80,7 @@ const navItems = {
       { href: "/professional/resume", label: "Currículo", icon: FileText },
       { href: "/professional/courses", label: "Cursos", icon: GraduationCap },
       { href: "/professional/services", label: "Meus serviços", icon: Store },
+      { href: "/professional/service-conversations", label: "Conversas de serviços", icon: MessagesSquare },
       { href: "/professional/screening-status", label: "Situação da Triagem", icon: ClipboardCheck },
       { href: "/professional/referrals", label: "Encaminhamentos", icon: BriefcaseBusiness },
       { href: "/professional/notifications", label: "Notificações", icon: Bell },
@@ -93,7 +94,8 @@ const navItems = {
       { href: "/client", label: "Minha área", icon: LayoutGrid },
       { href: "/services", label: "Buscar prestadores", icon: Search },
       { href: "/client/requests", label: "Solicitações", icon: ClipboardCheck },
-      { href: "/client/conversations", label: "Conversas", icon: MessagesSquare }
+      { href: "/client/conversations", label: "Conversas", icon: MessagesSquare },
+      { href: "/client/notifications", label: "Notificações", icon: Bell }
     ]
   }
 } satisfies Record<AppRole, { title: string; subtitle: string; items: Array<{ href: string; label: string; icon: LucideIcon }> }>;

@@ -10,6 +10,8 @@ const base = (title: string, body: string) => `
   </body>
 </html>`;
 
+const safe = (value = "") => value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char] ?? char);
+
 export const emailTemplates = {
   welcome_professional: (v: Record<string, string>) => ({ subject: "Bem-vindo ao Portal de Triagem", html: base("Bem-vindo, profissional", `<p>Ola ${v.name}. Seu perfil foi criado e será analisado pela equipe.</p>`) }),
   welcome_company: (v: Record<string, string>) => ({ subject: "Empresa cadastrada no Portal", html: base("Cadastro empresarial recebido", `<p>Olá ${v.name}. Sua empresa já pode registrar demandas internas após aprovação.</p>`) }),
@@ -23,7 +25,8 @@ export const emailTemplates = {
   support_ticket_response: (v: Record<string, string>) => ({ subject: "Resposta no chamado", html: base("Nova resposta do suporte", `<p>${v.message}</p>`) }),
   training_available: (v: Record<string, string>) => ({ subject: "Treinamento disponível", html: base("Treinamento liberado", `<p>A trilha ${v.track} está disponível para acompanhamento.</p>`) }),
   lgpd_data_export: (v: Record<string, string>) => ({ subject: "Exportação de dados", html: base("Seus dados estao prontos", `<p>Acesse sua exportação pelo link seguro: <a href="${v.url}">baixar dados</a>.</p>`) }),
-  account_deletion_confirm: (v: Record<string, string>) => ({ subject: "Exclusão de conta confirmada", html: base("Conta removida", `<p>O processo de exclusão/anonimização foi concluído em ${v.date}.</p>`) })
+  account_deletion_confirm: (v: Record<string, string>) => ({ subject: "Exclusão de conta confirmada", html: base("Conta removida", `<p>O processo de exclusão/anonimização foi concluído em ${v.date}.</p>`) }),
+  marketplace_message: (v: Record<string, string>) => ({ subject: "Nova mensagem sobre um serviço", html: base("Você recebeu uma nova mensagem", `<p>Olá ${safe(v.name)}.</p><p>${safe(v.preview)}</p><p><a href="${safe(v.url)}">Abrir conversa no Portal Encaixe</a></p>`) })
 };
 
 export type EmailTemplateKey = keyof typeof emailTemplates;

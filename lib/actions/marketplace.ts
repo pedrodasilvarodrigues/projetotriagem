@@ -2,14 +2,18 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireRole } from "@/lib/auth/access";
+import { getCurrentRole, requireRole } from "@/lib/auth/access";
+import { createAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
 import { createServerClient } from "@/lib/supabase/server";
+import { sendTransactionalEmail } from "@/lib/resend/send-email";
 
 const clean = (value: FormDataEntryValue | null) => String(value ?? "").trim();
 const optionalNumber = (value: FormDataEntryValue | null) => clean(value) ? Number(clean(value).replace(",", ".")) : null;
 
 export async function saveProviderProfileAction(formData: FormData) {
   await requireRole("professional");
+  const redirectTo = clean(formData.get("redirectTo"));
+  const destination = redirectTo.startsWith("/") && !redirectTo.startsWith("//") ? redirectTo : "/professional/services";
   const supabase = await createServerClient();
   const specialties = clean(formData.get("specialties")).split(",").map((v) => v.trim()).filter(Boolean);
   const { data: providerId, error } = await supabase.rpc("submit_service_provider_profile", {
@@ -22,19 +26,20 @@ export async function saveProviderProfileAction(formData: FormData) {
     target_availability: clean(formData.get("availability")) || null,
     target_experience: clean(formData.get("experienceDescription")) || null
   });
-  if (error || !providerId) redirect(`/professional/services?error=${encodeURIComponent(error?.message ?? "perfil-invalido")}`);
+  if (error || !providerId) redirect(`${destination}?error=${encodeURIComponent(error?.message ?? "perfil-invalido")}`);
   const categoryIds = formData.getAll("categoryIds").map(String).filter(Boolean);
   await supabase.from("service_provider_categories").delete().eq("provider_id", providerId);
   if (categoryIds.length) {
     const { error: categoryError } = await supabase.from("service_provider_categories").insert(categoryIds.map((categoryId) => ({ provider_id: providerId, category_id: categoryId })));
-    if (categoryError) redirect(`/professional/services?error=${encodeURIComponent(categoryError.message)}`);
+    if (categoryError) redirect(`${destination}?error=${encodeURIComponent(categoryError.message)}`);
   }
   await supabase.from("service_provider_areas").delete().eq("provider_id", providerId);
   const city = clean(formData.get("city"));
   const state = clean(formData.get("state")).toUpperCase();
   if (city && state) await supabase.from("service_provider_areas").insert({ provider_id: providerId, city, state, region_name: clean(formData.get("regionName")) || null, radius_km: Number(clean(formData.get("radiusKm")) || 20) });
   revalidatePath("/professional/services");
-  redirect("/professional/services?success=enviado-para-analise");
+  revalidatePath("/professional/profile");
+  redirect(`${destination}?success=enviado-para-analise`);
 }
 
 export async function uploadPortfolioAction(formData: FormData) {
@@ -64,7 +69,8 @@ export async function saveClientProfileAction(formData: FormData) {
 }
 
 export async function startConversationAction(formData: FormData) {
-  await requireRole("client");
+  const role = await getCurrentRole();
+  if (role !== "client" && role !== "professional") redirect("/acesso-negado");
   const supabase = await createServerClient();
   const { data, error } = await supabase.rpc("start_marketplace_conversation", { target_provider_id: clean(formData.get("providerId")) });
   if (error || !data) redirect(`/services?error=${encodeURIComponent(error?.message ?? "conversa-indisponivel")}`);
@@ -79,6 +85,24 @@ export async function sendMarketplaceMessageAction(formData: FormData) {
   if (!data.user || !conversationId || !body) return;
   const { error } = await supabase.from("marketplace_messages").insert({ conversation_id: conversationId, sender_id: data.user.id, body });
   if (error) redirect(`/marketplace/conversations/${conversationId}?error=${encodeURIComponent(error.message)}`);
+  if (hasSupabaseAdminEnv() && process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL) {
+    try {
+      const admin = createAdminClient();
+      const { data: conversation } = await admin.from("marketplace_conversations").select("requester_user_id,provider_id").eq("id", conversationId).single();
+      if (conversation) {
+        const { data: provider } = await admin.from("service_provider_profiles").select("professional:professionals(user_id)").eq("id", conversation.provider_id).single();
+        const relation = provider?.professional as unknown as { user_id?: string } | { user_id?: string }[] | null;
+        const providerUserId = Array.isArray(relation) ? relation[0]?.user_id : relation?.user_id;
+        const recipientId = data.user.id === conversation.requester_user_id ? providerUserId : conversation.requester_user_id;
+        if (recipientId) {
+          const { data: recipient } = await admin.from("profiles").select("email,full_name").eq("id", recipientId).maybeSingle();
+          if (recipient?.email) await sendTransactionalEmail({ to: recipient.email, template: "marketplace_message", variables: { name: recipient.full_name || "usuário", preview: body.slice(0, 160), url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://projetotriagem.vercel.app"}/marketplace/conversations/${conversationId}` } });
+        }
+      }
+    } catch (emailError) {
+      console.error("[marketplace] Falha na notificação por e-mail", emailError);
+    }
+  }
   revalidatePath(`/marketplace/conversations/${conversationId}`);
 }
 
@@ -108,12 +132,24 @@ export async function confirmServiceCompletionAction(formData: FormData) {
 }
 
 export async function createServiceReviewAction(formData: FormData) {
-  await requireRole("client");
+  const role = await getCurrentRole();
+  if (role !== "client" && role !== "professional") redirect("/acesso-negado");
   const supabase = await createServerClient();
   const conversationId = clean(formData.get("conversationId"));
-  const { error } = await supabase.rpc("create_service_review", { target_request_id: clean(formData.get("requestId")), target_rating: Number(clean(formData.get("rating"))), target_comment: clean(formData.get("comment")) || null });
+  const { error } = await supabase.rpc("create_service_conversation_review", { target_conversation_id: conversationId, target_rating: Number(clean(formData.get("rating"))), target_comment: clean(formData.get("comment")) || null });
   if (error) redirect(`/marketplace/conversations/${conversationId}?error=${encodeURIComponent(error.message)}`);
   revalidatePath(`/marketplace/conversations/${conversationId}`);
+}
+
+export async function setServiceOfferingAction(formData: FormData) {
+  await requireRole("professional");
+  const enabled = formData.get("enabled") === "on" || formData.get("enabled") === "true";
+  const supabase = await createServerClient();
+  const { error } = await supabase.rpc("set_service_offering", { target_enabled: enabled });
+  if (error) redirect(`/professional/profile?error=${encodeURIComponent(error.message)}`);
+  revalidatePath("/professional/profile");
+  revalidatePath("/professional/services");
+  redirect(`/professional/profile?message=${enabled ? "servicos-ativados" : "servicos-desativados"}${enabled ? "&offerServices=1" : ""}`);
 }
 
 export async function reportMarketplaceAction(formData: FormData) {
@@ -170,4 +206,14 @@ export async function resolveMarketplaceReportAction(formData: FormData) {
   await supabase.from("marketplace_reports").update({ status, resolved_at: status === "resolved" || status === "archived" ? new Date().toISOString() : null }).eq("id", reportId);
   if (data.user) await supabase.from("marketplace_moderation_actions").insert({ report_id: reportId, admin_id: data.user.id, action_type: status === "archived" ? "archive_report" : "warn", reason: clean(formData.get("reason")) || null });
   revalidatePath("/admin/marketplace-reports");
+}
+
+export async function markMarketplaceNotificationsReadAction() {
+  const supabase = await createServerClient();
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) redirect("/login");
+  const { error } = await supabase.from("marketplace_notifications").update({ read_at: new Date().toISOString() }).eq("user_id", data.user.id).is("read_at", null);
+  if (error) throw new Error(error.message);
+  revalidatePath("/professional/notifications");
+  revalidatePath("/client/notifications");
 }

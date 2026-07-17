@@ -60,6 +60,16 @@ export default async function CompanyCandidatesPage() {
     : { data: [] };
 
   const processes = (candidateProcesses ?? []) as unknown as CandidateProcess[];
+  const professionalIds = processes.map((process) => one(process.professional)?.id).filter((id): id is string => Boolean(id));
+  const { data: certifications } = professionalIds.length ? await supabase.from("professional_certifications").select("professional_id,course:courses(category)").in("professional_id", professionalIds) : { data: [] };
+  const certificationAreas = new Map<string, Set<string>>();
+  (certifications ?? []).forEach((item) => {
+    const course = one(item.course as { category: string } | { category: string }[] | null);
+    if (!course?.category) return;
+    const areas = certificationAreas.get(item.professional_id) ?? new Set<string>();
+    areas.add(course.category);
+    certificationAreas.set(item.professional_id, areas);
+  });
 
   return (
     <AppShell eyebrow="Empresa" title="Candidatos apresentados">
@@ -82,7 +92,7 @@ export default async function CompanyCandidatesPage() {
                     <td><strong>{candidate.full_name}</strong><br /><span className="text-xs text-slate-500">{candidate.city ?? "-"}/{candidate.state ?? "-"}</span></td>
                     <td>{candidate.email ?? "Email não informado"}<br /><span className="text-xs text-slate-500">{candidate.phone ?? "Telefone não informado"}</span></td>
                     <td><strong>{demand.name ?? demand.title}</strong><br /><span className="text-xs text-slate-500">{demand.title}</span></td>
-                    <td>{candidate.desired_role ?? "Objetivo não informado"}<br /><span className="text-xs text-slate-500">Escolaridade: {candidate.education_level ?? "-"}</span></td>
+                    <td>{candidate.desired_role ?? "Objetivo não informado"}<br /><span className="text-xs text-slate-500">Escolaridade: {candidate.education_level ?? "-"}</span>{[...(certificationAreas.get(candidate.id) ?? [])].map((area) => <span key={area} className="mt-2 block w-fit rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">Certificado em: {area}</span>)}</td>
                     <td><span className="inline-flex rounded bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-800">{processStatusLabel(process.status)}</span></td>
                     <td>{new Date(process.updated_at).toLocaleDateString("pt-BR")}</td>
                   </tr>

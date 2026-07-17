@@ -74,7 +74,7 @@ export function CourseForm({ course, questions = [], lockedQuiz = false }: Cours
           </select>
         </label>
         <label className="text-sm font-semibold md:col-span-2">Tags de habilidade<input name="skillTags" defaultValue={(course?.skill_tags ?? []).join(", ")} className="field-input mt-2" placeholder="Ex: atendimento, excel, segurança do trabalho" /></label>
-        <label className="text-sm font-semibold md:col-span-2">Link do vídeo<input name="videoUrl" required defaultValue={course?.video_url ?? ""} className="field-input mt-2" placeholder="https://..." /></label>
+        <label className="text-sm font-semibold md:col-span-2">Link do vídeo<input name="videoUrl" required defaultValue={course?.video_url ?? ""} className="field-input mt-2" placeholder="YouTube ou arquivo MP4/WEBM/OGG" /><span className="mt-1 block text-xs font-normal text-slate-500">O progresso é validado automaticamente e a prova é liberada ao atingir 90%.</span></label>
         <label className="text-sm font-semibold md:col-span-2">Descrição<textarea name="description" required defaultValue={course?.description ?? ""} className="field-input mt-2 min-h-28" /></label>
       </div>
 

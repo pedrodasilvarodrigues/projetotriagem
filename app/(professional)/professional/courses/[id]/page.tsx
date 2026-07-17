@@ -39,10 +39,11 @@ export default async function ProfessionalCourseDetailPage({ params, searchParam
   const { data: userData } = await supabase.auth.getUser();
   const { data: professional } = userData.user ? await supabase.from("professionals").select("id").eq("user_id", userData.user.id).maybeSingle() : { data: null };
 
-  const [{ data: course }, { data: attempts }, { data: quizRows }] = await Promise.all([
+  const [{ data: course }, { data: attempts }, { data: quizRows }, { data: videoProgress }] = await Promise.all([
     supabase.from("courses").select("id,title,description,category,workload_hours,skill_tags,video_url").eq("id", id).eq("status", "published").maybeSingle(),
     professional?.id ? supabase.from("course_attempts").select("id,attempt_number,final_score,approved,completed_at").eq("course_id", id).eq("professional_id", professional.id).order("attempt_number", { ascending: true }) : Promise.resolve({ data: [] }),
-    supabase.rpc("get_published_course_quiz", { target_course_id: id })
+    supabase.rpc("get_published_course_quiz", { target_course_id: id }),
+    professional?.id ? supabase.from("course_video_progress").select("watched_percent").eq("course_id", id).eq("professional_id", professional.id).maybeSingle() : Promise.resolve({ data: null })
   ]);
 
   if (!course) notFound();
@@ -83,6 +84,7 @@ export default async function ProfessionalCourseDetailPage({ params, searchParam
           quizRows={(quizRows ?? []) as QuizRow[]}
           attemptsUsed={typedAttempts.length}
           approved={approved}
+          initialProgress={Number(videoProgress?.watched_percent ?? 0)}
         />
       </div>
     </AppShell>

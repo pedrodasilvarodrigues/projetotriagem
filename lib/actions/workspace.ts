@@ -101,6 +101,19 @@ const experienceSchema = z.object({
   description: z.string().min(10).max(1500)
 });
 
+const resumeItemDeleteSchema = z.object({
+  itemId: z.string().uuid(),
+  itemType: z.enum(["education", "experience", "course", "language", "skill"])
+});
+
+const resumeItemTables = {
+  education: "professional_educations",
+  experience: "professional_experiences",
+  course: "professional_courses",
+  language: "professional_languages",
+  skill: "professional_skills"
+} as const;
+
 function splitList(value?: string) {
   return (value ?? "")
     .split(",")
@@ -610,6 +623,36 @@ export async function addProfessionalExperienceAction(formData: FormData) {
 
   revalidatePath("/professional/resume");
   redirect("/professional/resume?message=experiencia-adicionada");
+}
+
+export async function deleteProfessionalResumeItemAction(formData: FormData) {
+  const parsed = resumeItemDeleteSchema.safeParse({
+    itemId: formData.get("itemId"),
+    itemType: formData.get("itemType")
+  });
+
+  if (!parsed.success) redirect("/professional/resume?error=item-invalido");
+
+  const { supabase, professional } = await getProfessionalContext();
+  const table = resumeItemTables[parsed.data.itemType];
+  const { data: deletedItem, error } = await supabase
+    .from(table)
+    .delete()
+    .eq("id", parsed.data.itemId)
+    .eq("professional_id", professional.id)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !deletedItem) {
+    professionalFormError("/professional/resume", "erro-ao-excluir-item", {
+      itemId: parsed.data.itemId,
+      itemType: parsed.data.itemType,
+      error: error?.message ?? "Registro não encontrado ou sem permissão"
+    });
+  }
+
+  revalidatePath("/professional/resume");
+  redirect("/professional/resume?message=item-excluido");
 }
 
 export async function uploadProfessionalResumeAction(formData: FormData) {

@@ -150,6 +150,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Evoluir os filtros de vagas para salvar pesquisas e alertas por email quando SMTP estiver pronto.
 
 # Observacoes
+- Currículo atualizado em 23/07/2026: registros manuais de formação, experiência, curso/qualificação, idioma e habilidade agora podem ser excluídos individualmente, com confirmação, feedback de processamento e validação de propriedade tanto na ação do servidor quanto nas políticas RLS existentes. Certificações emitidas pelo Portal continuam protegidas.
 - Reimplementação de 23/07/2026: a intro cinematográfica passou a ser um overlay global no layout raiz, com duração total de 5 segundos, sem opção de interrupção manual e uma exibição por sessão via `sessionStorage`. O arco inclui busca por luz laranja, aproximação orgânica das formas, transformação na marca oficial, pulso, nome, slogan e crossfade; `prefers-reduced-motion` recebe somente a versão estática com fade.
 - Correção de 23/07/2026: o cadastro de Cliente deixou de gravar o status inexistente `active` em `profiles` e passou a usar `approved`, valor válido de `approval_status`. O fluxo também passou a persistir perfil, papel e consentimento com compensação segura, registrar o erro real no servidor e apresentar validações e máscaras claras no formulário.
 - Camada de movimento implementada em 17/07/2026: loading de página centralizado com engrenagem da marca e transição de encaixe entre rotas internas. A engrenagem permanece separada da intro cinematográfica global.

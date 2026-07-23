@@ -5,6 +5,7 @@ import { DateTextInput } from "@/components/forms/date-text-input";
 import { InstitutionAutocomplete } from "@/components/forms/institution-autocomplete";
 import { ResumeDownloadCustomizer } from "@/components/professional/resume-download-customizer";
 import { PersonalDataFields } from "@/components/professional/personal-data-fields";
+import { RemoveResumeItemButton } from "@/components/professional/remove-resume-item-button";
 import { ResumeSectionNav } from "@/components/professional/resume-section-nav";
 import {
   addProfessionalCourseAction,
@@ -48,6 +49,8 @@ const personalErrorMessages: Record<string, string> = {
   "erro-ao-salvar-idioma": "Não foi possível salvar o idioma. Tente novamente.",
   "erro-ao-salvar-habilidade": "Não foi possível salvar a habilidade. Tente novamente.",
   "erro-ao-salvar-experiencia": "Não foi possível salvar a experiência. Tente novamente.",
+  "item-invalido": "Não foi possível identificar o item que você tentou excluir.",
+  "erro-ao-excluir-item": "Não foi possível excluir este item. Atualize a página e tente novamente.",
   "perfil-profissional-indisponivel": "Não foi possível carregar seu perfil para salvar. Atualize a página e tente novamente."
 };
 
@@ -263,9 +266,14 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             <div className="mt-5 grid gap-3 md:grid-cols-2">
               {((educations ?? []) as EducationRow[]).map((education) => (
                 <article key={education.id} className="border border-slate-200 bg-slate-50 p-4">
-                  <h3 className="font-semibold">{education.course_name}</h3>
-                  <p className="mt-1 text-sm text-slate-600">{education.institution}</p>
-                  <p className="mt-2 text-xs font-semibold text-slate-500">{education.level} · {education.completed_at ? new Date(education.completed_at).getFullYear() : "Em andamento"}</p>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <h3 className="font-semibold">{education.course_name}</h3>
+                      <p className="mt-1 text-sm text-slate-600">{education.institution}</p>
+                      <p className="mt-2 text-xs font-semibold text-slate-500">{education.level} · {education.completed_at ? new Date(education.completed_at).getFullYear() : "Em andamento"}</p>
+                    </div>
+                    <RemoveResumeItemButton itemId={education.id} itemType="education" label={education.course_name} />
+                  </div>
                 </article>
               ))}
               {(educations ?? []).length === 0 ? <p className="text-sm text-slate-500">Nenhuma formação adicionada.</p> : null}
@@ -287,9 +295,14 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             <div className="mt-5 space-y-3">
               {((experiences ?? []) as ExperienceRow[]).map((experience) => (
                 <article key={experience.id} className="border border-slate-200 bg-slate-50 p-4">
-                  <h3 className="font-semibold">{experience.role_title}</h3>
-                  <p className="mt-1 text-sm text-slate-600">{experience.company_name} · {dateLabel(experience.started_at)} até {experience.is_current ? "Atual" : dateLabel(experience.ended_at)}</p>
-                  <p className="mt-3 text-sm leading-6 text-slate-600">{experience.description}</p>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <h3 className="font-semibold">{experience.role_title}</h3>
+                      <p className="mt-1 text-sm text-slate-600">{experience.company_name} · {dateLabel(experience.started_at)} até {experience.is_current ? "Atual" : dateLabel(experience.ended_at)}</p>
+                      <p className="mt-3 text-sm leading-6 text-slate-600">{experience.description}</p>
+                    </div>
+                    <RemoveResumeItemButton itemId={experience.id} itemType="experience" label={`${experience.role_title} na ${experience.company_name}`} />
+                  </div>
                 </article>
               ))}
               {(experiences ?? []).length === 0 ? <p className="text-sm text-slate-500">Nenhuma experiência adicionada.</p> : null}
@@ -330,9 +343,14 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             <div className="mt-5 grid gap-3 md:grid-cols-2">
               {((courses ?? []) as CourseRow[]).map((course) => (
                 <article key={course.id} className="border border-slate-200 bg-slate-50 p-4">
-                  <h3 className="font-semibold">{course.name}</h3>
-                  <p className="mt-1 text-sm text-slate-600">{course.institution ?? "Instituição não informada"}</p>
-                  <p className="mt-2 text-xs font-semibold text-slate-500">{course.workload_hours ? `${course.workload_hours}h` : "Carga não informada"} · {course.completed_at ? new Date(course.completed_at).getFullYear() : "Em andamento"}</p>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <h3 className="font-semibold">{course.name}</h3>
+                      <p className="mt-1 text-sm text-slate-600">{course.institution ?? "Instituição não informada"}</p>
+                      <p className="mt-2 text-xs font-semibold text-slate-500">{course.workload_hours ? `${course.workload_hours}h` : "Carga não informada"} · {course.completed_at ? new Date(course.completed_at).getFullYear() : "Em andamento"}</p>
+                    </div>
+                    <RemoveResumeItemButton itemId={course.id} itemType="course" label={course.name} />
+                  </div>
                 </article>
               ))}
               {(courses ?? []).length === 0 ? <p className="text-sm text-slate-500">Nenhum curso adicionado.</p> : null}
@@ -354,8 +372,13 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             <div className="mt-5 grid gap-3 md:grid-cols-2">
               {((languages ?? []) as LanguageRow[]).map((language) => (
                 <article key={language.id} className="border border-slate-200 bg-slate-50 p-4">
-                  <h3 className="font-semibold">{language.language_name}</h3>
-                  <p className="mt-1 text-sm text-slate-600">{language.proficiency}</p>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <h3 className="font-semibold">{language.language_name}</h3>
+                      <p className="mt-1 text-sm text-slate-600">{language.proficiency}</p>
+                    </div>
+                    <RemoveResumeItemButton itemId={language.id} itemType="language" label={language.language_name} />
+                  </div>
                 </article>
               ))}
               {(languages ?? []).length === 0 ? <p className="text-sm text-slate-500">Nenhum idioma adicionado.</p> : null}
@@ -371,7 +394,10 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             <h2 className="text-lg font-semibold">Habilidades e competências</h2>
             <div className="mt-5 flex flex-wrap gap-2">
               {((skills ?? []) as SkillRow[]).map((skill) => (
-                <span key={skill.id} className="border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold">{skill.name} · {skill.skill_type} · {skill.proficiency ?? 1}/5</span>
+                <div key={skill.id} className="flex flex-wrap items-center gap-2 border border-slate-200 bg-slate-50 px-3 py-2">
+                  <span className="text-sm font-semibold">{skill.name} · {skill.skill_type} · {skill.proficiency ?? 1}/5</span>
+                  <RemoveResumeItemButton itemId={skill.id} itemType="skill" label={skill.name} />
+                </div>
               ))}
               {(skills ?? []).length === 0 ? <p className="text-sm text-slate-500">Nenhuma habilidade adicionada.</p> : null}
             </div>

@@ -538,25 +538,56 @@ export async function registerClientWithEmailAction(formData: FormData) {
   });
   if (!parsed.success) redirect("/register?type=client&error=dados-invalidos");
   if (!canUseAdminClient()) redirect("/register?type=client&error=configuracao-supabase-incompleta");
+
   const data = parsed.data;
   const admin = createAdminClient();
   const { data: createdUser, error } = await admin.auth.admin.createUser({
     email: data.email, password: data.password, email_confirm: true,
     user_metadata: { full_name: data.fullName, role: "client" }
   });
+
   if (error || !createdUser.user) redirect(`/register?type=client&error=${signupErrorCode(error)}`);
+
   const userId = createdUser.user.id;
   const { ipAddress, userAgent } = await getRequestMeta();
-  const [{ error: profileError }, { error: clientError }, { error: roleError }] = await Promise.all([
-    admin.from("profiles").upsert({ id: userId, full_name: data.fullName, email: data.email, phone: onlyDigits(data.phone), status: "active" }),
-    admin.from("client_profiles").upsert({ user_id: userId, city: data.city, state: data.state.toUpperCase() }),
-    admin.from("user_roles").upsert({ user_id: userId, role: "client" })
+  const [{ error: profileError }, { error: clientError }, { error: roleError }, { error: consentError }] = await Promise.all([
+    admin.from("profiles").upsert({
+      id: userId,
+      full_name: data.fullName,
+      email: data.email,
+      phone: onlyDigits(data.phone),
+      status: "approved"
+    }),
+    admin
+      .from("client_profiles")
+      .upsert(
+        { user_id: userId, city: data.city, state: data.state.toUpperCase() },
+        { onConflict: "user_id" }
+      ),
+    admin.from("user_roles").upsert({ user_id: userId, role: "client" }),
+    admin.from("consent_records").insert({
+      user_id: userId,
+      terms_version: "2026-06-03",
+      privacy_version: "2026-06-03",
+      ip_address: ipAddress,
+      user_agent: userAgent
+    })
   ]);
-  if (profileError || clientError || roleError) {
+
+  const persistenceError = profileError ?? clientError ?? roleError ?? consentError;
+  if (persistenceError) {
+    logAuthError("Falha ao persistir cadastro de cliente", persistenceError, {
+      userId,
+      profileError: profileError?.message,
+      clientError: clientError?.message,
+      roleError: roleError?.message,
+      consentError: consentError?.message
+    });
     await admin.auth.admin.deleteUser(userId);
     redirect("/register?type=client&error=nao-foi-possivel-criar-conta");
   }
-  await admin.from("consent_records").insert({ user_id: userId, terms_version: "2026-06-03", privacy_version: "2026-06-03", ip_address: ipAddress, user_agent: userAgent });
+
+  logAuth("Cadastro de cliente concluído", { userId });
   redirect("/login?message=cadastro-criado");
 }
 

@@ -23,8 +23,6 @@ import {
   Target,
   TrendingUp,
   UserRoundCheck,
-  Cog,
-  Handshake,
   type LucideIcon
 } from "lucide-react";
 import { PortalEncaixeLogo } from "@/components/app/logo";
@@ -131,147 +129,6 @@ function EncaixeDivider() {
   );
 }
 
-function PortalEncaixeIntro({ onComplete }: { onComplete: () => void }) {
-  const [lettersVisible, setLettersVisible] = useState(false);
-  const [fadeOut, setFadeOut] = useState(false);
-  const [showLogo, setShowLogo] = useState(false);
-  const [showFlash, setShowFlash] = useState(false);
-
-  const prefersReduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  useEffect(() => {
-    if (prefersReduced) {
-      const timer = setTimeout(() => {
-        setFadeOut(true);
-      }, 2300);
-
-      const endTimer = setTimeout(() => {
-        onComplete();
-      }, 2800);
-
-      return () => {
-        clearTimeout(timer);
-        clearTimeout(endTimer);
-      };
-    }
-
-    const flashTimer = setTimeout(() => {
-      setShowFlash(true);
-    }, 1800);
-
-    const logoTimer = setTimeout(() => {
-      setShowLogo(true);
-    }, 1800);
-
-    const letterTimer = setTimeout(() => {
-      setLettersVisible(true);
-    }, 2000);
-
-    const completeTimer = setTimeout(() => {
-      setFadeOut(true);
-    }, 3200);
-
-    const endTimer = setTimeout(() => {
-      onComplete();
-    }, 3700);
-
-    return () => {
-      clearTimeout(flashTimer);
-      clearTimeout(logoTimer);
-      clearTimeout(letterTimer);
-      clearTimeout(completeTimer);
-      clearTimeout(endTimer);
-    };
-  }, [onComplete, prefersReduced]);
-
-  const title = "PORTAL ENCAIXE";
-
-  if (prefersReduced) {
-    return (
-      <div className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#05101e] text-[#FAFBFC] transition-opacity duration-500 ${fadeOut ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
-        <div className="flex flex-col items-center gap-6 text-center select-none animate-[fade-in_0.8s_ease_forwards]">
-          <div className="relative flex size-24 items-center justify-center rounded-2xl bg-gradient-to-br from-[#1B4E78] to-[#0F2D4E] text-[#FAFBFC] border border-white/10">
-            <Cog className="absolute size-20 text-[#F2811D]/35" />
-            <Handshake className="relative size-12 text-[#FAFBFC]" />
-          </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-widest text-white mt-4">PORTAL ENCAIXE</h1>
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#F2811D] mt-2">conectando você ao profissional certo</span>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div 
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#05101e] text-[#FAFBFC] transition-opacity duration-500 ${fadeOut ? "opacity-0 pointer-events-none" : "opacity-100"}`}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Introdução do Portal Encaixe"
-    >
-      <div className="absolute inset-0 bg-[#05101e] grain-overlay opacity-[0.06] pointer-events-none" />
-
-      <div className="relative flex flex-col items-center gap-6 text-center select-none w-full max-w-lg px-6">
-        <div className="relative flex h-40 w-full items-center justify-center overflow-visible">
-          <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible z-10" viewBox="0 0 400 160">
-            <path 
-              d="M 50 80 Q 200 140 350 80" 
-              fill="none" 
-              stroke="#F2811D" 
-              strokeWidth="3.5"
-              strokeLinecap="round"
-              strokeDasharray="800"
-              strokeDashoffset="800"
-              className="animate-trace-draw"
-              style={{ animationDelay: "200ms" }}
-            />
-          </svg>
-
-          <div 
-            className="absolute size-8 rounded-full bg-gradient-to-r from-blue-400 to-[#1B4E78] shadow-[0_0_24px_rgba(59,130,246,0.6)] animate-orb-left"
-            style={{ animationDelay: "400ms" }}
-          />
-
-          <div 
-            className="absolute size-8 rounded-full bg-gradient-to-r from-[#F2811D] to-[#F5A24D] shadow-[0_0_24px_rgba(242,129,29,0.6)] animate-orb-right"
-            style={{ animationDelay: "400ms" }}
-          />
-
-          {showFlash && (
-            <div className="absolute size-24 bg-gradient-to-r from-orange-400 to-[#F2811D] rounded-full animate-flash-glow z-20 pointer-events-none" />
-          )}
-
-          {showLogo && (
-            <div className="relative flex size-24 items-center justify-center rounded-2xl bg-gradient-to-br from-[#1B4E78] to-[#0F2D4E] text-[#FAFBFC] shadow-2xl border border-white/10 overflow-hidden animate-logo-pop z-30">
-              <Cog className="absolute size-20 text-[#F2811D]/35 animate-[spin_5s_linear_infinite]" />
-              <Handshake className="relative size-12 text-[#FAFBFC]" />
-            </div>
-          )}
-        </div>
-
-        <div className="mt-4 flex flex-col items-center">
-          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-widest text-white flex gap-[2px]">
-            {title.split("").map((char, i) => (
-              <span 
-                key={i} 
-                className={`inline-block transition-all duration-300 transform ${lettersVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
-                style={{ 
-                  transitionDelay: `${i * 45}ms`,
-                  marginRight: char === " " ? "8px" : "0"
-                }}
-              >
-                {char !== " " ? char : ""}
-              </span>
-            ))}
-          </h1>
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#F2811D] mt-2 opacity-0 animate-fade-in-up" style={{ animationDelay: "2500ms" }}>
-            conectando você ao profissional certo
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function TiltMockup({ src, alt }: { src: string; alt: string }) {
   const [tiltStyle, setTiltStyle] = useState<React.CSSProperties>({});
   const [isMobile, setIsMobile] = useState(false);
@@ -369,25 +226,10 @@ function InfoCard({ title, text, icon: Icon, delayClass = "" }: { title: string;
 }
 
 export function PublicHome({ stats, companies }: { stats: PublicStats; companies: PublicCompany[] }) {
-  const [showIntro, setShowIntro] = useState(true);
   const companyList = companies.length > 0 ? companies : fallbackCompanies;
   const marqueeItems = useMemo(() => [...companyList, ...companyList], [companyList]);
 
   useEffect(() => {
-    document.documentElement.style.overflow = "hidden";
-    return () => {
-      document.documentElement.style.overflow = "";
-    };
-  }, []);
-
-  const handleIntroComplete = () => {
-    setShowIntro(false);
-    document.documentElement.style.overflow = "";
-  };
-
-  useEffect(() => {
-    if (showIntro) return;
-    
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       document.querySelectorAll(".reveal-on-scroll").forEach((el) => {
         el.classList.add("is-visible");
@@ -412,14 +254,12 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
     });
 
     return () => observer.disconnect();
-  }, [showIntro]);
+  }, []);
 
   return (
     <main id="conteudo" className="min-h-screen bg-[#FAFBFC] text-slate-900 font-sans relative overflow-x-hidden">
       {/* Cinematic noise film overlay */}
       <div className="fixed inset-0 grain-overlay opacity-[0.025] pointer-events-none z-[999]" />
-
-      {showIntro && <PortalEncaixeIntro onComplete={handleIntroComplete} />}
 
       <PublicHeader />
 

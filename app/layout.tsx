@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CinematicIntro } from "@/components/app/cinematic-intro";
 import { RouteTransition } from "@/components/app/route-transition";
 import "./globals.css";
 
@@ -14,6 +15,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <a className="sr-only focus:not-sr-only" href="#conteudo">
           Pular para conteúdo principal
         </a>
+        <CinematicIntro />
         <RouteTransition>{children}</RouteTransition>
       </body>
     </html>

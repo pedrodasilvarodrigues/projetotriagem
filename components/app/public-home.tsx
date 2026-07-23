@@ -131,8 +131,6 @@ function EncaixeDivider() {
   );
 }
 
-const CINEMATIC_INTRO_SESSION_KEY = "portal-encaixe:cinematic-intro:v2";
-
 function PortalEncaixeIntro({ onComplete }: { onComplete: () => void }) {
   const [lettersVisible, setLettersVisible] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
@@ -145,11 +143,11 @@ function PortalEncaixeIntro({ onComplete }: { onComplete: () => void }) {
     if (prefersReduced) {
       const timer = setTimeout(() => {
         setFadeOut(true);
-      }, 900);
+      }, 2300);
 
       const endTimer = setTimeout(() => {
         onComplete();
-      }, 1400);
+      }, 2800);
 
       return () => {
         clearTimeout(timer);
@@ -159,23 +157,23 @@ function PortalEncaixeIntro({ onComplete }: { onComplete: () => void }) {
 
     const flashTimer = setTimeout(() => {
       setShowFlash(true);
-    }, 2700);
+    }, 1800);
 
     const logoTimer = setTimeout(() => {
       setShowLogo(true);
-    }, 2700);
+    }, 1800);
 
     const letterTimer = setTimeout(() => {
       setLettersVisible(true);
-    }, 3250);
+    }, 2000);
 
     const completeTimer = setTimeout(() => {
       setFadeOut(true);
-    }, 4500);
+    }, 3200);
 
     const endTimer = setTimeout(() => {
       onComplete();
-    }, 5000);
+    }, 3700);
 
     return () => {
       clearTimeout(flashTimer);
@@ -224,18 +222,18 @@ function PortalEncaixeIntro({ onComplete }: { onComplete: () => void }) {
               strokeDasharray="800"
               strokeDashoffset="800"
               className="animate-trace-draw"
-              style={{ animationDelay: "350ms", animationDuration: "2200ms" }}
+              style={{ animationDelay: "200ms" }}
             />
           </svg>
 
           <div 
             className="absolute size-8 rounded-full bg-gradient-to-r from-blue-400 to-[#1B4E78] shadow-[0_0_24px_rgba(59,130,246,0.6)] animate-orb-left"
-            style={{ animationDelay: "650ms", animationDuration: "2050ms" }}
+            style={{ animationDelay: "400ms" }}
           />
 
           <div 
             className="absolute size-8 rounded-full bg-gradient-to-r from-[#F2811D] to-[#F5A24D] shadow-[0_0_24px_rgba(242,129,29,0.6)] animate-orb-right"
-            style={{ animationDelay: "650ms", animationDuration: "2050ms" }}
+            style={{ animationDelay: "400ms" }}
           />
 
           {showFlash && (
@@ -265,7 +263,7 @@ function PortalEncaixeIntro({ onComplete }: { onComplete: () => void }) {
               </span>
             ))}
           </h1>
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#F2811D] mt-2 opacity-0 animate-fade-in-up" style={{ animationDelay: "3650ms" }}>
+          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#F2811D] mt-2 opacity-0 animate-fade-in-up" style={{ animationDelay: "2500ms" }}>
             conectando você ao profissional certo
           </span>
         </div>
@@ -371,21 +369,19 @@ function InfoCard({ title, text, icon: Icon, delayClass = "" }: { title: string;
 }
 
 export function PublicHome({ stats, companies }: { stats: PublicStats; companies: PublicCompany[] }) {
-  const [showIntro, setShowIntro] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
   const companyList = companies.length > 0 ? companies : fallbackCompanies;
   const marqueeItems = useMemo(() => [...companyList, ...companyList], [companyList]);
 
   useEffect(() => {
-    const hasSeen = sessionStorage.getItem(CINEMATIC_INTRO_SESSION_KEY);
-    if (!hasSeen) {
-      setShowIntro(true);
-      document.documentElement.style.overflow = "hidden";
-    }
+    document.documentElement.style.overflow = "hidden";
+    return () => {
+      document.documentElement.style.overflow = "";
+    };
   }, []);
 
   const handleIntroComplete = () => {
     setShowIntro(false);
-    sessionStorage.setItem(CINEMATIC_INTRO_SESSION_KEY, "true");
     document.documentElement.style.overflow = "";
   };
 

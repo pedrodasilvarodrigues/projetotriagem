@@ -16,12 +16,13 @@
     "@supabase/supabase-js": "latest",
     "date-fns": "latest",
     "lucide-react": "latest",
-    "next": "latest",
+    "next": "16.2.11",
     "nuqs": "latest",
     "react": "latest",
     "react-dom": "latest",
     "react-hook-form": "latest",
     "resend": "latest",
+    "sweetalert2": "11.22.4",
     "zod": "latest"
   },
   "devDependencies": {

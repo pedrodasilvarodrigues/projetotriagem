@@ -150,6 +150,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Evoluir os filtros de vagas para salvar pesquisas e alertas por email quando SMTP estiver pronto.
 
 # Observacoes
+- CorreÃ§Ã£o de 22/07/2026: a cena cinematogrÃ¡fica de entrada foi restaurada com uma chave de sessÃ£o versionada, evitando que a marca legada `hasSeenSplash` esconda a nova intro. A regra permanece uma exibiÃ§Ã£o por sessÃ£o, com 5 segundos e sem remover a engrenagem de loading.
 - Camada de movimento implementada em 17/07/2026: loading de pÃ¡gina centralizado com engrenagem da marca, transiÃ§Ã£o de encaixe entre rotas internas, intro cinematogrÃ¡fica com duraÃ§Ã£o total de 5 segundos uma vez por sessÃ£o e experiÃªncia reduzida estÃ¡tica para `prefers-reduced-motion`.
 - Login e cadastro compartilham a nova composiÃ§Ã£o visual baseada no asset fornecido pelo produto, com gradiente respirando, fluxo luminoso, profundidade, contagem progressiva, badges em sequÃªncia, entrada do formulÃ¡rio, foco animado, shimmer no CTA, elevaÃ§Ã£o do Google e engrenagem compacta durante envios. Nenhuma regra de autenticaÃ§Ã£o foi alterada.
 - Adequacao de producao de 16/07/2026: Cursos agora registra no Supabase o progresso real do video e libera prova apenas a partir de 90%; links aceitos sao YouTube ou video direto MP4/WEBM/OGG. A validacao tambem existe no banco antes de inserir tentativa.

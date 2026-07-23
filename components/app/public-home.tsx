@@ -131,6 +131,8 @@ function EncaixeDivider() {
   );
 }
 
+const CINEMATIC_INTRO_SESSION_KEY = "portal-encaixe:cinematic-intro:v2";
+
 function PortalEncaixeIntro({ onComplete }: { onComplete: () => void }) {
   const [lettersVisible, setLettersVisible] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
@@ -374,7 +376,7 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
   const marqueeItems = useMemo(() => [...companyList, ...companyList], [companyList]);
 
   useEffect(() => {
-    const hasSeen = sessionStorage.getItem("hasSeenSplash");
+    const hasSeen = sessionStorage.getItem(CINEMATIC_INTRO_SESSION_KEY);
     if (!hasSeen) {
       setShowIntro(true);
       document.documentElement.style.overflow = "hidden";
@@ -383,7 +385,7 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
 
   const handleIntroComplete = () => {
     setShowIntro(false);
-    sessionStorage.setItem("hasSeenSplash", "true");
+    sessionStorage.setItem(CINEMATIC_INTRO_SESSION_KEY, "true");
     document.documentElement.style.overflow = "";
   };
 

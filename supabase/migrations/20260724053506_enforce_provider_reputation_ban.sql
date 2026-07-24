@@ -1,0 +1,2 @@
+-- Migration sem operação preservada porque o identificador foi registrado
+-- remotamente durante a criação incremental do módulo de reputação.

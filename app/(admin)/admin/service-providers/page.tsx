@@ -12,7 +12,8 @@ const statusLabels: Record<string, string> = {
   pending: "Pendente",
   approved: "Aprovado",
   rejected: "Reprovado",
-  suspended: "Suspenso"
+  suspended: "Suspenso",
+  banned: "Banido"
 };
 const successMessages: Record<string, string> = {
   approved: "Prestador aprovado e liberado na busca de serviços.",
@@ -92,6 +93,7 @@ export default async function AdminServiceProvidersPage({
           <option value="approved">Aprovados</option>
           <option value="rejected">Reprovados</option>
           <option value="suspended">Suspensos</option>
+          <option value="banned">Banidos</option>
         </select>
         <button type="submit" className="rounded-xl bg-[#0F2D4E] px-5 py-2.5 font-bold text-white">
           Filtrar
@@ -106,6 +108,7 @@ export default async function AdminServiceProvidersPage({
             const isSuspended = provider.status === "suspended";
             const isApproved = provider.status === "approved";
             const isRejected = provider.status === "rejected";
+            const isBanned = provider.status === "banned";
 
             return (
               <article key={provider.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -126,7 +129,12 @@ export default async function AdminServiceProvidersPage({
                   Especialidades: {provider.specialties?.join(", ") || "Não informadas"}
                 </p>
 
-                <form action={moderateProviderAction} className="mt-4 grid gap-2 sm:grid-cols-[minmax(220px,1fr)_repeat(3,auto)]">
+                {isBanned ? (
+                  <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                    <strong className="block">Banimento automático definitivo</strong>
+                    <span className="mt-1 block">Este prestador foi removido das buscas por reputação abaixo do limite mínimo e não pode ser reativado pelo painel.</span>
+                  </div>
+                ) : <form action={moderateProviderAction} className="mt-4 grid gap-2 sm:grid-cols-[minmax(220px,1fr)_repeat(3,auto)]">
                   <input type="hidden" name="providerId" value={provider.id} />
                   <input
                     className={input}
@@ -177,7 +185,7 @@ export default async function AdminServiceProvidersPage({
                       Suspender
                     </button>
                   )}
-                </form>
+                </form>}
 
                 {pendingImages.length > 0 ? (
                   <div className="mt-4 rounded-xl bg-amber-50 p-4">

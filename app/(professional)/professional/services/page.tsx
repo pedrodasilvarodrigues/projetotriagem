@@ -9,7 +9,7 @@ import { isMarketplaceEnabled } from "@/lib/features";
 export const dynamic = "force-dynamic";
 const input = "mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm outline-none focus:border-[#F2811D] focus:ring-4 focus:ring-orange-100";
 const statusInfo: Record<string, { label: string; className: string; icon: typeof Clock3 }> = {
-  pending: { label: "Em análise", className: "border-amber-200 bg-amber-50 text-amber-800", icon: Clock3 }, approved: { label: "Aprovado e visível", className: "border-emerald-200 bg-emerald-50 text-emerald-800", icon: CheckCircle2 }, rejected: { label: "Reprovado — corrija e reenvie", className: "border-red-200 bg-red-50 text-red-800", icon: AlertCircle }, suspended: { label: "Suspenso", className: "border-red-200 bg-red-50 text-red-800", icon: ShieldAlert }
+  pending: { label: "Em análise", className: "border-amber-200 bg-amber-50 text-amber-800", icon: Clock3 }, approved: { label: "Aprovado e visível", className: "border-emerald-200 bg-emerald-50 text-emerald-800", icon: CheckCircle2 }, rejected: { label: "Reprovado — corrija e reenvie", className: "border-red-200 bg-red-50 text-red-800", icon: AlertCircle }, suspended: { label: "Suspenso", className: "border-red-200 bg-red-50 text-red-800", icon: ShieldAlert }, banned: { label: "Função de prestador encerrada", className: "border-red-300 bg-red-50 text-red-900", icon: ShieldAlert }
 };
 
 export default async function ProfessionalServicesPage({ searchParams }: { searchParams: Promise<{ error?: string; success?: string }> }) {
@@ -18,9 +18,12 @@ export default async function ProfessionalServicesPage({ searchParams }: { searc
   if (!await isMarketplaceEnabled()) redirect("/professional/profile");
   const { data: userData } = await supabase.auth.getUser();
   const { data: professional } = await supabase.from("professionals").select("id,city,state").eq("user_id", userData.user?.id).maybeSingle();
-  const { data: capability } = professional ? await supabase.from("professional_capabilities").select("provides_services").eq("professional_id", professional.id).maybeSingle() : { data: null };
+  const [{ data: capability }, { data: provider }] = professional ? await Promise.all([
+    supabase.from("professional_capabilities").select("provides_services").eq("professional_id", professional.id).maybeSingle(),
+    supabase.from("service_provider_profiles").select("*").eq("professional_id", professional.id).maybeSingle()
+  ]) : [{ data: null }, { data: null }];
+  if (provider?.status === "banned") return <AppShell eyebrow="Profissional" title="Meus serviços"><section className="mx-auto max-w-2xl rounded-2xl border border-red-200 bg-white p-8 text-center shadow-sm"><ShieldAlert className="mx-auto text-red-700" size={40} /><p className="mt-4 text-xs font-bold uppercase tracking-wide text-red-700">Função de prestador encerrada</p><h2 className="mt-2 text-2xl font-bold text-[#0F2D4E]">O acesso à gestão de serviços foi encerrado definitivamente</h2><p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-600">Seu perfil não aparece mais nas buscas e não pode ser reativado. Esta medida afeta somente a oferta de serviços: seu currículo, candidaturas, vagas e cursos permanecem disponíveis normalmente.</p><Link href="/professional" className="mt-6 inline-flex rounded-xl bg-[#0F2D4E] px-5 py-3 text-sm font-bold text-white">Voltar para Minha Área</Link></section></AppShell>;
   if (!capability?.provides_services) return <AppShell eyebrow="Profissional" title="Meus serviços"><section className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm"><Store className="mx-auto text-[#F2811D]" size={36} /><h2 className="mt-4 text-xl font-bold text-[#0F2D4E]">Ative “Oferecer serviços” no seu perfil</h2><p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-600">Esta área é exclusiva para gerenciar o serviço que você oferece, portfólio, conversas recebidas e avaliações.</p><Link href="/professional/profile?offerServices=1" className="mt-5 inline-flex rounded-xl bg-[#0F2D4E] px-5 py-3 text-sm font-bold text-white">Ir para o Perfil</Link></section></AppShell>;
-  const { data: provider } = professional ? await supabase.from("service_provider_profiles").select("*").eq("professional_id", professional.id).maybeSingle() : { data: null };
   const [{ data: categories }, { data: linked }, { data: areas }, { data: portfolio }, { data: conversations }, { data: requests }, { data: reviews }] = await Promise.all([
     supabase.from("service_categories").select("id,name,parent_id").eq("is_active", true).order("display_order").order("name"),
     provider ? supabase.from("service_provider_categories").select("category_id").eq("provider_id", provider.id) : Promise.resolve({ data: [] }),

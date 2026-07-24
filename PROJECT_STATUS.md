@@ -5,6 +5,10 @@ Portal de Triagem Profissional
 Plataforma de recrutamento e triagem profissional que conecta profissionais e empresas por meio de cadastro, banco de talentos, demandas, compatibilidade e encaminhamento qualificado.
 
 # Concluido
+- Sistema de reputação dos prestadores concluído: avaliação clicável de 1 a 5 estrelas, comentário opcional, média/comentários no perfil, uma avaliação por conversa e recálculo transacional no Supabase.
+- Banimento automático da função de prestador implementado somente a partir da 3ª avaliação: ocorre se as 3 mais recentes forem menores ou iguais a 3 ou se a média geral for menor ou igual a 3.
+- Banimento remove o perfil das buscas, desativa a oferta de serviços, bloqueia definitivamente a gestão, registra o CPF normalizado em `banned_cpfs`, cria histórico/notificação e preserva currículo, vagas, candidaturas e cursos.
+- CPF banido não pode ativar novamente a oferta de serviços, mesmo em outra conta; RLS também impede autoaprovação, alteração do status de moderação e manipulação da própria média.
 - Cursos agora aparecem somente na área administrativa; páginas e envio de tentativas do profissional foram removidos.
 - Preferência individual de prestadores adicionada às configurações do profissional; ao desativar, menus, rotas e operações de serviços somem apenas para aquela conta.
 - Migrations `20260715000100_harden_company_candidate_rls.sql`, `20260715000200_add_courses_training_module.sql` e `20260715172757_harden_course_function_privileges.sql` aplicadas no projeto Supabase de produção `znmlgfllkwtcyvrpmwbt`.
@@ -150,6 +154,9 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Evoluir os filtros de vagas para salvar pesquisas e alertas por email quando SMTP estiver pronto.
 
 # Observacoes
+- Reputação e banimento validados no Supabase remoto em 24/07/2026 com transações revertidas: 2 avaliações de nota 1 não baniram; notas 5/1/3 baniram pela média 3; notas 5/5/5/3/3/3 baniram pelas 3 recentes com média 4; CPF bloqueado impediu reativação; RLS impediu autoaprovação. `supabase db lint`, `npm run lint` e build de produção passaram sem erros.
+- Migrations da reputação: `20260724053426_add_provider_ban_schema.sql`, `20260724053506_enforce_provider_reputation_ban.sql`, `20260724053554_enforce_provider_reputation_ban.sql`, `20260724065000_preserve_banned_provider_moderation_visibility.sql` e `20260724065500_protect_provider_moderation_fields.sql`, todas aplicadas no Supabase remoto.
+- O banimento afeta somente a função de prestador. Cobrança, reembolso ou assinatura permanecem fora do escopo até a definição futura do modelo de monetização.
 - Moderação de prestadores corrigida em 24/07/2026: a ação administrativa agora valida prestador/status/motivo, confirma no banco o estado gravado, redireciona para uma tela atualizada e informa sucesso ou erro em português. A função transacional do Supabase passou a bloquear prestadores inexistentes, exigir motivo para reprovação/suspensão e registrar status anterior/novo no histórico.
 - Confirmação de exclusão do currículo atualizada em 23/07/2026: o diálogo nativo do navegador foi substituído por SweetAlert2, com identidade azul-marinho/laranja, ação destrutiva explícita, cancelamento em destaque e bloqueio de fechamento acidental ao clicar fora.
 - Currículo atualizado em 23/07/2026: registros manuais de formação, experiência, curso/qualificação, idioma e habilidade agora podem ser excluídos individualmente, com confirmação, feedback de processamento e validação de propriedade tanto na ação do servidor quanto nas políticas RLS existentes. Certificações emitidas pelo Portal continuam protegidas.

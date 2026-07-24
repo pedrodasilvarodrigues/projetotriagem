@@ -136,9 +136,36 @@ export async function createServiceReviewAction(formData: FormData) {
   if (role !== "client" && role !== "professional") redirect("/acesso-negado");
   const supabase = await createServerClient();
   const conversationId = clean(formData.get("conversationId"));
-  const { error } = await supabase.rpc("create_service_conversation_review", { target_conversation_id: conversationId, target_rating: Number(clean(formData.get("rating"))), target_comment: clean(formData.get("comment")) || null });
-  if (error) redirect(`/marketplace/conversations/${conversationId}?error=${encodeURIComponent(error.message)}`);
+  const rating = Number(clean(formData.get("rating")));
+  const comment = clean(formData.get("comment"));
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+    redirect(`/marketplace/conversations/${conversationId}?error=invalid_rating`);
+  }
+  if (comment.length > 2000) {
+    redirect(`/marketplace/conversations/${conversationId}?error=review_comment_too_long`);
+  }
+
+  const { data: reviewId, error } = await supabase.rpc("create_service_conversation_review", {
+    target_conversation_id: conversationId,
+    target_rating: rating,
+    target_comment: comment || null
+  });
+  if (error) {
+    const errorCode = error.code === "23505" ? "review_already_submitted" : error.message;
+    redirect(`/marketplace/conversations/${conversationId}?error=${encodeURIComponent(errorCode)}`);
+  }
+
+  const { data: review } = reviewId
+    ? await supabase.from("service_reviews").select("provider_id").eq("id", reviewId).maybeSingle()
+    : { data: null };
   revalidatePath(`/marketplace/conversations/${conversationId}`);
+  revalidatePath("/services");
+  revalidatePath("/professional");
+  if (review?.provider_id) {
+    revalidatePath(`/services/providers/${review.provider_id}`);
+    revalidatePath("/professional/services");
+  }
+  redirect(`/marketplace/conversations/${conversationId}?success=avaliacao-publicada`);
 }
 
 export async function setServiceOfferingAction(formData: FormData) {

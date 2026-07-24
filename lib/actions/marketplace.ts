@@ -165,9 +165,39 @@ export async function reportMarketplaceAction(formData: FormData) {
 export async function moderateProviderAction(formData: FormData) {
   await requireRole("admin");
   const supabase = await createServerClient();
-  const { error } = await supabase.rpc("admin_moderate_service_provider", { target_provider_id: clean(formData.get("providerId")), target_status: clean(formData.get("status")), target_reason: clean(formData.get("reason")) || null });
+  const providerId = clean(formData.get("providerId"));
+  const status = clean(formData.get("status"));
+  const reason = clean(formData.get("reason"));
+  const validStatuses = ["approved", "rejected", "suspended", "pending"];
+
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(providerId) || !validStatuses.includes(status)) {
+    redirect("/admin/service-providers?error=solicitacao-invalida");
+  }
+  if ((status === "rejected" || status === "suspended") && !reason) {
+    redirect("/admin/service-providers?error=motivo-obrigatorio");
+  }
+
+  const { error } = await supabase.rpc("admin_moderate_service_provider", {
+    target_provider_id: providerId,
+    target_status: status,
+    target_reason: reason || null
+  });
   if (error) redirect(`/admin/service-providers?error=${encodeURIComponent(error.message)}`);
+
+  const { data: updatedProvider, error: verificationError } = await supabase
+    .from("service_provider_profiles")
+    .select("status")
+    .eq("id", providerId)
+    .maybeSingle();
+  if (verificationError || updatedProvider?.status !== status) {
+    redirect("/admin/service-providers?error=aprovacao-nao-confirmada");
+  }
+
   revalidatePath("/admin/service-providers");
+  revalidatePath("/services");
+  revalidatePath("/professional");
+  revalidatePath("/professional/services");
+  redirect(`/admin/service-providers?success=${encodeURIComponent(status)}`);
 }
 
 export async function saveServiceCategoryAction(formData: FormData) {

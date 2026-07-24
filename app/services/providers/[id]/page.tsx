@@ -8,8 +8,23 @@ import { isMarketplaceEnabled } from "@/lib/features";
 
 export const dynamic = "force-dynamic";
 
-export default async function ProviderPublicPage({ params }: { params: Promise<{ id: string }> }) {
+const conversationErrors: Record<string, string> = {
+  marketplace_requester_required: "Entre com uma conta de Cliente ou Profissional para iniciar uma conversa.",
+  provider_unavailable: "Este prestador não está disponível para novas conversas agora.",
+  cannot_contact_own_provider_profile: "Você não pode iniciar uma conversa com o seu próprio perfil de prestador.",
+  client_profile_required: "Complete seu perfil de Cliente antes de iniciar uma conversa.",
+  conversation_unavailable: "Não foi possível iniciar a conversa. Tente novamente."
+};
+
+export default async function ProviderPublicPage({
+  params,
+  searchParams
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
+}) {
   const { id } = await params;
+  const query = await searchParams;
   if (!hasSupabasePublicEnv()) notFound();
   const supabase = await createServerClient();
   if (!await isMarketplaceEnabled()) notFound();
@@ -23,6 +38,7 @@ export default async function ProviderPublicPage({ params }: { params: Promise<{
   ]);
   const portfolioWithUrls = admin ? await Promise.all((portfolio ?? []).map(async (item) => ({ ...item, url: (await admin.storage.from("provider-portfolios").createSignedUrl(item.storage_path, 3600)).data?.signedUrl }))) : [];
   return <PublicPageShell title={provider.full_name} eyebrow="Perfil do prestador" description={provider.professional_title}>
+    {query.error ? <p className="mb-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700" role="alert">{conversationErrors[decodeURIComponent(query.error)] ?? "Não foi possível iniciar a conversa. Tente novamente."}</p> : null}
     <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
       <div className="space-y-6">
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><div className="flex flex-wrap items-start justify-between gap-4"><div><span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700"><ShieldCheck size={15} />Prestador aprovado</span><h2 className="mt-4 text-2xl font-bold text-[#0F2D4E]">{provider.professional_title}</h2><p className="mt-2 flex items-center gap-1 text-sm text-slate-500"><MapPin size={16} />{provider.city}, {provider.state}</p></div><div className="rounded-xl bg-amber-50 p-3 text-center text-amber-800"><span className="flex items-center gap-1 text-xl font-bold"><Star size={19} fill="currentColor" />{Number(provider.rating_average).toFixed(1)}</span><small>{provider.rating_count} avaliações</small></div></div><p className="mt-6 whitespace-pre-wrap leading-7 text-slate-700">{provider.service_description}</p><div className="mt-5 flex flex-wrap gap-2">{provider.category_names?.map((item: string) => <span key={item} className="rounded-full bg-blue-50 px-3 py-1.5 text-sm font-semibold text-[#0F2D4E]">{item}</span>)}{provider.specialties?.map((item: string) => <span key={item} className="rounded-full bg-orange-50 px-3 py-1.5 text-sm font-semibold text-orange-700">{item}</span>)}</div></section>
@@ -30,7 +46,7 @@ export default async function ProviderPublicPage({ params }: { params: Promise<{
         {portfolioWithUrls.length > 0 && <section><h2 className="mb-4 text-xl font-bold text-[#0F2D4E]">Portfólio</h2><div className="grid gap-4 sm:grid-cols-2">{portfolioWithUrls.map((item) => <article key={item.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">{item.url && <img src={item.url} alt={item.title} className="aspect-video w-full object-cover" />}<div className="p-4"><h3 className="font-bold text-[#0F2D4E]">{item.title}</h3><p className="mt-1 text-sm text-slate-600">{item.description}</p></div></article>)}</div></section>}
         <section><h2 className="mb-4 text-xl font-bold text-[#0F2D4E]">Avaliações verificadas</h2><div className="grid gap-3">{reviews?.length ? reviews.map((review) => <article key={review.id} className="rounded-2xl border border-slate-200 bg-white p-5"><p className="font-bold text-amber-600">{"★".repeat(review.rating)}{"☆".repeat(5-review.rating)}</p><p className="mt-2 text-sm leading-6 text-slate-700">{review.comment || "Avaliação sem comentário."}</p>{review.provider_response && <p className="mt-3 rounded-xl bg-slate-50 p-3 text-sm"><strong>Resposta:</strong> {review.provider_response}</p>}</article>) : <p className="rounded-2xl bg-white p-5 text-sm text-slate-500">Este prestador ainda não recebeu avaliações.</p>}</div></section>
       </div>
-      <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:sticky lg:top-24"><p className="text-sm text-slate-500">Modalidade</p><p className="font-bold text-[#0F2D4E]">{provider.service_mode === "both" ? "Presencial e remoto" : provider.service_mode === "remote" ? "Remoto" : "Presencial"}</p><p className="mt-4 text-sm text-slate-500">Preço</p><p className="text-xl font-bold text-[#0F2D4E]">{provider.starting_price ? `A partir de R$ ${Number(provider.starting_price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "Sob orçamento"}</p><form action={startConversationAction} className="mt-6"><input type="hidden" name="providerId" value={id} /><button className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#F2811D] px-5 py-3.5 font-bold text-white hover:bg-[#dd7010]"><MessageCircle size={19} />Conversar e solicitar serviço</button></form><p className="mt-3 text-center text-xs leading-5 text-slate-500">Entre como cliente ou profissional. O telefone e o e-mail não são expostos.</p></aside>
+      <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:sticky lg:top-24"><p className="text-sm text-slate-500">Modalidade</p><p className="font-bold text-[#0F2D4E]">{provider.service_mode === "both" ? "Presencial e remoto" : provider.service_mode === "remote" ? "Remoto" : "Presencial"}</p><p className="mt-4 text-sm text-slate-500">Preço</p><p className="text-xl font-bold text-[#0F2D4E]">{provider.starting_price ? `A partir de R$ ${Number(provider.starting_price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "Sob orçamento"}</p><form action={startConversationAction} className="mt-6"><input type="hidden" name="providerId" value={id} /><input type="hidden" name="returnTo" value={`/services/providers/${id}`} /><button className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#F2811D] px-5 py-3.5 font-bold text-white hover:bg-[#dd7010]"><MessageCircle size={19} />Conversar e solicitar serviço</button></form><p className="mt-3 text-center text-xs leading-5 text-slate-500">Entre como cliente ou profissional. O telefone e o e-mail não são expostos.</p></aside>
     </div>
   </PublicPageShell>;
 }

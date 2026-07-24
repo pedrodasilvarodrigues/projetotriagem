@@ -5,6 +5,13 @@ Portal de Triagem Profissional
 Plataforma de recrutamento e triagem profissional que conecta profissionais e empresas por meio de cadastro, banco de talentos, demandas, compatibilidade e encaminhamento qualificado.
 
 # Concluido
+- Corrigido o início de conversas pelo perfil e pelos posts do prestador: sessão, papel e criação usam o mesmo cliente Supabase; o destino é preservado durante a autenticação e o sucesso abre diretamente o chat criado.
+- Página principal de Cliente e Profissional transformada em `Explorar`, sem cards administrativos, usando o mesmo componente compartilhado de vitrine, filtros compactos e estado vazio editorial.
+- Prestadores agora possuem CRUD completo de posts em `Meus serviços`, com até 6 imagens reais por publicação, upload direto no Supabase Storage, edição, substituição de imagens e remoção lógica.
+- A área Explorar exibe até 5 prestadores aprovados com posts e avaliações, ordenados dinamicamente por nota média, quantidade de avaliações e publicação mais recente.
+- Cada prestador recebe um carrossel independente com swipe/scroll-snap no celular, setas no desktop, reputação, categorias, localização e cards clicáveis.
+- Criada a rota `/services/posts/[id]` com galeria ampliada, descrição completa, reputação, perfil e início real de conversa pelo chat interno.
+- Posts e mídias usam RLS por proprietário; empresas e usuários anônimos não leem publicações, não geram URLs assinadas e não acessam o ranking do marketplace.
 - Sistema de reputação dos prestadores concluído: avaliação clicável de 1 a 5 estrelas, comentário opcional, média/comentários no perfil, uma avaliação por conversa e recálculo transacional no Supabase.
 - Banimento automático da função de prestador implementado somente a partir da 3ª avaliação: ocorre se as 3 mais recentes forem menores ou iguais a 3 ou se a média geral for menor ou igual a 3.
 - Banimento remove o perfil das buscas, desativa a oferta de serviços, bloqueia definitivamente a gestão, registra o CPF normalizado em `banned_cpfs`, cria histórico/notificação e preserva currículo, vagas, candidaturas e cursos.
@@ -154,6 +161,9 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Evoluir os filtros de vagas para salvar pesquisas e alertas por email quando SMTP estiver pronto.
 
 # Observacoes
+- Explorar/posts implementados em 24/07/2026 pelas migrations `20260724160032_add_service_posts_explore.sql`, `20260724161133_harden_service_post_paths.sql`, `20260724164705_restrict_service_post_media_to_marketplace_roles.sql` e `20260724170119_allow_removing_service_post_with_missing_media.sql`, aplicadas no Supabase remoto.
+- O bucket privado `service-posts` aceita apenas JPG, PNG e WEBP de até 8 MB; a interface limita cada post a 6 imagens e entrega mídia por URL assinada de uma hora somente a Cliente, Profissional ou Admin.
+- Testes transacionais com rollback confirmaram: criação pelo proprietário, bloqueio de caminho alheio, exclusão de suspensos do ranking, isolamento completo da conta Empresa e desempate por nota → total de avaliações → post mais recente. Nenhum post artificial permaneceu no banco.
 - Reputação e banimento validados no Supabase remoto em 24/07/2026 com transações revertidas: 2 avaliações de nota 1 não baniram; notas 5/1/3 baniram pela média 3; notas 5/5/5/3/3/3 baniram pelas 3 recentes com média 4; CPF bloqueado impediu reativação; RLS impediu autoaprovação. `supabase db lint`, `npm run lint` e build de produção passaram sem erros.
 - Migrations da reputação: `20260724053426_add_provider_ban_schema.sql`, `20260724053506_enforce_provider_reputation_ban.sql`, `20260724053554_enforce_provider_reputation_ban.sql`, `20260724065000_preserve_banned_provider_moderation_visibility.sql` e `20260724065500_protect_provider_moderation_fields.sql`, todas aplicadas no Supabase remoto.
 - O banimento afeta somente a função de prestador. Cobrança, reembolso ou assinatura permanecem fora do escopo até a definição futura do modelo de monetização.

@@ -3,12 +3,142 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCurrentRole, requireRole } from "@/lib/auth/access";
+import { appendSearchParam, safeInternalRedirect } from "@/lib/auth/safe-redirect";
 import { createAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
 import { createServerClient } from "@/lib/supabase/server";
 import { sendTransactionalEmail } from "@/lib/resend/send-email";
+import {
+  SERVICE_POST_MAX_IMAGES,
+  SERVICE_POSTS_BUCKET
+} from "@/lib/marketplace/explore";
 
 const clean = (value: FormDataEntryValue | null) => String(value ?? "").trim();
 const optionalNumber = (value: FormDataEntryValue | null) => clean(value) ? Number(clean(value).replace(",", ".")) : null;
+
+type ServicePostActionResult = { ok: true } | { ok: false; error: string };
+
+function validatePostDescription(value: string) {
+  const description = value.trim();
+  if (description.length < 3) return "Descreva o trabalho em pelo menos 3 caracteres.";
+  if (description.length > 1000) return "A descrição deve ter no máximo 1.000 caracteres.";
+  return null;
+}
+
+function validatePostPaths(paths: string[], userId: string, providerId: string) {
+  const expectedPrefix = `${userId}/${providerId}/`;
+  return paths.length >= 1
+    && paths.length <= SERVICE_POST_MAX_IMAGES
+    && paths.every((path) => path.startsWith(expectedPrefix) && !path.includes(".."));
+}
+
+export async function createServicePostAction(input: {
+  providerId: string;
+  description: string;
+  imagePaths: string[];
+}): Promise<ServicePostActionResult> {
+  await requireRole("professional");
+  const supabase = await createServerClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) return { ok: false, error: "Sua sessão expirou. Entre novamente." };
+
+  const descriptionError = validatePostDescription(input.description);
+  if (descriptionError) return { ok: false, error: descriptionError };
+  if (!validatePostPaths(input.imagePaths, userData.user.id, input.providerId)) {
+    return { ok: false, error: "As imagens enviadas não são válidas." };
+  }
+
+  const { data: provider } = await supabase
+    .from("service_provider_profiles")
+    .select("id,status")
+    .eq("id", input.providerId)
+    .maybeSingle();
+  if (!provider || provider.status === "banned") {
+    return { ok: false, error: "Perfil de prestador indisponível para publicações." };
+  }
+
+  const { error } = await supabase.from("service_posts").insert({
+    provider_id: input.providerId,
+    images: input.imagePaths,
+    description: input.description.trim(),
+    status: "published"
+  });
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/professional/services");
+  revalidatePath("/professional");
+  revalidatePath("/client");
+  return { ok: true };
+}
+
+export async function updateServicePostAction(input: {
+  postId: string;
+  description: string;
+  imagePaths?: string[];
+}): Promise<ServicePostActionResult> {
+  await requireRole("professional");
+  const supabase = await createServerClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) return { ok: false, error: "Sua sessão expirou. Entre novamente." };
+
+  const descriptionError = validatePostDescription(input.description);
+  if (descriptionError) return { ok: false, error: descriptionError };
+
+  const { data: post, error: readError } = await supabase
+    .from("service_posts")
+    .select("id,provider_id,images")
+    .eq("id", input.postId)
+    .maybeSingle();
+  if (readError || !post) return { ok: false, error: "Publicação não encontrada." };
+
+  const replacementPaths = input.imagePaths?.length ? input.imagePaths : null;
+  if (replacementPaths && !validatePostPaths(replacementPaths, userData.user.id, post.provider_id)) {
+    return { ok: false, error: "As novas imagens não são válidas." };
+  }
+
+  const { error } = await supabase
+    .from("service_posts")
+    .update({
+      description: input.description.trim(),
+      ...(replacementPaths ? { images: replacementPaths } : {}),
+      status: "published"
+    })
+    .eq("id", input.postId);
+  if (error) return { ok: false, error: error.message };
+
+  if (replacementPaths) {
+    await supabase.storage.from(SERVICE_POSTS_BUCKET).remove(post.images ?? []);
+  }
+
+  revalidatePath("/professional/services");
+  revalidatePath("/professional");
+  revalidatePath("/client");
+  revalidatePath(`/services/posts/${input.postId}`);
+  return { ok: true };
+}
+
+export async function deleteServicePostAction(postId: string): Promise<ServicePostActionResult> {
+  await requireRole("professional");
+  const supabase = await createServerClient();
+  const { data: post, error: readError } = await supabase
+    .from("service_posts")
+    .select("id,images")
+    .eq("id", postId)
+    .maybeSingle();
+  if (readError || !post) return { ok: false, error: "Publicação não encontrada." };
+
+  const { error } = await supabase
+    .from("service_posts")
+    .update({ status: "removed" })
+    .eq("id", postId);
+  if (error) return { ok: false, error: error.message };
+
+  await supabase.storage.from(SERVICE_POSTS_BUCKET).remove(post.images ?? []);
+  revalidatePath("/professional/services");
+  revalidatePath("/professional");
+  revalidatePath("/client");
+  revalidatePath(`/services/posts/${postId}`);
+  return { ok: true };
+}
 
 export async function saveProviderProfileAction(formData: FormData) {
   await requireRole("professional");
@@ -69,12 +199,31 @@ export async function saveClientProfileAction(formData: FormData) {
 }
 
 export async function startConversationAction(formData: FormData) {
-  const role = await getCurrentRole();
-  if (role !== "client" && role !== "professional") redirect("/acesso-negado");
   const supabase = await createServerClient();
-  const { data, error } = await supabase.rpc("start_marketplace_conversation", { target_provider_id: clean(formData.get("providerId")) });
-  if (error || !data) redirect(`/services?error=${encodeURIComponent(error?.message ?? "conversa-indisponivel")}`);
-  redirect(`/marketplace/conversations/${data}`);
+  const providerId = clean(formData.get("providerId"));
+  const returnTo = safeInternalRedirect(formData.get("returnTo"), providerId ? `/services/providers/${providerId}` : "/services");
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) {
+    redirect(appendSearchParam("/login?error=sessao-expirada", "next", returnTo));
+  }
+
+  const { data: roleRecord, error: roleError } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userData.user.id)
+    .maybeSingle();
+  if (roleError || (roleRecord?.role !== "client" && roleRecord?.role !== "professional")) {
+    redirect(appendSearchParam(returnTo, "error", "marketplace_requester_required"));
+  }
+
+  const { data: conversationId, error } = await supabase.rpc("start_marketplace_conversation", {
+    target_provider_id: providerId
+  });
+  if (error || !conversationId) {
+    redirect(appendSearchParam(returnTo, "error", error?.message ?? "conversation_unavailable"));
+  }
+
+  redirect(`/marketplace/conversations/${conversationId}`);
 }
 
 export async function sendMarketplaceMessageAction(formData: FormData) {

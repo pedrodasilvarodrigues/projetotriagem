@@ -76,7 +76,7 @@ const navItems: Record<AppRole, NavigationConfig> = {
     title: "Profissional",
     subtitle: "Perfil, triagem e encaminhamentos",
     items: [
-      { href: "/professional", label: "Minha Área", icon: LayoutGrid },
+      { href: "/professional", label: "Explorar", icon: LayoutGrid },
       { href: "/professional/search-demands", label: "Buscar demandas", icon: Search },
       { href: "/professional/profile", label: "Perfil", icon: UserRoundCog },
       { href: "/professional/resume", label: "Currículo", icon: FileText },
@@ -92,7 +92,7 @@ const navItems: Record<AppRole, NavigationConfig> = {
     title: "Cliente",
     subtitle: "Prestadores, solicitações e conversas",
     items: [
-      { href: "/client", label: "Minha área", icon: LayoutGrid },
+      { href: "/client", label: "Explorar", icon: LayoutGrid },
       { href: "/services", label: "Buscar prestadores", icon: Search },
       { href: "/client/requests", label: "Solicitações", icon: ClipboardCheck },
       { href: "/client/conversations", label: "Conversas", icon: MessagesSquare },

@@ -7,6 +7,7 @@ import { createServerClient, hasSupabasePublicEnv } from "@/lib/supabase/server"
 import { PortalEncaixeLogo } from "@/components/app/logo";
 import { AuthSubmitButton } from "@/components/auth/auth-submit-button";
 import { AuthVisualPanel } from "@/components/auth/auth-visual-panel";
+import { safeInternalRedirect } from "@/lib/auth/safe-redirect";
 
 const errorMessages: Record<string, string> = {
   "sessao-expirada": "Sua sessão expirou por segurança. Por favor, entre novamente para continuar sua jornada.",
@@ -47,7 +48,9 @@ function GoogleIcon() {
   );
 }
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string; message?: string }> }) {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string; message?: string; next?: string }> }) {
+  const params = await searchParams;
+  const nextPath = safeInternalRedirect(params.next, "");
   const isSupabaseConfigured = hasSupabasePublicEnv();
 
   if (isSupabaseConfigured) {
@@ -58,7 +61,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       const { data: userData } = await supabase.auth.getUser();
       if (userData.user) {
         const entryPath = await resolveAuthenticatedEntryPath(supabase, userData.user.id, userData.user.user_metadata).catch(() => null);
-        authenticatedRedirect = entryPath ?? "/onboarding";
+        const requiresOnboarding = !entryPath || entryPath.startsWith("/onboarding");
+        authenticatedRedirect = nextPath && !requiresOnboarding ? nextPath : entryPath ?? "/onboarding";
       }
     } catch (error) {
       console.error("[auth] Falha ao recuperar sessão na página de login", { error: error instanceof Error ? error.message : String(error) });
@@ -67,7 +71,6 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     if (authenticatedRedirect) redirect(authenticatedRedirect);
   }
 
-  const params = await searchParams;
   const error = params.error ? decodeURIComponent(params.error) : null;
   const message = params.message ? decodeURIComponent(params.message) : null;
 
@@ -181,6 +184,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
               ) : null}
 
               <form action={signInWithEmailAction} className="mt-6 space-y-4">
+                <input type="hidden" name="next" value={nextPath} />
                 <label className="block text-sm font-bold text-slate-800">
                   Email
                   <span className="mt-2 flex items-center gap-3 rounded-xl border border-slate-300 bg-slate-50 px-3 py-3 shadow-inner transition focus-within:border-orange-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-100">
@@ -210,6 +214,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
               </div>
 
               <form action={signInWithGoogleAction}>
+                <input type="hidden" name="next" value={nextPath} />
                 <button className="auth-google-button group flex w-full items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3.5 text-sm font-bold text-slate-700 shadow-sm transition disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 disabled:shadow-none disabled:hover:translate-y-0" type="submit" disabled={!isSupabaseConfigured}>
                   <GoogleIcon />
                   Continuar com Google

@@ -72,7 +72,9 @@ export async function proxy(request: NextRequest) {
   }
 
   if (protectedArea && !data.user) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("next", `${request.nextUrl.pathname}${request.nextUrl.search}`);
+    return NextResponse.redirect(loginUrl);
   }
 
   if (data.user && path.startsWith("/onboarding")) {

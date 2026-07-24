@@ -7,6 +7,7 @@ import { createAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
 import { sendTransactionalEmail } from "@/lib/resend/send-email";
 import { createServerClient, hasSupabasePublicEnv } from "@/lib/supabase/server";
 import { ageFromBirthDate, isValidBrazilianPhone, isValidCnpj, isValidCpf, onlyDigits } from "@/lib/validations/br";
+import { appendSearchParam, safeInternalRedirect } from "@/lib/auth/safe-redirect";
 
 const minimumAge = Number(process.env.MINIMUM_PROFESSIONAL_AGE ?? 14);
 const productionAppUrl = "https://projetotriagem.vercel.app";
@@ -349,7 +350,8 @@ async function saveCompanySignup(client: ReturnType<typeof createAdminClient>, u
 export async function signInWithGoogleAction(formData?: FormData) {
   if (!hasSupabasePublicEnv()) redirect("/login?error=configuracao-supabase-incompleta");
 
-  let target = "/login?error=nao-foi-possivel-iniciar-google";
+  const nextPath = safeInternalRedirect(formData instanceof FormData ? formData.get("next") : null, "");
+  let target = appendSearchParam("/login?error=nao-foi-possivel-iniciar-google", "next", nextPath || null);
 
   try {
     const supabase = await createServerClient();
@@ -358,6 +360,7 @@ export async function signInWithGoogleAction(formData?: FormData) {
     const signupRole = accountType === "professional" || accountType === "company" || accountType === "client" ? accountType : "";
     const callbackUrl = new URL(`${origin}/auth/callback`);
     if (signupRole) callbackUrl.searchParams.set("signupRole", signupRole);
+    if (nextPath) callbackUrl.searchParams.set("next", nextPath);
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -372,7 +375,7 @@ export async function signInWithGoogleAction(formData?: FormData) {
 
     if (error || !data.url) {
       logAuthError("Falha ao iniciar login Google", error ?? "missing-google-url", { redirectTo: callbackUrl.toString() });
-      target = `/login?error=${encodeURIComponent(error?.message ?? "nao-foi-possivel-iniciar-google")}`;
+      target = appendSearchParam(`/login?error=${encodeURIComponent(error?.message ?? "nao-foi-possivel-iniciar-google")}`, "next", nextPath || null);
     } else {
       logAuth("Redirecionando para Google OAuth", { redirectTo: callbackUrl.toString() });
       target = data.url;
@@ -385,18 +388,20 @@ export async function signInWithGoogleAction(formData?: FormData) {
 }
 
 export async function signInWithEmailAction(formData: FormData) {
+  const nextPath = safeInternalRedirect(formData.get("next"), "");
+  const preserveNext = (path: string) => appendSearchParam(path, "next", nextPath || null);
   const parsed = emailPasswordSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password")
   });
 
-  if (!parsed.success) redirect("/login?error=credenciais-invalidas");
+  if (!parsed.success) redirect(preserveNext("/login?error=credenciais-invalidas"));
 
-  let target = "/auth/callback";
+  let target = preserveNext("/auth/callback");
 
   try {
     if (!hasSupabasePublicEnv()) {
-      target = "/login?error=configuracao-supabase-incompleta";
+      target = preserveNext("/login?error=configuracao-supabase-incompleta");
     } else {
       logAuth("Login iniciado", { email: parsed.data.email });
       const supabase = await createServerClient();
@@ -410,25 +415,25 @@ export async function signInWithEmailAction(formData: FormData) {
           const { data: retryData, error: retryError } = await supabase.auth.signInWithPassword(parsed.data);
           if (!retryError && retryData.user) {
             logAuth("Usuário autenticado após confirmação automática", { userId: retryData.user.id });
-            target = "/auth/callback";
+            target = preserveNext("/auth/callback");
           } else {
             if (retryError) logAuthError("Falha no retry de login", retryError, { email: parsed.data.email });
-            target = `/login?error=${authErrorCode(retryError)}`;
+            target = preserveNext(`/login?error=${authErrorCode(retryError)}`);
           }
         } else {
-          target = `/login?error=${code}`;
+          target = preserveNext(`/login?error=${code}`);
         }
       } else if (data.user) {
         logAuth("Usuário autenticado", { userId: data.user.id });
-        target = "/auth/callback";
+        target = preserveNext("/auth/callback");
       } else {
         logAuthError("Login sem usuário na resposta", "missing-user", { email: parsed.data.email });
-        target = "/login?error=erro-autenticacao";
+        target = preserveNext("/login?error=erro-autenticacao");
       }
     }
   } catch (error) {
     logAuthError("Excecao inesperada no login", error, { email: parsed.data.email });
-    target = "/login?error=erro-servidor-login";
+    target = preserveNext("/login?error=erro-servidor-login");
   }
 
   logAuth("Redirecionando após o acesso", { route: target });

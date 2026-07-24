@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { resolveAuthenticatedEntryPath } from "@/lib/auth/entry";
 import { createServerClient } from "@/lib/supabase/server";
+import { safeInternalRedirect } from "@/lib/auth/safe-redirect";
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
@@ -8,7 +9,7 @@ export async function GET(request: NextRequest) {
   const next = requestUrl.searchParams.get("next");
   const signupRoleParam = requestUrl.searchParams.get("signupRole");
   const signupRole = signupRoleParam === "professional" || signupRoleParam === "company" || signupRoleParam === "client" ? signupRoleParam : null;
-  const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : null;
+  const safeNext = safeInternalRedirect(next, "") || null;
   let supabase: Awaited<ReturnType<typeof createServerClient>>;
 
   try {
@@ -47,9 +48,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/onboarding", request.url));
   }
 
-  if (!signupRole && entryPath.startsWith("/onboarding")) {
-    console.log("[auth] Login Google sem cadastro completo, seguindo para onboarding", { userId: data.user.id });
-    return NextResponse.redirect(new URL("/onboarding", request.url));
+  if (entryPath.startsWith("/onboarding")) {
+    console.log("[auth] Cadastro incompleto, seguindo para onboarding", { userId: data.user.id, route: entryPath });
+    return NextResponse.redirect(new URL(entryPath, request.url));
+  }
+
+  if (safeNext) {
+    console.log("[auth] Redirecionando callback para destino preservado", { userId: data.user.id, route: safeNext });
+    return NextResponse.redirect(new URL(safeNext, request.url));
   }
 
   console.log("[auth] Redirecionando callback", { userId: data.user.id, route: entryPath });

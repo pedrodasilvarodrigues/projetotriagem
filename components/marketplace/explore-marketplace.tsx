@@ -5,6 +5,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import { createServicePostSignedUrlMap, isUuid, normalizeFeaturedProviders } from "@/lib/marketplace/explore";
 import { ProviderPostCarousel } from "@/components/marketplace/provider-post-carousel";
 import { ProviderCard, type ProviderSummary } from "@/components/marketplace/provider-card";
+import { ProviderDiscoveryCarousel } from "@/components/marketplace/provider-discovery-carousel";
 
 export type ExploreSearchParams = {
   q?: string;
@@ -35,17 +36,20 @@ async function ExploreContent({
   basePath: "/professional" | "/client";
 }) {
   const supabase = await createServerClient();
-  const categoryId = isUuid(params.category) ? params.category : null;
+  const isClientExplore = basePath === "/client";
+  const categoryId = !isClientExplore && isUuid(params.category) ? params.category : null;
+  const searchText = isClientExplore ? null : params.q?.trim() || null;
+  const targetCity = isClientExplore ? null : params.city?.trim() || null;
   const [{ data: featuredRows, error: featuredError }, { data: discoveryRows, error: discoveryError }, { data: categories }] = await Promise.all([
     supabase.rpc("get_featured_service_providers", {
-      search_text: params.q?.trim() || null,
+      search_text: searchText,
       target_category: categoryId,
-      target_city: params.city?.trim() || null
+      target_city: targetCity
     }),
     supabase.rpc("search_service_providers", {
-      search_text: params.q?.trim() || null,
+      search_text: searchText,
       target_category: categoryId,
-      target_city: params.city?.trim() || null,
+      target_city: targetCity,
       target_mode: null,
       minimum_rating: null,
       result_limit: 8,
@@ -76,10 +80,14 @@ async function ExploreContent({
     .filter((provider) => provider.posts.length > 0);
   const roots = categories?.filter((category) => !category.parent_id) ?? [];
   const children = categories?.filter((category) => category.parent_id) ?? [];
-  const hasFilters = Boolean(params.q || params.category || params.city);
+  const hasFilters = !isClientExplore && Boolean(params.q || params.category || params.city);
 
   return (
     <div className="space-y-7">
+      {isClientExplore ? (
+        <ProviderDiscoveryCarousel providers={discoveryProviders} allProvidersHref="/client/providers" />
+      ) : (
+        <>
       <section className="relative overflow-hidden rounded-[30px] bg-[#0F2D4E] px-5 py-7 text-white shadow-[0_24px_70px_rgba(15,45,78,0.2)] sm:px-8 sm:py-9">
         <div aria-hidden="true" className="absolute -right-16 -top-20 size-64 rounded-full border-[42px] border-[#F2811D]/15" />
         <div aria-hidden="true" className="absolute bottom-0 right-20 h-px w-56 bg-gradient-to-r from-transparent via-[#F2811D] to-transparent" />
@@ -145,6 +153,8 @@ async function ExploreContent({
           </div>
         ) : null}
       </form>
+        </>
+      )}
 
       {featuredError && discoveryError ? (
         <section className="rounded-[28px] border border-[#F0C7C3] bg-[#FFF7F5] px-6 py-10 text-center">
@@ -169,7 +179,7 @@ async function ExploreContent({
             </div>
           ) : null}
 
-          {discoveryProviders.length ? (
+          {!isClientExplore && discoveryProviders.length ? (
             <section className="space-y-5">
               <div className="flex flex-wrap items-end justify-between gap-3 px-1">
                 <div>

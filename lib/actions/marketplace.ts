@@ -11,6 +11,7 @@ import {
   SERVICE_POST_MAX_IMAGES,
   SERVICE_POSTS_BUCKET
 } from "@/lib/marketplace/explore";
+import { safeErrorCode, userFacingErrorMessage } from "@/lib/errors/user-facing";
 
 const clean = (value: FormDataEntryValue | null) => String(value ?? "").trim();
 const optionalNumber = (value: FormDataEntryValue | null) => clean(value) ? Number(clean(value).replace(",", ".")) : null;
@@ -62,7 +63,7 @@ export async function createServicePostAction(input: {
     description: input.description.trim(),
     status: "published"
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: userFacingErrorMessage(error) };
 
   revalidatePath("/professional/services");
   revalidatePath("/professional");
@@ -103,7 +104,7 @@ export async function updateServicePostAction(input: {
       status: "published"
     })
     .eq("id", input.postId);
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: userFacingErrorMessage(error) };
 
   if (replacementPaths) {
     await supabase.storage.from(SERVICE_POSTS_BUCKET).remove(post.images ?? []);
@@ -130,7 +131,7 @@ export async function deleteServicePostAction(postId: string): Promise<ServicePo
     .from("service_posts")
     .update({ status: "removed" })
     .eq("id", postId);
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: userFacingErrorMessage(error) };
 
   await supabase.storage.from(SERVICE_POSTS_BUCKET).remove(post.images ?? []);
   revalidatePath("/professional/services");
@@ -156,12 +157,12 @@ export async function saveProviderProfileAction(formData: FormData) {
     target_availability: clean(formData.get("availability")) || null,
     target_experience: clean(formData.get("experienceDescription")) || null
   });
-  if (error || !providerId) redirect(`${destination}?error=${encodeURIComponent(error?.message ?? "perfil-invalido")}`);
+  if (error || !providerId) redirect(`${destination}?error=${safeErrorCode(error ?? "perfil-invalido")}`);
   const categoryIds = formData.getAll("categoryIds").map(String).filter(Boolean);
   await supabase.from("service_provider_categories").delete().eq("provider_id", providerId);
   if (categoryIds.length) {
     const { error: categoryError } = await supabase.from("service_provider_categories").insert(categoryIds.map((categoryId) => ({ provider_id: providerId, category_id: categoryId })));
-    if (categoryError) redirect(`${destination}?error=${encodeURIComponent(categoryError.message)}`);
+    if (categoryError) redirect(`${destination}?error=${safeErrorCode(categoryError)}`);
   }
   await supabase.from("service_provider_areas").delete().eq("provider_id", providerId);
   const city = clean(formData.get("city"));
@@ -182,9 +183,9 @@ export async function uploadPortfolioAction(formData: FormData) {
   const extension = file.name.split(".").pop()?.replace(/[^a-z0-9]/gi, "") || "jpg";
   const path = `${userData.user.id}/${providerId}/${crypto.randomUUID()}.${extension}`;
   const { error: uploadError } = await supabase.storage.from("provider-portfolios").upload(path, file, { contentType: file.type, upsert: false });
-  if (uploadError) redirect(`/professional/services?error=${encodeURIComponent(uploadError.message)}`);
+  if (uploadError) redirect(`/professional/services?error=${safeErrorCode(uploadError)}`);
   const { error } = await supabase.from("service_provider_portfolio").insert({ provider_id: providerId, title: clean(formData.get("title")) || "Trabalho realizado", description: clean(formData.get("description")) || null, storage_path: path });
-  if (error) { await supabase.storage.from("provider-portfolios").remove([path]); redirect(`/professional/services?error=${encodeURIComponent(error.message)}`); }
+  if (error) { await supabase.storage.from("provider-portfolios").remove([path]); redirect(`/professional/services?error=${safeErrorCode(error)}`); }
   revalidatePath("/professional/services");
 }
 
@@ -210,12 +211,12 @@ export async function uploadServiceCoverAction(formData: FormData) {
   const extensionByType: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
   const path = `${userData.user.id}/covers/${provider.id}-${crypto.randomUUID()}.${extensionByType[file.type]}`;
   const { error: uploadError } = await supabase.storage.from("provider-portfolios").upload(path, file, { contentType: file.type, upsert: false });
-  if (uploadError) redirect(`/professional/services?error=${encodeURIComponent(uploadError.message)}`);
+  if (uploadError) redirect(`/professional/services?error=${safeErrorCode(uploadError)}`);
 
   const { error: updateError } = await supabase.from("service_provider_profiles").update({ cover_image_path: path, updated_at: new Date().toISOString() }).eq("id", provider.id);
   if (updateError) {
     await supabase.storage.from("provider-portfolios").remove([path]);
-    redirect(`/professional/services?error=${encodeURIComponent(updateError.message)}`);
+    redirect(`/professional/services?error=${safeErrorCode(updateError)}`);
   }
   if (provider.cover_image_path) await supabase.storage.from("provider-portfolios").remove([provider.cover_image_path]);
 
@@ -233,7 +234,7 @@ export async function saveClientProfileAction(formData: FormData) {
   const { data } = await supabase.auth.getUser();
   if (!data.user) redirect("/login");
   const { error } = await supabase.from("client_profiles").upsert({ user_id: data.user.id, city: clean(formData.get("city")), state: clean(formData.get("state")).toUpperCase(), region_name: clean(formData.get("regionName")) || null, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
-  if (error) redirect(`/client?error=${encodeURIComponent(error.message)}`);
+  if (error) redirect(`/client?error=${safeErrorCode(error)}`);
   revalidatePath("/client");
 }
 
@@ -272,7 +273,7 @@ export async function sendMarketplaceMessageAction(formData: FormData) {
   const body = clean(formData.get("body"));
   if (!data.user || !conversationId || !body) return;
   const { error } = await supabase.from("marketplace_messages").insert({ conversation_id: conversationId, sender_id: data.user.id, body });
-  if (error) redirect(`/marketplace/conversations/${conversationId}?error=${encodeURIComponent(error.message)}`);
+  if (error) redirect(`/marketplace/conversations/${conversationId}?error=${safeErrorCode(error)}`);
   if (hasSupabaseAdminEnv() && process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL) {
     try {
       const admin = createAdminClient();
@@ -299,7 +300,7 @@ export async function createServiceRequestAction(formData: FormData) {
   const supabase = await createServerClient();
   const conversationId = clean(formData.get("conversationId"));
   const { error } = await supabase.rpc("create_service_request", { target_conversation_id: conversationId, target_title: clean(formData.get("title")), target_description: clean(formData.get("description")), target_pricing: clean(formData.get("pricingModel")), target_amount: optionalNumber(formData.get("amount")) });
-  if (error) redirect(`/marketplace/conversations/${conversationId}?error=${encodeURIComponent(error.message)}`);
+  if (error) redirect(`/marketplace/conversations/${conversationId}?error=${safeErrorCode(error)}`);
   revalidatePath(`/marketplace/conversations/${conversationId}`);
 }
 
@@ -307,7 +308,7 @@ export async function transitionServiceRequestAction(formData: FormData) {
   const supabase = await createServerClient();
   const conversationId = clean(formData.get("conversationId"));
   const { error } = await supabase.rpc("transition_service_request", { target_request_id: clean(formData.get("requestId")), target_status: clean(formData.get("status")), target_note: clean(formData.get("note")) || null });
-  if (error) redirect(`/marketplace/conversations/${conversationId}?error=${encodeURIComponent(error.message)}`);
+  if (error) redirect(`/marketplace/conversations/${conversationId}?error=${safeErrorCode(error)}`);
   revalidatePath(`/marketplace/conversations/${conversationId}`);
 }
 
@@ -315,7 +316,7 @@ export async function confirmServiceCompletionAction(formData: FormData) {
   const supabase = await createServerClient();
   const conversationId = clean(formData.get("conversationId"));
   const { error } = await supabase.rpc("confirm_service_completion", { target_request_id: clean(formData.get("requestId")) });
-  if (error) redirect(`/marketplace/conversations/${conversationId}?error=${encodeURIComponent(error.message)}`);
+  if (error) redirect(`/marketplace/conversations/${conversationId}?error=${safeErrorCode(error)}`);
   revalidatePath(`/marketplace/conversations/${conversationId}`);
 }
 
@@ -339,7 +340,7 @@ export async function createServiceReviewAction(formData: FormData) {
     target_comment: comment || null
   });
   if (error) {
-    const errorCode = error.code === "23505" ? "review_already_submitted" : error.message;
+    const errorCode = error.code === "23505" ? "review_already_submitted" : safeErrorCode(error);
     redirect(`/marketplace/conversations/${conversationId}?error=${encodeURIComponent(errorCode)}`);
   }
 
@@ -361,7 +362,7 @@ export async function setServiceOfferingAction(formData: FormData) {
   const enabled = formData.get("enabled") === "on" || formData.get("enabled") === "true";
   const supabase = await createServerClient();
   const { error } = await supabase.rpc("set_service_offering", { target_enabled: enabled });
-  if (error) redirect(`/professional/profile?error=${encodeURIComponent(error.message)}`);
+  if (error) redirect(`/professional/profile?error=${safeErrorCode(error)}`);
   revalidatePath("/professional/profile");
   revalidatePath("/professional/services");
   redirect(`/professional/profile?message=${enabled ? "servicos-ativados" : "servicos-desativados"}${enabled ? "&offerServices=1" : ""}`);
@@ -373,7 +374,7 @@ export async function reportMarketplaceAction(formData: FormData) {
   const conversationId = clean(formData.get("conversationId"));
   if (!data.user) redirect("/login");
   const { error } = await supabase.from("marketplace_reports").insert({ reporter_id: data.user.id, report_type: clean(formData.get("reportType")), provider_id: clean(formData.get("providerId")) || null, conversation_id: conversationId || null, request_id: clean(formData.get("requestId")) || null, reason: clean(formData.get("reason")), description: clean(formData.get("description")) || null });
-  if (error) redirect(`${conversationId ? `/marketplace/conversations/${conversationId}` : "/services"}?error=${encodeURIComponent(error.message)}`);
+  if (error) redirect(`${conversationId ? `/marketplace/conversations/${conversationId}` : "/services"}?error=${safeErrorCode(error)}`);
   redirect(`${conversationId ? `/marketplace/conversations/${conversationId}` : "/services"}?success=denuncia-enviada`);
 }
 
@@ -397,7 +398,7 @@ export async function moderateProviderAction(formData: FormData) {
     target_status: status,
     target_reason: reason || null
   });
-  if (error) redirect(`/admin/service-providers?error=${encodeURIComponent(error.message)}`);
+  if (error) redirect(`/admin/service-providers?error=${safeErrorCode(error)}`);
 
   const { data: updatedProvider, error: verificationError } = await supabase
     .from("service_provider_profiles")
@@ -422,7 +423,7 @@ export async function saveServiceCategoryAction(formData: FormData) {
   const name = clean(formData.get("name"));
   const payload = { name, slug: clean(formData.get("slug")) || name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""), parent_id: clean(formData.get("parentId")) || null, display_order: Number(clean(formData.get("displayOrder")) || 0), is_active: formData.get("isActive") === "on", updated_at: new Date().toISOString() };
   const result = id ? await supabase.from("service_categories").update(payload).eq("id", id) : await supabase.from("service_categories").insert(payload);
-  if (result.error) redirect(`/admin/service-categories?error=${encodeURIComponent(result.error.message)}`);
+  if (result.error) redirect(`/admin/service-categories?error=${safeErrorCode(result.error)}`);
   revalidatePath("/admin/service-categories");
 }
 
@@ -438,7 +439,7 @@ export async function moderatePortfolioAction(formData: FormData) {
   await requireRole("admin");
   const supabase = await createServerClient();
   const { error } = await supabase.from("service_provider_portfolio").update({ moderation_status: clean(formData.get("status")), updated_at: new Date().toISOString() }).eq("id", clean(formData.get("portfolioId")));
-  if (error) redirect(`/admin/service-providers?error=${encodeURIComponent(error.message)}`);
+  if (error) redirect(`/admin/service-providers?error=${safeErrorCode(error)}`);
   revalidatePath("/admin/service-providers");
 }
 
@@ -458,7 +459,7 @@ export async function markMarketplaceNotificationsReadAction() {
   const { data } = await supabase.auth.getUser();
   if (!data.user) redirect("/login");
   const { error } = await supabase.from("marketplace_notifications").update({ read_at: new Date().toISOString() }).eq("user_id", data.user.id).is("read_at", null);
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(userFacingErrorMessage(error));
   revalidatePath("/professional/notifications");
   revalidatePath("/client/notifications");
 }

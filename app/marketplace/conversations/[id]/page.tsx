@@ -7,6 +7,7 @@ import { confirmServiceCompletionAction, createServiceRequestAction, reportMarke
 import { getCurrentRole } from "@/lib/auth/access";
 import { createServerClient } from "@/lib/supabase/server";
 import { isMarketplaceEnabled } from "@/lib/features";
+import { userFacingErrorMessage } from "@/lib/errors/user-facing";
 
 export const dynamic = "force-dynamic";
 const input = "mt-1.5 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#F2811D]";
@@ -41,7 +42,7 @@ export default async function MarketplaceConversationPage({ params, searchParams
   const alreadyReviewed = Boolean(ownReviews?.length);
 
   return <AppShell eyebrow={eyebrow} title="Negociação de serviço">
-    {query.error && <p className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{errorMessages[decodeURIComponent(query.error)] ?? decodeURIComponent(query.error)}</p>}
+    {query.error && <p className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{errorMessages[decodeURIComponent(query.error)] ?? userFacingErrorMessage(query.error)}</p>}
     {query.success && <p className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">{query.success === "avaliacao-publicada" ? "Avaliação publicada com sucesso." : "Operação concluída."}</p>}
     <div className="grid gap-6 xl:grid-cols-[1fr_390px]">
       <ChatPanel conversationId={id} currentUserId={userData.user.id} initialMessages={messages ?? []} />

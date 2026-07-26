@@ -4,6 +4,7 @@ import { AppShell } from "@/components/app/shell";
 import { moderatePortfolioAction, moderateProviderAction } from "@/lib/actions/marketplace";
 import { isMarketplaceEnabled } from "@/lib/features";
 import { createServerClient } from "@/lib/supabase/server";
+import { userFacingErrorMessage } from "@/lib/errors/user-facing";
 
 export const dynamic = "force-dynamic";
 
@@ -69,7 +70,7 @@ export default async function AdminServiceProvidersPage({
     : { data: [] };
 
   const rawError = params.error ? decodeURIComponent(params.error) : queryError?.message;
-  const friendlyError = rawError ? errorMessages[rawError] ?? rawError : null;
+  const friendlyError = rawError ? errorMessages[rawError] ?? userFacingErrorMessage(rawError) : null;
   const successMessage = params.success ? successMessages[params.success] : null;
 
   return (

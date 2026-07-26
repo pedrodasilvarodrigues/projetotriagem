@@ -17,6 +17,7 @@ import {
   servicePostPublicUrl,
   type ServicePost
 } from "@/lib/marketplace/explore";
+import { userFacingErrorMessage } from "@/lib/errors/user-facing";
 
 type UploadResult = { paths: string[] } | { error: string; paths: string[] };
 
@@ -49,7 +50,7 @@ async function uploadImages(files: File[], userId: string, providerId: string): 
     });
     if (error) {
       if (uploadedPaths.length) await supabase.storage.from(SERVICE_POSTS_BUCKET).remove(uploadedPaths);
-      return { error: error.message, paths: [] };
+      return { error: userFacingErrorMessage(error), paths: [] };
     }
     uploadedPaths.push(path);
   }

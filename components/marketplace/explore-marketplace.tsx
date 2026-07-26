@@ -4,6 +4,7 @@ import { Search, SlidersHorizontal, Sparkles, Store, X } from "lucide-react";
 import { createServerClient } from "@/lib/supabase/server";
 import { createServicePostSignedUrlMap, isUuid, normalizeFeaturedProviders } from "@/lib/marketplace/explore";
 import { ProviderPostCarousel } from "@/components/marketplace/provider-post-carousel";
+import { ProviderCard, type ProviderSummary } from "@/components/marketplace/provider-card";
 
 export type ExploreSearchParams = {
   q?: string;
@@ -35,11 +36,20 @@ async function ExploreContent({
 }) {
   const supabase = await createServerClient();
   const categoryId = isUuid(params.category) ? params.category : null;
-  const [{ data: featuredRows, error }, { data: categories }] = await Promise.all([
+  const [{ data: featuredRows, error: featuredError }, { data: discoveryRows, error: discoveryError }, { data: categories }] = await Promise.all([
     supabase.rpc("get_featured_service_providers", {
       search_text: params.q?.trim() || null,
       target_category: categoryId,
       target_city: params.city?.trim() || null
+    }),
+    supabase.rpc("search_service_providers", {
+      search_text: params.q?.trim() || null,
+      target_category: categoryId,
+      target_city: params.city?.trim() || null,
+      target_mode: null,
+      minimum_rating: null,
+      result_limit: 8,
+      result_offset: 0
     }),
     supabase
       .from("service_categories")
@@ -50,6 +60,7 @@ async function ExploreContent({
   ]);
 
   const providerRows = normalizeFeaturedProviders(featuredRows as unknown[] | null);
+  const discoveryProviders = (discoveryRows ?? []) as ProviderSummary[];
   const imagePaths = providerRows.flatMap((provider) => provider.posts.flatMap((post) => post.images));
   const signedUrls = await createServicePostSignedUrlMap(supabase, imagePaths);
   const providers = providerRows
@@ -135,14 +146,16 @@ async function ExploreContent({
         ) : null}
       </form>
 
-      {error ? (
+      {featuredError && discoveryError ? (
         <section className="rounded-[28px] border border-[#F0C7C3] bg-[#FFF7F5] px-6 py-10 text-center">
           <Store className="mx-auto text-[#B5473E]" size={34} />
           <h2 className="mt-3 text-xl font-bold text-[#0F2D4E]">Não foi possível carregar a vitrine agora</h2>
           <p className="mt-2 text-sm text-[#607085]">Atualize a página em alguns instantes. Seus dados e conversas continuam seguros.</p>
         </section>
-      ) : providers.length ? (
-        <div className="space-y-7">
+      ) : providers.length || discoveryProviders.length ? (
+        <div className="space-y-9">
+          {providers.length ? (
+            <div className="space-y-7">
           <div className="flex flex-wrap items-end justify-between gap-3 px-1">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#F2811D]">Destaques do Encaixe</p>
@@ -153,6 +166,25 @@ async function ExploreContent({
           {providers.map((provider, index) => (
             <ProviderPostCarousel key={provider.provider_id} provider={provider} position={index + 1} />
           ))}
+            </div>
+          ) : null}
+
+          {discoveryProviders.length ? (
+            <section className="space-y-5">
+              <div className="flex flex-wrap items-end justify-between gap-3 px-1">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#F2811D]">Prestadores disponíveis</p>
+                  <h2 className="mt-1 text-2xl font-bold text-[#0F2D4E]">Encontre ajuda para o que precisa agora</h2>
+                </div>
+                <Link href={`${basePath}/providers`} className="rounded-xl border border-[#CAD6E2] bg-white px-4 py-2.5 text-sm font-bold text-[#0F2D4E] transition hover:border-[#F2811D] hover:text-[#C85F08]">
+                  Ver todos os prestadores
+                </Link>
+              </div>
+              <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                {discoveryProviders.map((provider) => <ProviderCard key={provider.provider_id} provider={provider} />)}
+              </div>
+            </section>
+          ) : null}
         </div>
       ) : (
         <section className="relative overflow-hidden rounded-[30px] border border-dashed border-[#BFCEDB] bg-[#F4F7FA] px-6 py-16 text-center">

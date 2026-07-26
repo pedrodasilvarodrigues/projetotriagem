@@ -5,6 +5,8 @@ Portal de Triagem Profissional
 Plataforma de recrutamento e triagem profissional que conecta profissionais e empresas por meio de cadastro, banco de talentos, demandas, compatibilidade e encaminhamento qualificado.
 
 # Concluido
+- Corrigida a aba `Buscar prestadores`: Cliente e Profissional agora usam rotas internas protegidas (`/client/providers` e `/professional/providers`), preservando sessão e menu da área autenticada. A busca lista todos os prestadores aprovados, possui filtros automáticos por nome/serviço, categoria, cidade e modalidade, além de paginação.
+- A área `Explorar` mantém os carrosséis de posts em destaque e passou a exibir também uma seleção de prestadores aprovados, inclusive aqueles que ainda não possuem post ou avaliação, com acesso direto à busca completa.
 - Corrigido o início de conversas pelo perfil e pelos posts do prestador: sessão, papel e criação usam o mesmo cliente Supabase; o destino é preservado durante a autenticação e o sucesso abre diretamente o chat criado.
 - Página principal de Cliente e Profissional transformada em `Explorar`, sem cards administrativos, usando o mesmo componente compartilhado de vitrine, filtros compactos e estado vazio editorial.
 - Prestadores agora possuem CRUD completo de posts em `Meus serviços`, com até 6 imagens reais por publicação, upload direto no Supabase Storage, edição, substituição de imagens e remoção lógica.

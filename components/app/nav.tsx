@@ -77,6 +77,7 @@ const navItems: Record<AppRole, NavigationConfig> = {
     subtitle: "Perfil, triagem e encaminhamentos",
     items: [
       { href: "/professional", label: "Explorar", icon: LayoutGrid },
+      { href: "/professional/providers", label: "Buscar prestadores", icon: Search },
       { href: "/professional/search-demands", label: "Buscar demandas", icon: Search },
       { href: "/professional/profile", label: "Perfil", icon: UserRoundCog },
       { href: "/professional/resume", label: "Currículo", icon: FileText },
@@ -93,7 +94,7 @@ const navItems: Record<AppRole, NavigationConfig> = {
     subtitle: "Prestadores, solicitações e conversas",
     items: [
       { href: "/client", label: "Explorar", icon: LayoutGrid },
-      { href: "/services", label: "Buscar prestadores", icon: Search },
+      { href: "/client/providers", label: "Buscar prestadores", icon: Search },
       { href: "/client/requests", label: "Solicitações", icon: ClipboardCheck },
       { href: "/client/conversations", label: "Conversas", icon: MessagesSquare },
       { href: "/client/notifications", label: "Notificações", icon: Bell }
@@ -104,6 +105,7 @@ const navItems: Record<AppRole, NavigationConfig> = {
 const marketplaceRoutes = [
   "/services",
   "/client",
+  "/professional/providers",
   "/professional/services",
   "/professional/service-conversations",
   "/admin/service-providers",

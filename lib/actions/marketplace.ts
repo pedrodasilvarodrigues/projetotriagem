@@ -188,6 +188,45 @@ export async function uploadPortfolioAction(formData: FormData) {
   revalidatePath("/professional/services");
 }
 
+export async function uploadServiceCoverAction(formData: FormData) {
+  await requireRole("professional");
+  const supabase = await createServerClient();
+  const { data: userData } = await supabase.auth.getUser();
+  const file = formData.get("coverImage");
+  const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+  if (!userData.user || !(file instanceof File) || !allowedTypes.has(file.type) || file.size < 1 || file.size > 8_000_000) {
+    redirect("/professional/services?error=capa-invalida");
+  }
+
+  const { data: professional } = await supabase.from("professionals").select("id").eq("user_id", userData.user.id).maybeSingle();
+  if (!professional) redirect("/professional/services?error=perfil-profissional-nao-encontrado");
+  const { data: provider } = await supabase
+    .from("service_provider_profiles")
+    .select("id,cover_image_path,status")
+    .eq("professional_id", professional.id)
+    .maybeSingle();
+  if (!provider || provider.status === "banned") redirect("/professional/services?error=prestador-indisponivel");
+
+  const extensionByType: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+  const path = `${userData.user.id}/covers/${provider.id}-${crypto.randomUUID()}.${extensionByType[file.type]}`;
+  const { error: uploadError } = await supabase.storage.from("provider-portfolios").upload(path, file, { contentType: file.type, upsert: false });
+  if (uploadError) redirect(`/professional/services?error=${encodeURIComponent(uploadError.message)}`);
+
+  const { error: updateError } = await supabase.from("service_provider_profiles").update({ cover_image_path: path, updated_at: new Date().toISOString() }).eq("id", provider.id);
+  if (updateError) {
+    await supabase.storage.from("provider-portfolios").remove([path]);
+    redirect(`/professional/services?error=${encodeURIComponent(updateError.message)}`);
+  }
+  if (provider.cover_image_path) await supabase.storage.from("provider-portfolios").remove([provider.cover_image_path]);
+
+  revalidatePath("/professional/services");
+  revalidatePath("/professional");
+  revalidatePath("/professional/providers");
+  revalidatePath("/client");
+  revalidatePath("/client/providers");
+  redirect("/professional/services?success=capa-atualizada");
+}
+
 export async function saveClientProfileAction(formData: FormData) {
   await requireRole("client");
   const supabase = await createServerClient();

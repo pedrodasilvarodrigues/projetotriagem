@@ -7,10 +7,12 @@ import { ProviderCard, type ProviderSummary } from "@/components/marketplace/pro
 
 export function ProviderDiscoveryCarousel({
   providers,
-  allProvidersHref
+  allProvidersHref,
+  profileBasePath
 }: {
   providers: ProviderSummary[];
   allProvidersHref: string;
+  profileBasePath: string;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -57,7 +59,7 @@ export function ProviderDiscoveryCarousel({
       >
         {providers.map((provider) => (
           <div key={provider.provider_id} className="w-[86vw] max-w-[350px] shrink-0 snap-start sm:w-[330px]">
-            <ProviderCard provider={provider} />
+            <ProviderCard provider={provider} profileBasePath={profileBasePath} />
           </div>
         ))}
       </div>

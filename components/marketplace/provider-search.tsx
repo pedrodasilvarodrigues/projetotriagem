@@ -4,6 +4,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import { isUuid } from "@/lib/marketplace/explore";
 import { ProviderCard, type ProviderSummary } from "@/components/marketplace/provider-card";
 import { ProviderSearchFilters } from "@/components/marketplace/provider-search-filters";
+import { attachProviderCoverUrls } from "@/lib/marketplace/provider-media";
 
 export type ProviderSearchParams = {
   q?: string;
@@ -50,7 +51,7 @@ export async function ProviderSearch({
       .order("name")
   ]);
 
-  const providers = (providerRows ?? []) as ProviderSummary[];
+  const providers = await attachProviderCoverUrls((providerRows ?? []) as ProviderSummary[]);
   const hasNextPage = providers.length === PAGE_SIZE;
   const queryWithoutPage = new URLSearchParams();
   if (params.q) queryWithoutPage.set("q", params.q);
@@ -95,7 +96,7 @@ export async function ProviderSearch({
             <p className="text-sm font-semibold text-slate-500">{providers.length} nesta página</p>
           </div>
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {providers.map((provider) => <ProviderCard key={provider.provider_id} provider={provider} />)}
+            {providers.map((provider) => <ProviderCard key={provider.provider_id} provider={provider} profileBasePath={basePath} />)}
           </div>
           {(page > 1 || hasNextPage) ? (
             <nav aria-label="Paginação de prestadores" className="flex items-center justify-center gap-3 pt-2">

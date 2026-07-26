@@ -6,6 +6,7 @@ import { createServicePostSignedUrlMap, isUuid, normalizeFeaturedProviders } fro
 import { ProviderPostCarousel } from "@/components/marketplace/provider-post-carousel";
 import { ProviderCard, type ProviderSummary } from "@/components/marketplace/provider-card";
 import { ProviderDiscoveryCarousel } from "@/components/marketplace/provider-discovery-carousel";
+import { attachProviderCoverUrls } from "@/lib/marketplace/provider-media";
 
 export type ExploreSearchParams = {
   q?: string;
@@ -64,7 +65,7 @@ async function ExploreContent({
   ]);
 
   const providerRows = normalizeFeaturedProviders(featuredRows as unknown[] | null);
-  const discoveryProviders = (discoveryRows ?? []) as ProviderSummary[];
+  const discoveryProviders = await attachProviderCoverUrls((discoveryRows ?? []) as ProviderSummary[]);
   const imagePaths = providerRows.flatMap((provider) => provider.posts.flatMap((post) => post.images));
   const signedUrls = await createServicePostSignedUrlMap(supabase, imagePaths);
   const providers = providerRows
@@ -85,7 +86,7 @@ async function ExploreContent({
   return (
     <div className="space-y-7">
       {isClientExplore ? (
-        <ProviderDiscoveryCarousel providers={discoveryProviders} allProvidersHref="/client/providers" />
+        <ProviderDiscoveryCarousel providers={discoveryProviders} allProvidersHref="/client/providers" profileBasePath="/client/providers" />
       ) : (
         <>
       <section className="relative overflow-hidden rounded-[30px] bg-[#0F2D4E] px-5 py-7 text-white shadow-[0_24px_70px_rgba(15,45,78,0.2)] sm:px-8 sm:py-9">
@@ -191,7 +192,7 @@ async function ExploreContent({
                 </Link>
               </div>
               <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {discoveryProviders.map((provider) => <ProviderCard key={provider.provider_id} provider={provider} />)}
+                {discoveryProviders.map((provider) => <ProviderCard key={provider.provider_id} provider={provider} profileBasePath="/professional/providers" />)}
               </div>
             </section>
           ) : null}

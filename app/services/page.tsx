@@ -5,6 +5,7 @@ import { createAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
 import { createServerClient, hasSupabasePublicEnv } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { isMarketplaceEnabled } from "@/lib/features";
+import { attachProviderCoverUrls } from "@/lib/marketplace/provider-media";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
       catalogClient.from("service_categories").select("id,name,parent_id").eq("is_active", true).order("display_order").order("name")
     ]);
     providers = (providerResult.data ?? []) as ProviderSummary[];
+    providers = await attachProviderCoverUrls(providers);
     categories = categoryResult.data ?? [];
   }
   return <PublicPageShell title="Encontre quem resolve" eyebrow="Marketplace de serviços" description="Prestadores aprovados, contato protegido e negociação direta dentro do Portal Encaixe.">

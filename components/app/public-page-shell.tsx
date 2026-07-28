@@ -6,11 +6,23 @@ export function PublicPageShell({
   title,
   description,
   eyebrow = "Portal Encaixe",
+  primaryAction = { href: "/register", label: "Cadastrar currículo" },
+  secondaryAction = { href: "/vagas-publicas", label: "Ver vagas públicas" },
+  asideTitle = "Por que cadastrar?",
+  asideItems = [
+    "Seu perfil entra no banco de talentos.",
+    "A triagem cruza currículo, cidade e objetivo.",
+    "Você acompanha encaminhamentos pelo portal."
+  ],
   children
 }: {
   title: string;
   description: string;
   eyebrow?: string;
+  primaryAction?: { href: string; label: string };
+  secondaryAction?: { href: string; label: string };
+  asideTitle?: string;
+  asideItems?: string[];
   children: React.ReactNode;
 }) {
   return (
@@ -38,24 +50,20 @@ export function PublicPageShell({
               {description}
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link href="/register" className="btn-primary rounded-2xl px-5 py-3 text-sm">
-                Cadastrar currículo
+              <Link href={primaryAction.href} className="btn-primary rounded-2xl px-5 py-3 text-sm">
+                {primaryAction.label}
                 <ArrowRight aria-hidden="true" size={17} />
               </Link>
-              <Link href="/vagas-publicas" className="btn-secondary rounded-2xl bg-white px-5 py-3 text-sm">
-                Ver vagas públicas
+              <Link href={secondaryAction.href} className="btn-secondary rounded-2xl bg-white px-5 py-3 text-sm">
+                {secondaryAction.label}
               </Link>
             </div>
           </div>
 
           <aside className="rounded-[2rem] border border-white/70 bg-white/75 p-5 shadow-2xl shadow-[#0F2D4E]/10 backdrop-blur">
-            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#F2811D]">Por que cadastrar?</p>
+            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#F2811D]">{asideTitle}</p>
             <ul className="mt-4 space-y-3 text-sm font-semibold text-slate-700">
-              {[
-                "Seu perfil entra no banco de talentos.",
-                "A triagem cruza currículo, cidade e objetivo.",
-                "Você acompanha encaminhamentos pelo portal."
-              ].map((item) => (
+              {asideItems.map((item) => (
                 <li key={item} className="flex gap-3">
                   <CheckCircle2 aria-hidden="true" className="mt-0.5 shrink-0 text-[#F2811D]" size={18} />
                   <span>{item}</span>

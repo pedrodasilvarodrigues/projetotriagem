@@ -521,6 +521,7 @@ export function PublicHome({ stats, companies }: { stats: PublicStats; companies
                 <span className="text-xs font-bold uppercase tracking-widest text-[#F2811D]">Plataforma</span>
                 <Link href="/sobre" className="text-sm text-slate-400 hover:text-white transition">Sobre nós</Link>
                 <Link href="/como-funciona" className="text-sm text-slate-400 hover:text-white transition">Como funciona</Link>
+                <Link href="/services" className="text-sm text-slate-400 hover:text-white transition">Serviços</Link>
                 <Link href="/vagas-publicas" className="text-sm text-slate-400 hover:text-white transition">Vagas</Link>
               </div>
               <div className="flex flex-col gap-3">

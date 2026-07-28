@@ -5,6 +5,7 @@ Portal de Triagem Profissional
 Plataforma de recrutamento e triagem profissional que conecta profissionais e empresas por meio de cadastro, banco de talentos, demandas, compatibilidade e encaminhamento qualificado.
 
 # Concluido
+- Favicon da marca adicionado com o emblema azul-marinho, laranja e branco do Portal Encaixe.
 - Telas de login e cadastro receberam um botão claro para voltar à página inicial, sem duplicar a marca no cabeçalho do formulário.
 - Corrigido o erro `permission denied for table service_provider_profiles` no upload da capa: usuários autenticados receberam somente os privilégios das colunas de capa, ainda protegidos pela RLS existente. Mensagens técnicas do marketplace agora são convertidas em orientações amigáveis antes de chegar à interface.
 - Perfis de prestadores agora abrem dentro das áreas autenticadas de Cliente e Profissional, preservando menu e sessão. Criada uma página própria com capa, apresentação, portfólio, avaliações e início de conversa.

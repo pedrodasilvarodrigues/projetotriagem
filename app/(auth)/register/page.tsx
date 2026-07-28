@@ -1,13 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, Building2, CheckCircle2, ShoppingBag, UserRoundCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, Building2, CheckCircle2, ShoppingBag, UserRoundCheck } from "lucide-react";
 import { ClientRegisterForm } from "@/components/auth/client-register-form";
 import { CompanyRegisterForm } from "@/components/auth/company-register-form";
 import { ProfessionalRegisterForm } from "@/components/auth/professional-register-form";
 import { signInWithGoogleAction } from "@/lib/actions/auth";
 import { resolveAuthenticatedEntryPath } from "@/lib/auth/entry";
 import { createServerClient } from "@/lib/supabase/server";
-import { PortalEncaixeLogo } from "@/components/app/logo";
 import { AuthVisualPanel } from "@/components/auth/auth-visual-panel";
 
 export const dynamic = "force-dynamic";
@@ -70,11 +69,13 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
 
       <section className="relative flex min-h-screen items-start justify-center overflow-y-auto px-6 py-8 auth-split-right">
         <div className="w-full max-w-2xl">
-          <div className="mb-6 flex items-center justify-between gap-4">
-            <Link href="/" className="flex items-center gap-3">
-              <PortalEncaixeLogo />
+          <div className="mb-6 flex items-center justify-between gap-3">
+            <Link href="/" className="btn-secondary inline-flex min-h-10 items-center gap-2 rounded-xl bg-white px-4 py-2 text-xs shadow-sm transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-100 sm:text-sm">
+              <ArrowLeft aria-hidden="true" size={16} />
+              <span className="hidden sm:inline">Voltar ao início</span>
+              <span className="sm:hidden">Início</span>
             </Link>
-            <Link href="/login" className="btn-secondary py-2 px-4 rounded-xl text-xs sm:text-sm bg-white shadow-sm">
+            <Link href="/login" className="btn-secondary inline-flex min-h-10 items-center rounded-xl bg-white px-4 py-2 text-xs shadow-sm transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-100 sm:text-sm">
               Entrar
             </Link>
           </div>

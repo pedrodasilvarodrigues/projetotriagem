@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, BadgeCheck, BriefcaseBusiness, Building2, CheckCircle2, LockKeyhole, Mail, ShieldCheck, UserRoundCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, BadgeCheck, BriefcaseBusiness, Building2, CheckCircle2, LockKeyhole, Mail, ShieldCheck, UserRoundCheck } from "lucide-react";
 import { signInWithEmailAction, signInWithGoogleAction } from "@/lib/actions/auth";
 import { resolveAuthenticatedEntryPath } from "@/lib/auth/entry";
 import { createServerClient, hasSupabasePublicEnv } from "@/lib/supabase/server";
@@ -134,12 +134,14 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
 
         <section className="relative flex items-center justify-center px-4 py-8 sm:px-6 lg:px-10 bg-[#FAFBFC] auth-split-right">
           <div className="w-full max-w-md">
-            <div className="mb-5 flex items-center justify-between gap-4 lg:justify-end">
-              <Link href="/" className="flex items-center gap-3 lg:hidden">
-                <PortalEncaixeLogo />
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <Link href="/" className="btn-secondary inline-flex min-h-10 items-center gap-2 rounded-xl bg-white px-4 py-2 text-xs shadow-sm transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-100 sm:text-sm">
+                <ArrowLeft aria-hidden="true" size={16} />
+                <span className="hidden sm:inline">Voltar ao início</span>
+                <span className="sm:hidden">Início</span>
               </Link>
-              <Link href="/register" className="btn-secondary py-2 px-4 rounded-xl text-xs sm:text-sm">
-                Criar Conta
+              <Link href="/register" className="btn-secondary inline-flex min-h-10 items-center rounded-xl bg-white px-4 py-2 text-xs shadow-sm transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-100 sm:text-sm">
+                Criar conta
               </Link>
             </div>
 

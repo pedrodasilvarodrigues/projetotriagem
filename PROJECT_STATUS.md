@@ -5,6 +5,7 @@ Portal de Triagem Profissional
 Plataforma de recrutamento e triagem profissional que conecta profissionais e empresas por meio de cadastro, banco de talentos, demandas, compatibilidade e encaminhamento qualificado.
 
 # Concluido
+- Telas de login e cadastro receberam um botão claro para voltar à página inicial, sem duplicar a marca no cabeçalho do formulário.
 - Corrigido o erro `permission denied for table service_provider_profiles` no upload da capa: usuários autenticados receberam somente os privilégios das colunas de capa, ainda protegidos pela RLS existente. Mensagens técnicas do marketplace agora são convertidas em orientações amigáveis antes de chegar à interface.
 - Perfis de prestadores agora abrem dentro das áreas autenticadas de Cliente e Profissional, preservando menu e sessão. Criada uma página própria com capa, apresentação, portfólio, avaliações e início de conversa.
 - Prestadores ganharam upload real de imagem de capa em `Meus serviços`; a mídia fica no Storage privado, aparece nos cards e no topo do perfil, e pode ser substituída pelo proprietário. Migration `20260726030000_add_service_provider_cover.sql` aplicada no Supabase remoto.

@@ -648,6 +648,309 @@
   }
 }
 
+/* Timeline cinematográfica avançada: sobrepõe a versão legada preservada acima. */
+.cinematic-intro {
+  background: #071426;
+  color: #FAFBFC;
+  isolation: isolate;
+}
+
+.cinematic-intro__atmosphere {
+  inset: -5%;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(27, 78, 120, 0.86), transparent 36%),
+    radial-gradient(circle at 74% 28%, rgba(242, 129, 29, 0.22), transparent 25%),
+    radial-gradient(circle at 18% 72%, rgba(90, 142, 181, 0.2), transparent 28%),
+    linear-gradient(145deg, #050d18 0%, #0F2D4E 48%, #071426 100%);
+  animation: none;
+  transform-origin: center;
+  will-change: filter, transform;
+}
+
+.cinematic-intro__haze {
+  position: absolute;
+  z-index: 1;
+  width: min(58vw, 46rem);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  filter: blur(72px);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.cinematic-intro__haze--blue {
+  left: -12vw;
+  bottom: -24vw;
+  background: rgba(72, 126, 168, 0.5);
+}
+
+.cinematic-intro__haze--orange {
+  top: -26vw;
+  right: -14vw;
+  background: rgba(242, 129, 29, 0.42);
+}
+
+.cinematic-intro__dust-field {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.cinematic-intro__dust {
+  position: absolute;
+  border-radius: 999px;
+  background: #F7D8B7;
+  box-shadow: 0 0 8px rgba(245, 162, 77, 0.6);
+  will-change: transform, opacity;
+}
+
+.cinematic-intro__grain {
+  z-index: 3;
+  opacity: 0.045;
+  pointer-events: none;
+}
+
+.cinematic-intro__search-scene {
+  position: absolute;
+  z-index: 5;
+  width: min(84vw, 50rem);
+  height: min(42vw, 19rem);
+  min-height: 11rem;
+  will-change: transform, opacity;
+}
+
+.cinematic-intro__search-path {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.cinematic-intro__search-path path {
+  stroke-width: 3;
+  stroke-dasharray: none;
+  stroke-dashoffset: 0;
+  filter: drop-shadow(0 0 5px rgba(242, 129, 29, 0.95)) drop-shadow(0 0 18px rgba(242, 129, 29, 0.5));
+  animation: none;
+}
+
+.cinematic-intro__seeker {
+  top: 50%;
+  left: 50%;
+  width: 0.72rem;
+  height: 0.72rem;
+  opacity: 1;
+  background: #FF9A3D;
+  box-shadow: 0 0 12px #F2811D, 0 0 34px rgba(242, 129, 29, 0.95);
+  animation: none;
+  will-change: transform, opacity;
+}
+
+.cinematic-intro__encounter {
+  position: absolute;
+  z-index: 6;
+  inset: 0;
+  width: auto;
+  height: auto;
+  pointer-events: none;
+}
+
+.cinematic-intro__shape {
+  top: auto;
+  left: auto;
+  right: auto;
+  width: clamp(4rem, 10vw, 6.5rem);
+  height: clamp(4rem, 10vw, 6.5rem);
+  opacity: 1;
+  filter: drop-shadow(0 24px 40px rgba(0, 0, 0, 0.34));
+  animation: none;
+  will-change: transform, opacity;
+}
+
+.cinematic-intro__shape > span {
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: inset 0 0 24px rgba(255, 255, 255, 0.08);
+}
+
+.cinematic-intro__shape--professional {
+  animation: none;
+}
+
+.cinematic-intro__shape--professional > span {
+  border-radius: 52% 48% 42% 58%;
+  background: linear-gradient(145deg, #9CBBD3, #1B4E78);
+}
+
+.cinematic-intro__shape--company {
+  animation: none;
+}
+
+.cinematic-intro__shape--company > span {
+  border-radius: 24% 48% 24% 48%;
+  background: linear-gradient(145deg, #F8B269, #D7640B);
+}
+
+.cinematic-intro__climax {
+  position: absolute;
+  z-index: 7;
+  width: clamp(7rem, 20vw, 12rem);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: rgba(255, 148, 49, 0.94);
+  box-shadow:
+    0 0 40px rgba(242, 129, 29, 0.92),
+    0 0 100px rgba(242, 129, 29, 0.65),
+    0 0 180px rgba(242, 129, 29, 0.38);
+  will-change: transform, opacity;
+}
+
+.cinematic-intro__backdrop-gear {
+  position: absolute;
+  z-index: 4;
+  display: grid;
+  width: min(62vw, 34rem);
+  aspect-ratio: 1;
+  place-items: center;
+  color: #F2811D;
+  will-change: transform, opacity;
+}
+
+.cinematic-intro__backdrop-gear svg {
+  width: 100%;
+  height: 100%;
+  stroke-width: 0.8;
+}
+
+.cinematic-intro__reveal {
+  position: relative;
+  z-index: 8;
+  display: flex;
+  width: min(92vw, 52rem);
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.cinematic-intro__logo-wrap {
+  will-change: transform, opacity;
+}
+
+.cinematic-intro__logo {
+  width: clamp(7.5rem, 22vw, 10.5rem);
+  height: clamp(7.5rem, 22vw, 10.5rem);
+  border-color: rgba(255, 255, 255, 0.2);
+  border-radius: clamp(1.8rem, 5vw, 2.8rem);
+  background: linear-gradient(145deg, #1B4E78, #0F2D4E);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.36),
+    0 0 54px rgba(242, 129, 29, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.cinematic-intro__gear {
+  color: rgba(242, 129, 29, 0.42);
+  animation: none;
+}
+
+.cinematic-intro__handshake {
+  color: #FAFBFC;
+  filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.24));
+}
+
+.cinematic-intro__title,
+.cinematic-intro__static h1 {
+  margin-top: clamp(1.35rem, 3vh, 2rem);
+  font-size: clamp(1.7rem, 6.2vw, 3.5rem);
+  font-weight: 800;
+  letter-spacing: clamp(0.08em, 0.5vw, 0.18em);
+  line-height: 1.08;
+  text-wrap: nowrap;
+}
+
+.cinematic-intro__title span {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.cinematic-intro__letter--space {
+  width: 0.5em;
+}
+
+.cinematic-intro__slogan,
+.cinematic-intro__static p {
+  margin-top: 0.85rem;
+  color: #F5A24D;
+  font-size: clamp(0.66rem, 2.1vw, 0.92rem);
+  letter-spacing: clamp(0.08em, 0.32vw, 0.16em);
+  line-height: 1.5;
+  will-change: filter, transform, opacity;
+}
+
+.cinematic-intro__letterbox {
+  position: absolute;
+  z-index: 20;
+  right: 0;
+  left: 0;
+  height: 9vh;
+  background: #030912;
+  will-change: height;
+}
+
+.cinematic-intro__letterbox--top {
+  top: 0;
+}
+
+.cinematic-intro__letterbox--bottom {
+  bottom: 0;
+}
+
+.cinematic-intro__static {
+  animation: none;
+  text-align: center;
+}
+
+.cinematic-intro--reduced .cinematic-intro__logo {
+  width: clamp(6rem, 19vw, 8rem);
+  height: clamp(6rem, 19vw, 8rem);
+}
+
+@media (max-width: 640px) {
+  .cinematic-intro__haze {
+    width: 72vw;
+    filter: blur(36px);
+  }
+
+  .cinematic-intro__dust:nth-child(n+10) {
+    display: none;
+  }
+
+  .cinematic-intro__search-scene {
+    width: 112vw;
+    height: 52vw;
+  }
+
+  .cinematic-intro__shape {
+    width: clamp(3.5rem, 16vw, 5rem);
+    height: clamp(3.5rem, 16vw, 5rem);
+  }
+
+  .cinematic-intro__backdrop-gear {
+    width: 88vw;
+  }
+
+  .cinematic-intro__title,
+  .cinematic-intro__static h1 {
+    letter-spacing: 0.075em;
+  }
+
+  .cinematic-intro__slogan,
+  .cinematic-intro__static p {
+    max-width: 86vw;
+  }
+}
+
 @utility btn-secondary {
   display: inline-flex;
   align-items: center;

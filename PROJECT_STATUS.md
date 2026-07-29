@@ -5,6 +5,12 @@ Portal de Triagem Profissional
 Plataforma de recrutamento e triagem profissional que conecta profissionais e empresas por meio de cadastro, banco de talentos, demandas, compatibilidade e encaminhamento qualificado.
 
 # Concluido
+- Correção estrutural do modo escuro concluída em 29/07/2026:
+  - Adicionada variante manual de classe `.dark` e mapeamento de tokens de cor semânticos no `globals.css` (Tailwind CSS v4).
+  - Implementado o componente `ThemeToggle` para alternância e persistência de temas utilizando `localStorage`.
+  - Injetado script síncrono livre de flashes no `head` do `layout.tsx` e adicionado `suppressHydrationWarning`.
+  - Sobreposição e mapeamento de classes estáticas legadas (`bg-white`, `text-slate-900`, etc.) no contexto `.dark` em `globals.css` corrigindo todos os dashboards (Profissional, Empresa, Admin), cards, inputs, selects e tabelas do portal.
+  - Verificação de build (`npm run build -- --webpack`) e linter (`npm run lint`) validadas com sucesso.
 - Corrigido o erro `permission denied for table service_provider_profiles` no upload da capa: usuários autenticados receberam somente os privilégios das colunas de capa, ainda protegidos pela RLS existente. Mensagens técnicas do marketplace agora são convertidas em orientações amigáveis antes de chegar à interface.
 - Perfis de prestadores agora abrem dentro das áreas autenticadas de Cliente e Profissional, preservando menu e sessão. Criada uma página própria com capa, apresentação, portfólio, avaliações e início de conversa.
 - Prestadores ganharam upload real de imagem de capa em `Meus serviços`; a mídia fica no Storage privado, aparece nos cards e no topo do perfil, e pode ser substituída pelo proprietário. Migration `20260726030000_add_service_provider_cover.sql` aplicada no Supabase remoto.

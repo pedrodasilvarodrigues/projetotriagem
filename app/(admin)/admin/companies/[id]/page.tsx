@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app/shell";
-import { archiveCompanyAction, updateCompanyStatusAction } from "@/lib/actions/workspace";
+import { archiveCompanyAction, updateCompanyPlanAction, updateCompanyStatusAction } from "@/lib/actions/workspace";
+import { companyPlanLabel } from "@/lib/companies/plans";
 import { createServerClient } from "@/lib/supabase/server";
 import { statusLabel } from "@/lib/status-labels";
 
@@ -30,6 +31,7 @@ export default async function AdminCompanyDetailPage({ params }: { params: Promi
               <h2 className="mt-1 text-2xl font-semibold">{company.trade_name}</h2>
               <p className="mt-2 text-sm text-slate-600">{company.legal_name}</p>
               <p className="mt-2 text-sm text-slate-600">{company.city}/{company.state} · {company.corporate_email ?? "Email não informado"} · {company.phone ?? "Telefone não informado"}</p>
+              <p className="mt-3"><span className={`origin-badge ${company.plano === "essencial" ? "is-pending" : "is-interest"}`}>Plano {companyPlanLabel(company.plano)}</span></p>
               <p className="mt-4 text-sm leading-6 text-slate-700">{company.description ?? "Descrição empresarial ainda não informada."}</p>
             </div>
             <div className="grid gap-2 rounded-lg bg-slate-50 p-4">
@@ -48,6 +50,17 @@ export default async function AdminCompanyDetailPage({ params }: { params: Promi
                 <input type="hidden" name="companyId" value={company.id} />
                 <input type="hidden" name="redirectTo" value={`/admin/companies/${company.id}`} />
                 <button className="w-full rounded bg-amber-600 px-4 py-2 text-sm font-semibold text-white">Arquivar empresa</button>
+              </form>
+              <form action={updateCompanyPlanAction} className="grid gap-2 border-t border-slate-200 pt-3">
+                <input type="hidden" name="companyId" value={company.id} />
+                <input type="hidden" name="redirectTo" value={`/admin/companies/${company.id}`} />
+                <label className="text-xs font-bold text-slate-600" htmlFor="company-plan">Plano da empresa</label>
+                <select id="company-plan" name="plan" defaultValue={company.plano} className="field-input">
+                  <option value="essencial">Essencial</option>
+                  <option value="pro">Pro</option>
+                  <option value="vip">VIP</option>
+                </select>
+                <button className="rounded bg-[#0F2D4E] px-4 py-2 text-sm font-semibold text-white">Atualizar plano</button>
               </form>
             </div>
           </section>

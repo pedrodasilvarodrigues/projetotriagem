@@ -22,6 +22,7 @@ type Demand = {
 type CandidateProcess = {
   id: string;
   status: string;
+  candidate_origin: "curadoria" | "interesse_empresa";
   updated_at: string;
   professional: Candidate | Candidate[] | null;
   demand: Demand | Demand[] | null;
@@ -53,7 +54,7 @@ export default async function CompanyCandidatesPage() {
   const { data: candidateProcesses } = company?.id
     ? await supabase
         .from("screening_processes")
-        .select("id,status,updated_at,demand:demands!inner(id,name,title,status,company_id),professional:professionals!inner(id,full_name,email,phone,city,state,desired_role,education_level)")
+        .select("id,status,candidate_origin,updated_at,demand:demands!inner(id,name,title,status,company_id),professional:professionals!inner(id,full_name,email,phone,city,state,desired_role,education_level)")
         .eq("demand.company_id", company.id)
         .neq("status", "waiting")
         .order("updated_at", { ascending: false })
@@ -93,7 +94,12 @@ export default async function CompanyCandidatesPage() {
                     <td>{candidate.email ?? "Email não informado"}<br /><span className="text-xs text-slate-500">{candidate.phone ?? "Telefone não informado"}</span></td>
                     <td><strong>{demand.name ?? demand.title}</strong><br /><span className="text-xs text-slate-500">{demand.title}</span></td>
                     <td>{candidate.desired_role ?? "Objetivo não informado"}<br /><span className="text-xs text-slate-500">Escolaridade: {candidate.education_level ?? "-"}</span>{[...(certificationAreas.get(candidate.id) ?? [])].map((area) => <span key={area} className="mt-2 block w-fit rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">Certificado em: {area}</span>)}</td>
-                    <td><span className="inline-flex rounded bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-800">{processStatusLabel(process.status)}</span></td>
+                    <td>
+                      <span className="inline-flex rounded bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-800">{processStatusLabel(process.status)}</span>
+                      <span className={`origin-badge mt-2 ${process.candidate_origin === "interesse_empresa" ? "is-interest" : "is-curation"}`}>
+                        {process.candidate_origin === "interesse_empresa" ? "Você demonstrou interesse" : "Apresentado pela curadoria"}
+                      </span>
+                    </td>
                     <td>{new Date(process.updated_at).toLocaleDateString("pt-BR")}</td>
                   </tr>
                 );

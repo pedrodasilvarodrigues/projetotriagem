@@ -5,6 +5,7 @@ Portal de Triagem Profissional
 Plataforma de recrutamento e triagem profissional que conecta profissionais e empresas por meio de cadastro, banco de talentos, demandas, compatibilidade e encaminhamento qualificado.
 
 # Concluido
+- Vitrine Pro de profissionais implementada de ponta a ponta: gate real por plano `essencial/pro/vip`, currículos ativos exibidos por RPC sem contato, endereço, documentos ou empregadores, filtros e paginação, curtidas ilimitadas ligadas obrigatoriamente a uma demanda e reversíveis enquanto pendentes, fila administrativa de formalização sem veto, origem do candidato no processo e shortlist curado de até 10 profissionais para empresas Pro+. As migrations `20260729160059_add_pro_professional_showcase.sql` e `20260729162651_harden_pro_showcase_helpers.sql` estão aplicadas no Supabase remoto com RLS e helpers privados.
 - Configurações de personalização disponíveis para Profissional, Empresa e Admin, com tema claro/escuro/automático, escala de fonte e densidade de interface aplicadas globalmente, pré-visualização imediata, cache inicial e persistência por usuário no Supabase com RLS.
 - Intro cinematográfica expandida para aproximadamente 11 segundos em cinco cenas, com letterbox, partículas, parallax, grading de cor progressivo, speed ramping, clímax de encaixe, tipografia com overshoot e pausa final de 2 segundos.
 - Menu público recebeu a opção Serviços e a página do marketplace passou a explicar busca, contato, aprovação, reputação, contratação e pagamento direto entre as partes.

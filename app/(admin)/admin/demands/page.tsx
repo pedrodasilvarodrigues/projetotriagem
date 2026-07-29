@@ -1,5 +1,6 @@
 import { AppShell } from "@/components/app/shell";
-import { routeProfessionalToDemandAction, updateAdminDemandStatusAction } from "@/lib/actions/workspace";
+import { createProShortlistAction, routeProfessionalToDemandAction, updateAdminDemandStatusAction } from "@/lib/actions/workspace";
+import { hasProAccess, PRO_SHORTLIST_LIMIT } from "@/lib/companies/plans";
 import { createServerClient } from "@/lib/supabase/server";
 
 type DemandRow = {
@@ -18,7 +19,7 @@ type DemandRow = {
   required_courses: string[] | null;
   required_certifications: string[] | null;
   internal_notes: string | null;
-  company: { trade_name: string } | { trade_name: string }[] | null;
+  company: { trade_name: string; plano: string } | { trade_name: string; plano: string }[] | null;
 };
 
 type CandidateScore = {
@@ -122,7 +123,7 @@ export default async function AdminDemandsPage({ searchParams }: { searchParams:
   const supabase = await createServerClient();
   let query = supabase
     .from("demands")
-    .select("id,title,description,openings,status,city,state,salary_min,salary_max,minimum_experience_months,education_minimum,technical_skills,required_courses,required_certifications,internal_notes,company:companies(trade_name)")
+    .select("id,title,description,openings,status,city,state,salary_min,salary_max,minimum_experience_months,education_minimum,technical_skills,required_courses,required_certifications,internal_notes,company:companies(trade_name,plano)")
     .order("created_at", { ascending: false })
     .limit(80);
 
@@ -224,6 +225,13 @@ export default async function AdminDemandsPage({ searchParams }: { searchParams:
               } satisfies CandidateScore));
             const demandScores = [...scoredCandidates, ...fallbackCandidates].slice(0, 100);
             const demandTags = new Set([...(demand.technical_skills ?? []), ...(demand.required_courses ?? []), ...(demand.required_certifications ?? [])].map((tag) => normalize(tag)));
+            const demandCompany = one(demand.company);
+            const proShortlistCandidates = demandScores
+              .filter((score) => {
+                const process = processByProfessional.get(score.professional_id);
+                return !process || process.status === "waiting";
+              })
+              .slice(0, 30);
 
             return (
               <article key={demand.id} className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
@@ -259,6 +267,37 @@ export default async function AdminDemandsPage({ searchParams }: { searchParams:
                     </div>
                   </div>
                 </div>
+
+                {hasProAccess(demandCompany?.plano) ? (
+                  <form action={createProShortlistAction} className="pro-shortlist-panel">
+                    <input type="hidden" name="demandId" value={demand.id} />
+                    <input type="hidden" name="redirectTo" value="/admin/demands#apresentar" />
+                    <div className="pro-shortlist-heading">
+                      <div>
+                        <span>Shortlist ampliado Pro</span>
+                        <h3>Apresente até {PRO_SHORTLIST_LIMIT} profissionais de uma vez</h3>
+                        <p>Este canal é curado pelo administrador e permanece distinto dos interesses iniciados pela empresa.</p>
+                      </div>
+                      <button className="brand-action-button" type="submit">Apresentar selecionados</button>
+                    </div>
+                    <div className="pro-shortlist-options">
+                      {proShortlistCandidates.map((score) => {
+                        const professional = one(score.professional);
+                        if (!professional) return null;
+                        return (
+                          <label key={`shortlist-${demand.id}-${professional.id}`}>
+                            <input type="checkbox" name="professionalIds" value={professional.id} />
+                            <span>
+                              <strong>{professional.full_name}</strong>
+                              <small>{professional.desired_role ?? "Área não informada"} · {score.total_score !== null ? `${Number(score.total_score).toFixed(0)}% compatível` : "compatibilidade pendente"}</small>
+                            </span>
+                          </label>
+                        );
+                      })}
+                      {proShortlistCandidates.length === 0 ? <p>Nenhum profissional novo disponível para este shortlist.</p> : null}
+                    </div>
+                  </form>
+                ) : null}
 
                 <details className="mt-4 rounded border border-blue-100 bg-blue-50/60">
                   <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-blue-900">Apresentar candidato por compatibilidade</summary>

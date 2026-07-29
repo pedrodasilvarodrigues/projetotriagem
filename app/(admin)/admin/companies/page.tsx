@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app/shell";
-import { archiveCompanyAction, updateCompanyStatusAction } from "@/lib/actions/workspace";
+import { archiveCompanyAction, updateCompanyPlanAction, updateCompanyStatusAction } from "@/lib/actions/workspace";
+import { companyPlanLabel } from "@/lib/companies/plans";
 import { createServerClient } from "@/lib/supabase/server";
 import { statusLabel } from "@/lib/status-labels";
 
@@ -9,7 +10,7 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
   const supabase = await createServerClient();
   let query = supabase
     .from("companies")
-    .select("id,trade_name,legal_name,corporate_email,phone,city,state,status,deleted_at,created_at")
+    .select("id,trade_name,legal_name,corporate_email,phone,city,state,status,plano,deleted_at,created_at")
     .order("created_at", { ascending: false })
     .limit(120);
 
@@ -43,7 +44,7 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
         </section>
         <section id="status" className="scroll-mt-24 rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
           <table className="data-table">
-            <thead><tr><th>Empresa</th><th>Demandas</th><th>Apresentados</th><th>Situação</th><th>Ações</th></tr></thead>
+            <thead><tr><th>Empresa</th><th>Demandas</th><th>Apresentados</th><th>Plano</th><th>Situação</th><th>Ações</th></tr></thead>
             <tbody>
               {(companies ?? []).map((company) => {
                 const companyDemands = (demands ?? []).filter((item) => item.company_id === company.id);
@@ -57,6 +58,7 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
                     </td>
                     <td>{companyDemands.length}<p className="text-xs text-slate-500">{companyDemands.slice(0, 2).map((item) => item.title).join(", ")}</p></td>
                     <td>{companyPresentations.length}<p className="text-xs text-slate-500">Profissionais apresentados</p></td>
+                    <td><span className={`origin-badge ${company.plano === "essencial" ? "is-pending" : "is-interest"}`}>{companyPlanLabel(company.plano)}</span></td>
                     <td>{company.deleted_at ? "Arquivada" : statusLabel(company.status)}</td>
                     <td>
                       <div className="grid gap-2">
@@ -72,6 +74,16 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
                           </select>
                           <button className="w-full rounded bg-slate-950 px-3 py-2 text-xs font-semibold text-white">Salvar status</button>
                         </form>
+                        <form action={updateCompanyPlanAction}>
+                          <input type="hidden" name="companyId" value={company.id} />
+                          <input type="hidden" name="redirectTo" value="/admin/companies" />
+                          <select name="plan" defaultValue={company.plano} className="mb-2 w-full rounded border border-slate-300 px-2 py-2 text-xs">
+                            <option value="essencial">Plano Essencial</option>
+                            <option value="pro">Plano Pro</option>
+                            <option value="vip">Plano VIP</option>
+                          </select>
+                          <button className="w-full rounded bg-[#0F2D4E] px-3 py-2 text-xs font-semibold text-white">Atualizar plano</button>
+                        </form>
                         <form action={archiveCompanyAction}>
                           <input type="hidden" name="companyId" value={company.id} />
                           <input type="hidden" name="redirectTo" value="/admin/companies" />
@@ -82,7 +94,7 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
                   </tr>
                 );
               })}
-              {(companies ?? []).length === 0 ? <tr><td colSpan={5}>Nenhuma empresa encontrada.</td></tr> : null}
+              {(companies ?? []).length === 0 ? <tr><td colSpan={6}>Nenhuma empresa encontrada.</td></tr> : null}
             </tbody>
           </table>
         </section>

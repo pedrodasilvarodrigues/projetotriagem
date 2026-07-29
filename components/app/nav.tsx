@@ -13,6 +13,7 @@ import {
   FileText,
   GraduationCap,
   History,
+  HeartHandshake,
   Landmark,
   LayoutGrid,
   LogOut,
@@ -34,6 +35,7 @@ import type { AppRole } from "@/lib/auth/access";
 import { signOutAction } from "@/lib/actions/auth";
 import { type AppLanguage, translateUi } from "@/lib/i18n/ui";
 import { PortalEncaixeLogo } from "@/components/app/logo";
+import { hasProAccess } from "@/lib/companies/plans";
 
 type NavigationConfig = { title: string; subtitle: string; items: Array<{ href: string; label: string; icon: LucideIcon }> };
 
@@ -46,6 +48,7 @@ const navItems: Record<AppRole, NavigationConfig> = {
       { href: "/admin/professionals", label: "Profissionais", icon: UserRoundSearch },
       { href: "/admin/companies", label: "Empresas", icon: Building2 },
       { href: "/admin/demands", label: "Demandas", icon: BriefcaseBusiness },
+      { href: "/admin/company-likes", label: "Interesses Pro", icon: HeartHandshake },
       { href: "/admin/processes", label: "Processos", icon: ClipboardCheck },
       { href: "/admin/courses", label: "Cursos", icon: GraduationCap },
       { href: "/admin/reports", label: "Relatórios", icon: FileText },
@@ -66,6 +69,7 @@ const navItems: Record<AppRole, NavigationConfig> = {
       { href: "/company/profile", label: "Perfil da Empresa", icon: UserRoundCog },
       { href: "/company/demands/new", label: "Criar Demanda", icon: BriefcaseBusiness },
       { href: "/company/demands", label: "Demandas Ativas", icon: ClipboardCheck },
+      { href: "/company/showcase", label: "Vitrine Pro", icon: HeartHandshake },
       { href: "/company/candidates", label: "Análise de Candidatos", icon: UserRoundSearch },
       { href: "/company/history", label: "Histórico", icon: History },
       { href: "/company/notifications", label: "Notificações", icon: Bell },
@@ -113,17 +117,17 @@ const marketplaceRoutes = [
   "/admin/marketplace-reports"
 ];
 
-export function AppNav({ role, preferredLanguage, marketplaceEnabled }: { role: AppRole; preferredLanguage: AppLanguage; marketplaceEnabled: boolean }) {
+export function AppNav({ role, preferredLanguage, marketplaceEnabled, companyPlan }: { role: AppRole; preferredLanguage: AppLanguage; marketplaceEnabled: boolean; companyPlan?: string | null }) {
   const baseNav = navItems[role];
   const nav = useMemo(() => ({
     ...baseNav,
-    items: marketplaceEnabled
+    items: (marketplaceEnabled
       ? baseNav.items
       : baseNav.items.filter((item) => {
           if (role === "professional" && item.href === "/professional") return false;
           return !marketplaceRoutes.some((route) => item.href === route || item.href.startsWith(`${route}/`));
-        })
-  }), [baseNav, marketplaceEnabled, role]);
+        })).filter((item) => role !== "company" || item.href !== "/company/showcase" || hasProAccess(companyPlan))
+  }), [baseNav, companyPlan, marketplaceEnabled, role]);
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);

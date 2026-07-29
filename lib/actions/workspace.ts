@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth/access";
 import { ensureProfessionalPublicProfile } from "@/lib/auth/public-profile-sync";
+import { hasProAccess, PRO_SHORTLIST_LIMIT } from "@/lib/companies/plans";
 import { cleanInstitutionName, normalizeInstitutionName } from "@/lib/institutions";
 import { ensureInstitutionName } from "@/lib/institutions-server";
 import { createAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
@@ -1155,6 +1156,8 @@ export async function routeProfessionalToDemandAction(formData: FormData) {
     professional_id: professionalId,
     status,
     admin_owner_id: userData.user.id,
+    candidate_origin: "curadoria",
+    source_like_id: null,
     updated_at: new Date().toISOString()
   }, { onConflict: "demand_id,professional_id" });
 
@@ -1168,6 +1171,192 @@ export async function routeProfessionalToDemandAction(formData: FormData) {
   revalidatePath("/admin/professionals");
   revalidatePath(`/admin/professionals/${professionalId}`);
   redirect(`${redirectTo}?message=${mode === "present" ? "profissional-apresentado" : "profissional-na-fila"}`);
+}
+
+export async function toggleProfessionalLikeAction(input: {
+  professionalId: string;
+  demandId: string;
+  likeId: string | null;
+}): Promise<{
+  ok: boolean;
+  likeId: string | null;
+  status: "pendente" | "processado" | null;
+  message: string;
+  error: string;
+}> {
+  await requireRole("company");
+  const parsed = z.object({
+    professionalId: z.string().uuid(),
+    demandId: z.string().uuid(),
+    likeId: z.string().uuid().nullable()
+  }).safeParse(input);
+
+  if (!parsed.success) {
+    return { ok: false, likeId: null, status: null, message: "", error: "Não foi possível identificar este interesse." };
+  }
+
+  const supabase = await createServerClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) {
+    return { ok: false, likeId: null, status: null, message: "", error: "Sua sessão expirou. Entre novamente." };
+  }
+
+  const { data: company } = await supabase
+    .from("companies")
+    .select("id,plano,status,deleted_at")
+    .eq("owner_id", userData.user.id)
+    .maybeSingle();
+
+  if (!company || !hasProAccess(company.plano) || company.status !== "approved" || company.deleted_at) {
+    return { ok: false, likeId: null, status: null, message: "", error: "A vitrine está disponível somente para empresas com Plano Pro ativo." };
+  }
+
+  if (parsed.data.likeId) {
+    const { data, error } = await supabase
+      .from("company_professional_likes")
+      .delete()
+      .eq("id", parsed.data.likeId)
+      .eq("empresa_id", company.id)
+      .eq("status", "pendente")
+      .select("id")
+      .maybeSingle();
+
+    if (error || !data) {
+      return { ok: false, likeId: parsed.data.likeId, status: "pendente", message: "", error: "Este interesse já foi formalizado ou não pode mais ser desfeito." };
+    }
+
+    revalidatePath("/company/showcase");
+    return { ok: true, likeId: null, status: null, message: "Interesse removido.", error: "" };
+  }
+
+  const { data, error } = await supabase
+    .from("company_professional_likes")
+    .insert({
+      empresa_id: company.id,
+      professional_id: parsed.data.professionalId,
+      demanda_id: parsed.data.demandId
+    })
+    .select("id,status")
+    .single();
+
+  if (error?.code === "23505") {
+    const { data: existing } = await supabase
+      .from("company_professional_likes")
+      .select("id,status")
+      .eq("empresa_id", company.id)
+      .eq("professional_id", parsed.data.professionalId)
+      .eq("demanda_id", parsed.data.demandId)
+      .maybeSingle();
+    if (existing) {
+      return {
+        ok: true,
+        likeId: existing.id,
+        status: existing.status as "pendente" | "processado",
+        message: "Este profissional já está na sua lista.",
+        error: ""
+      };
+    }
+  }
+
+  if (error || !data) {
+    return { ok: false, likeId: null, status: null, message: "", error: "Não foi possível registrar o interesse. Verifique se a demanda continua aberta." };
+  }
+
+  revalidatePath("/company/showcase");
+  revalidatePath("/admin/company-likes");
+  return {
+    ok: true,
+    likeId: data.id,
+    status: data.status as "pendente" | "processado",
+    message: "Interesse enviado para formalização.",
+    error: ""
+  };
+}
+
+export async function formalizeCompanyLikeAction(formData: FormData) {
+  await requireRole("admin");
+  const likeId = String(formData.get("likeId") ?? "");
+  if (!z.string().uuid().safeParse(likeId).success) redirect("/admin/company-likes?error=dados-invalidos");
+
+  const supabase = await createServerClient();
+  const { error } = await supabase.rpc("formalize_company_professional_like", { target_like_id: likeId });
+  if (error) redirect(`/admin/company-likes?error=${encodeURIComponent(error.message)}`);
+
+  revalidatePath("/admin/company-likes");
+  revalidatePath("/admin/processes");
+  revalidatePath("/admin/demands");
+  revalidatePath("/company/candidates");
+  revalidatePath("/company/showcase");
+  revalidatePath("/professional/referrals");
+  redirect("/admin/company-likes?message=apresentacao-formalizada");
+}
+
+export async function createProShortlistAction(formData: FormData) {
+  await requireRole("admin");
+  const demandId = String(formData.get("demandId") ?? "");
+  const redirectTo = String(formData.get("redirectTo") ?? "/admin/demands#apresentar");
+  const professionalIds = [...new Set(formData.getAll("professionalIds").map(String))];
+  const validIds = z.array(z.string().uuid()).min(1).max(PRO_SHORTLIST_LIMIT).safeParse(professionalIds);
+  if (!z.string().uuid().safeParse(demandId).success || !validIds.success) {
+    redirect(`${redirectTo}?error=selecione-ate-${PRO_SHORTLIST_LIMIT}-profissionais`);
+  }
+
+  const supabase = await createServerClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) redirect("/login");
+
+  const { data: demand } = await supabase
+    .from("demands")
+    .select("id,status,company:companies!inner(id,plano)")
+    .eq("id", demandId)
+    .maybeSingle();
+  const demandCompany = Array.isArray(demand?.company) ? demand.company[0] : demand?.company;
+  if (!demand || !demandCompany || !hasProAccess(demandCompany.plano) || !["active", "screening"].includes(demand.status)) {
+    redirect(`${redirectTo}?error=shortlist-disponivel-apenas-para-empresa-pro`);
+  }
+
+  const rows = validIds.data.map((professionalId) => ({
+    demand_id: demandId,
+    professional_id: professionalId,
+    status: "forwarded",
+    admin_owner_id: userData.user.id,
+    candidate_origin: "curadoria",
+    source_like_id: null,
+    updated_at: new Date().toISOString()
+  }));
+  const { error } = await supabase.from("screening_processes").upsert(rows, { onConflict: "demand_id,professional_id" });
+  if (error) redirect(`${redirectTo}?error=${encodeURIComponent(error.message)}`);
+
+  await supabase.from("demands").update({ status: "screening" }).eq("id", demandId).eq("status", "active");
+  revalidatePath("/admin/demands");
+  revalidatePath("/admin/processes");
+  revalidatePath("/company/candidates");
+  revalidatePath("/professional/referrals");
+  redirect(`${redirectTo}?message=shortlist-pro-apresentado`);
+}
+
+export async function updateCompanyPlanAction(formData: FormData) {
+  await requireRole("admin");
+  const parsed = z.object({
+    companyId: z.string().uuid(),
+    plan: z.enum(["essencial", "pro", "vip"]),
+    redirectTo: z.string().startsWith("/admin/")
+  }).safeParse({
+    companyId: formData.get("companyId"),
+    plan: formData.get("plan"),
+    redirectTo: formData.get("redirectTo") ?? "/admin/companies"
+  });
+  if (!parsed.success) redirect("/admin/companies?error=dados-invalidos");
+
+  const supabase = await createServerClient();
+  const { error } = await supabase.from("companies").update({ plano: parsed.data.plan }).eq("id", parsed.data.companyId);
+  if (error) redirect(`${parsed.data.redirectTo}?error=${encodeURIComponent(error.message)}`);
+
+  revalidatePath("/admin/companies");
+  revalidatePath(`/admin/companies/${parsed.data.companyId}`);
+  revalidatePath("/company");
+  revalidatePath("/company/showcase");
+  redirect(`${parsed.data.redirectTo}?message=plano-atualizado`);
 }
 
 export async function createAdminDemandAction(formData: FormData) {

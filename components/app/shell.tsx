@@ -10,9 +10,12 @@ export async function AppShell({ title, eyebrow, children }: { title: string; ey
   const role = expectedRole ? await requireRole(expectedRole) : "professional";
   const supabase = await createServerClient();
   const { data: userData } = await supabase.auth.getUser();
-  const [{ data: settings }, marketplaceEnabled] = await Promise.all([
+  const [{ data: settings }, marketplaceEnabled, { data: company }] = await Promise.all([
     supabase.from("user_settings").select("preferred_language").eq("user_id", userData.user?.id).maybeSingle(),
-    isMarketplaceEnabled()
+    isMarketplaceEnabled(),
+    role === "company"
+      ? supabase.from("companies").select("plano").eq("owner_id", userData.user?.id).maybeSingle()
+      : Promise.resolve({ data: null })
   ]);
   const language = (settings?.preferred_language ?? "pt-BR") as AppLanguage;
   const mainClassName =
@@ -24,7 +27,7 @@ export async function AppShell({ title, eyebrow, children }: { title: string; ey
     <div className="min-h-screen bg-[#F1F4F8] text-slate-950 relative overflow-x-hidden">
       <div className="fixed inset-0 grain-overlay opacity-[0.025] pointer-events-none z-[999]" />
       <LanguageRuntime preferredLanguage={language} />
-      <AppNav role={role} preferredLanguage={language} marketplaceEnabled={marketplaceEnabled} />
+      <AppNav role={role} preferredLanguage={language} marketplaceEnabled={marketplaceEnabled} companyPlan={company?.plano} />
       <main id="conteudo" className={mainClassName}>
         <header className="mb-4 border-l-4 border-[#F2811D] bg-transparent py-2 pl-3 sm:mb-6 sm:pl-4 animate-fade-in-up">
           <p className="text-xs font-bold uppercase tracking-normal text-[#6B7280]">{translateUi(eyebrow, language)}</p>

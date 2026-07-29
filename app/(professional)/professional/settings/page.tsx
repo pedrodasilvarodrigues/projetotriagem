@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LockKeyhole, Mail, UserRoundCog } from "lucide-react";
 import { AppShell } from "@/components/app/shell";
+import { PersonalizationSettings } from "@/components/app/personalization-settings";
 import { SettingsPreferences } from "@/components/professional/settings-preferences";
 import { signOutAction } from "@/lib/actions/auth";
 import { updateUserSettingsAction } from "@/lib/actions/workspace";
@@ -57,7 +58,9 @@ export default async function ProfessionalSettingsPage({ searchParams }: { searc
           </section>
         </aside>
 
-        <form action={updateUserSettingsAction} className="border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="space-y-5">
+          <PersonalizationSettings />
+          <form action={updateUserSettingsAction} className="border border-slate-200 bg-white p-5 shadow-sm">
           <input type="hidden" name="redirectTo" value="/professional/settings" />
           {params.error ? <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">Não foi possível salvar as configurações.</p> : null}
           {params.message ? <p className="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-700">Configurações atualizadas.</p> : null}
@@ -77,7 +80,8 @@ export default async function ProfessionalSettingsPage({ searchParams }: { searc
           </div>
 
           <button className="mt-5 rounded-md bg-blue-700 px-5 py-3 text-sm font-semibold text-white" type="submit">Salvar configurações</button>
-        </form>
+          </form>
+        </div>
       </div>
     </AppShell>
   );

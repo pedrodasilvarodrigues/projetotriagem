@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/app/shell";
+import { PersonalizationSettings } from "@/components/app/personalization-settings";
 
 const settings = [
   ["Termos de Uso", "Texto jurídico e aceite dos usuários"],
@@ -13,13 +14,16 @@ const settings = [
 export default function AdminSettingsPage() {
   return (
     <AppShell eyebrow="Administrador" title="Configurações">
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-[#0F2D4E]">Configurações globais</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">Políticas, parâmetros e cadastros auxiliares do Portal Encaixe.</p>
-        <div className="mt-5 grid gap-3 md:grid-cols-2">
-          {settings.map(([title, description]) => <article key={title} className="rounded-xl border border-slate-200 bg-slate-50 p-4"><h3 className="font-semibold">{title}</h3><p className="mt-1 text-sm text-slate-600">{description}</p><span className="mt-3 inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500">Configuração operacional</span></article>)}
-        </div>
-      </section>
+      <div className="space-y-5">
+        <PersonalizationSettings />
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="text-lg font-semibold text-[#0F2D4E]">Configurações globais</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600">Políticas, parâmetros e cadastros auxiliares do Portal Encaixe.</p>
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
+            {settings.map(([title, description]) => <article key={title} className="rounded-xl border border-slate-200 bg-slate-50 p-4"><h3 className="font-semibold">{title}</h3><p className="mt-1 text-sm text-slate-600">{description}</p><span className="mt-3 inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500">Configuração operacional</span></article>)}
+          </div>
+        </section>
+      </div>
     </AppShell>
   );
 }

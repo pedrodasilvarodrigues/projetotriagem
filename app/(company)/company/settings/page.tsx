@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LockKeyhole, Mail, UserRoundCog } from "lucide-react";
 import { AppShell } from "@/components/app/shell";
+import { PersonalizationSettings } from "@/components/app/personalization-settings";
 import { SettingsPreferences } from "@/components/professional/settings-preferences";
 import { signOutAction } from "@/lib/actions/auth";
 import { requestDataExportAction, updateUserSettingsAction } from "@/lib/actions/workspace";
@@ -69,6 +70,7 @@ export default async function CompanySettingsPage({ searchParams }: { searchPara
         </aside>
 
         <div className="space-y-5">
+          <PersonalizationSettings />
           <form action={updateUserSettingsAction} className="border border-slate-200 bg-white p-5 shadow-sm">
             <input type="hidden" name="redirectTo" value="/company/settings" />
             {params.error ? <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">Não foi possível salvar as configurações.</p> : null}

@@ -36,6 +36,7 @@ import { signOutAction } from "@/lib/actions/auth";
 import { type AppLanguage, translateUi } from "@/lib/i18n/ui";
 import { PortalEncaixeLogo } from "@/components/app/logo";
 import { hasProAccess } from "@/lib/companies/plans";
+import { ThemeToggle } from "@/components/app/theme-toggle";
 
 type NavigationConfig = { title: string; subtitle: string; items: Array<{ href: string; label: string; icon: LucideIcon }> };
 
@@ -157,14 +158,17 @@ export function AppNav({ role, preferredLanguage, marketplaceEnabled, companyPla
           <Link href="/admin" className="flex items-center gap-3">
             <PortalEncaixeLogo />
           </Link>
-          <button
-            type="button"
-            onClick={() => setIsAdminMenuOpen(true)}
-            className="inline-flex size-10 items-center justify-center border border-white/15 bg-white/5 hover:bg-white/10 text-white rounded-xl transition cursor-pointer"
-          >
-            <Menu aria-hidden="true" size={20} />
-            <span className="sr-only">Abrir menu</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              type="button"
+              onClick={() => setIsAdminMenuOpen(true)}
+              className="inline-flex size-10 items-center justify-center border border-white/15 bg-white/5 hover:bg-white/10 text-white rounded-xl transition cursor-pointer"
+            >
+              <Menu aria-hidden="true" size={20} />
+              <span className="sr-only">Abrir menu</span>
+            </button>
+          </div>
         </header>
 
         {/* Mobile sidebar overlay drawer */}
@@ -221,10 +225,11 @@ export function AppNav({ role, preferredLanguage, marketplaceEnabled, companyPla
 
         {/* Desktop sidebar */}
         <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r-4 border-[#F2811D] bg-[#0F2D4E] text-white shadow-[12px_0_32px_rgba(15,23,42,0.18)] lg:flex">
-          <div className="border-b border-white/10 px-5 py-5">
+          <div className="flex items-center justify-between border-b border-white/10 px-5 py-5">
             <Link href="/admin" className="flex items-center gap-3">
               <PortalEncaixeLogo />
             </Link>
+            <ThemeToggle />
           </div>
 
           <nav aria-label={`Menu ${translated.title}`} className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto px-3 py-4">
@@ -270,16 +275,19 @@ export function AppNav({ role, preferredLanguage, marketplaceEnabled, companyPla
           <Link href={nav.items[0]?.href ?? "/"} className="flex min-w-0 flex-1 items-center gap-3">
             <PortalEncaixeLogo />
           </Link>
-          <button
-            type="button"
-            aria-expanded={!isCollapsed}
-            onClick={() => setIsCollapsed((current) => !current)}
-            className="inline-flex min-h-10 shrink-0 items-center gap-2 border border-white/15 bg-white/8 px-3 py-2 text-sm font-semibold text-slate-100 transition hover:border-[#F2811D] hover:text-white rounded-xl cursor-pointer"
-          >
-            {isCollapsed ? <ChevronDown aria-hidden="true" size={16} /> : <ChevronUp aria-hidden="true" size={16} />}
-            <span className="hidden sm:inline">{preferredLanguage === "en-US" ? (isCollapsed ? "Show menu" : "Collapse menu") : preferredLanguage === "es-ES" ? (isCollapsed ? "Mostrar menu" : "Ocultar menu") : (isCollapsed ? "Mostrar menu" : "Recolher menu")}</span>
-            <span className="sm:hidden">Menu</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              type="button"
+              aria-expanded={!isCollapsed}
+              onClick={() => setIsCollapsed((current) => !current)}
+              className="inline-flex min-h-10 shrink-0 items-center gap-2 border border-white/15 bg-white/8 px-3 py-2 text-sm font-semibold text-slate-100 transition hover:border-[#F2811D] hover:text-white rounded-xl cursor-pointer"
+            >
+              {isCollapsed ? <ChevronDown aria-hidden="true" size={16} /> : <ChevronUp aria-hidden="true" size={16} />}
+              <span className="hidden sm:inline">{preferredLanguage === "en-US" ? (isCollapsed ? "Show menu" : "Collapse menu") : preferredLanguage === "es-ES" ? (isCollapsed ? "Mostrar menu" : "Ocultar menu") : (isCollapsed ? "Mostrar menu" : "Recolher menu")}</span>
+              <span className="sm:hidden">Menu</span>
+            </button>
+          </div>
         </div>
 
         <div className={`${isCollapsed ? "hidden" : "mt-4"}`}>

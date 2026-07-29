@@ -1,15 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 @theme {
-  --color-primary: #0F2D4E;
-  --color-primary-medium: #1B4E78;
-  --color-accent: #F2811D;
-  --color-accent-light: #F5A24D;
-  --color-neutral-dark: #0F2D4E;
-  --color-neutral-text: #6B7280;
-  --color-neutral-bg: #FAFBFC;
-  --color-neutral-card: #F1F4F8;
+  --color-primary: var(--primary);
+  --color-primary-medium: var(--primary-medium);
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+  --color-neutral-dark: var(--primary);
+  --color-neutral-text: var(--muted);
+  --color-neutral-bg: var(--background);
+  --color-neutral-card: var(--surface-muted);
 
   --color-blue-50: #eef3f7;
   --color-blue-100: #dce7f0;
@@ -960,16 +962,16 @@
   font-size: 0.875rem;
   line-height: 1.25rem;
   padding: 0.75rem 1.25rem;
-  color: #0F2D4E;
+  color: var(--btn-secondary-text);
   background-color: transparent;
-  border: 2px solid #0F2D4E;
+  border: 2px solid var(--btn-secondary-border);
   border-radius: 0.75rem;
   transition: all 0.2s ease-in-out;
   cursor: pointer;
 
   &:hover:not(:disabled) {
-    background-color: #0F2D4E;
-    color: #FAFBFC;
+    background-color: var(--btn-secondary-hover-bg);
+    color: var(--btn-secondary-hover-text);
   }
 
   &:active:not(:disabled) {
@@ -1009,12 +1011,18 @@
   --muted: #6B7280;
   --primary: #0F2D4E;
   --primary-strong: #091A2F;
+  --primary-medium: #1B4E78;
   --accent: #F2811D;
+  --accent-light: #F5A24D;
   --accent-soft: #FFF1E4;
   --focus-ring: rgba(242, 129, 29, 0.28);
   --success: #16a34a;
   --warning: #F2811D;
   --danger: #dc2626;
+  --btn-secondary-border: #0F2D4E;
+  --btn-secondary-text: #0F2D4E;
+  --btn-secondary-hover-bg: #0F2D4E;
+  --btn-secondary-hover-text: #FAFBFC;
   --font-scale: 1;
   --density-scale: 1;
   --surface-padding-sm: 1rem;
@@ -1036,12 +1044,18 @@
   --muted: #AEC0CE;
   --primary: #F2F7FA;
   --primary-strong: #FFFFFF;
+  --primary-medium: #8DB8D8;
   --accent: #FF9A3C;
+  --accent-light: #FFB36D;
   --accent-soft: #402615;
   --focus-ring: rgba(255, 154, 60, 0.36);
   --success: #45D18A;
   --warning: #FFB15F;
   --danger: #FF7770;
+  --btn-secondary-border: #FF9A3C;
+  --btn-secondary-text: #FF9A3C;
+  --btn-secondary-hover-bg: #FF9A3C;
+  --btn-secondary-hover-text: #071522;
 }
 
 :root[data-font-size="pequeno"] {
@@ -2793,5 +2807,150 @@ p[class*="text-slate-500"][class*="text-sm"]:only-child {
 
   .pro-shortlist-options {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ==========================================
+   SOBREPOSIÇÃO E CORREÇÃO DE CLASSES ESTÁTICAS NO MODO ESCURO
+   ========================================== */
+html.dark {
+  /* Correção de fundos e superfícies */
+  body {
+    background-color: var(--background) !important;
+    color: var(--text) !important;
+    background-image:
+      linear-gradient(90deg, rgba(242, 129, 29, 0.015) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(242, 129, 29, 0.015) 1px, transparent 1px) !important;
+  }
+
+  .bg-white,
+  .bg-white\/80,
+  .bg-white\/90 {
+    background-color: var(--surface) !important;
+  }
+
+  .bg-slate-50,
+  .bg-slate-100,
+  .bg-slate-50\/50,
+  .bg-gray-50,
+  .bg-gray-100 {
+    background-color: var(--surface-muted) !important;
+  }
+
+  /* Correção de bordas e divisores */
+  .border-slate-200,
+  .border-slate-300,
+  .border-gray-200,
+  .border-gray-300,
+  .border-slate-200\/80,
+  .border-slate-100 {
+    border-color: var(--border) !important;
+  }
+
+  /* Correção de textos */
+  .text-slate-900,
+  .text-slate-800,
+  .text-slate-700,
+  .text-gray-900,
+  .text-gray-800,
+  .text-slate-950,
+  .text-\[\#0F2D4E\] {
+    color: var(--text) !important;
+  }
+
+  .text-slate-600,
+  .text-slate-500,
+  .text-gray-500,
+  .text-gray-600 {
+    color: var(--muted) !important;
+  }
+
+  /* Ajustes em inputs e selects */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="date"],
+  select,
+  textarea {
+    background-color: var(--surface-muted) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--muted) !important;
+    opacity: 0.7;
+  }
+
+  /* Checkboxes e botões de rádio */
+  input[type="checkbox"],
+  input[type="radio"] {
+    accent-color: var(--accent) !important;
+  }
+
+  /* Habilidades e checklists */
+  label.border-slate-200,
+  .rounded-md.border.border-slate-200 {
+    border-color: var(--border) !important;
+    background-color: var(--surface) !important;
+    color: var(--text) !important;
+  }
+
+  /* Tabelas */
+  table thead th {
+    color: var(--primary) !important;
+    border-bottom-color: var(--border) !important;
+  }
+
+  table tbody tr {
+    background-color: var(--surface) !important;
+  }
+
+  table tbody tr:hover {
+    background-color: rgba(242, 129, 29, 0.05) !important;
+  }
+
+  table tbody td {
+    border-top-color: var(--border) !important;
+    border-bottom-color: var(--border) !important;
+  }
+
+  table tbody td:first-child {
+    border-left-color: var(--border) !important;
+  }
+
+  table tbody td:last-child {
+    border-right-color: var(--border) !important;
+  }
+
+  /* Cards e listas vazias */
+  td[colSpan],
+  p[class*="text-slate-500"][class*="text-sm"]:only-child {
+    background: var(--surface) !important;
+    border-color: var(--border) !important;
+    color: var(--muted) !important;
+  }
+
+  /* Modais, overlays e popups */
+  div[role="dialog"] {
+    background-color: var(--surface) !important;
+    border-color: var(--border) !important;
+    color: var(--text) !important;
+  }
+
+  /* Botão de fechar modais */
+  button.text-slate-400 {
+    color: var(--muted) !important;
+    &:hover {
+      color: var(--text) !important;
+    }
+  }
+
+  /* Skeletons */
+  .animate-pulse {
+    background-color: var(--surface-muted) !important;
   }
 }

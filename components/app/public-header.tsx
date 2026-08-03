@@ -10,7 +10,6 @@ const navItems = [
   { href: "/", label: "Início" },
   { href: "/sobre", label: "Sobre" },
   { href: "/como-funciona", label: "Como funciona" },
-  { href: "/services", label: "Serviços" },
   { href: "/vagas-publicas", label: "Vagas públicas" },
   { href: "/empresas-parceiras", label: "Empresas parceiras" },
   { href: "/contato", label: "Contato" }

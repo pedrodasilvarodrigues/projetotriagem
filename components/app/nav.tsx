@@ -25,7 +25,6 @@ import {
   UserRoundCheck,
   UserRoundCog,
   UserRoundSearch,
-  MessagesSquare,
   Store,
   Tags,
   X,
@@ -81,13 +80,9 @@ const navItems: Record<AppRole, NavigationConfig> = {
     title: "Profissional",
     subtitle: "Perfil, triagem e encaminhamentos",
     items: [
-      { href: "/professional", label: "Explorar", icon: LayoutGrid },
-      { href: "/professional/providers", label: "Buscar prestadores", icon: Search },
-      { href: "/professional/search-demands", label: "Buscar demandas", icon: Search },
       { href: "/professional/profile", label: "Perfil", icon: UserRoundCog },
+      { href: "/professional/search-demands", label: "Buscar demandas", icon: Search },
       { href: "/professional/resume", label: "Currículo", icon: FileText },
-      { href: "/professional/services", label: "Meus serviços", icon: Store },
-      { href: "/professional/service-conversations", label: "Conversas de serviços", icon: MessagesSquare },
       { href: "/professional/screening-status", label: "Situação da Triagem", icon: ClipboardCheck },
       { href: "/professional/referrals", label: "Encaminhamentos", icon: BriefcaseBusiness },
       { href: "/professional/notifications", label: "Notificações", icon: Bell },
@@ -96,23 +91,14 @@ const navItems: Record<AppRole, NavigationConfig> = {
   },
   client: {
     title: "Cliente",
-    subtitle: "Prestadores, solicitações e conversas",
+    subtitle: "Módulo em desenvolvimento",
     items: [
-      { href: "/client", label: "Explorar", icon: LayoutGrid },
-      { href: "/client/providers", label: "Buscar prestadores", icon: Search },
-      { href: "/client/requests", label: "Solicitações", icon: ClipboardCheck },
-      { href: "/client/conversations", label: "Conversas", icon: MessagesSquare },
-      { href: "/client/notifications", label: "Notificações", icon: Bell }
+      { href: "/acesso-negado", label: "Voltar", icon: ShieldCheck }
     ]
   }
 };
 
 const marketplaceRoutes = [
-  "/services",
-  "/client",
-  "/professional/providers",
-  "/professional/services",
-  "/professional/service-conversations",
   "/admin/service-providers",
   "/admin/service-categories",
   "/admin/marketplace-reports"
@@ -125,7 +111,6 @@ export function AppNav({ role, preferredLanguage, marketplaceEnabled, companyPla
     items: (marketplaceEnabled
       ? baseNav.items
       : baseNav.items.filter((item) => {
-          if (role === "professional" && item.href === "/professional") return false;
           return !marketplaceRoutes.some((route) => item.href === route || item.href.startsWith(`${route}/`));
         })).filter((item) => role !== "company" || item.href !== "/company/showcase" || hasProAccess(companyPlan))
   }), [baseNav, companyPlan, marketplaceEnabled, role]);

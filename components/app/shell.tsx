@@ -12,7 +12,7 @@ export async function AppShell({ title, eyebrow, children }: { title: string; ey
   const { data: userData } = await supabase.auth.getUser();
   const [{ data: settings }, marketplaceEnabled, { data: company }] = await Promise.all([
     supabase.from("user_settings").select("preferred_language").eq("user_id", userData.user?.id).maybeSingle(),
-    isMarketplaceEnabled(),
+    role === "admin" ? isMarketplaceEnabled() : Promise.resolve(false),
     role === "company"
       ? supabase.from("companies").select("plano").eq("owner_id", userData.user?.id).maybeSingle()
       : Promise.resolve({ data: null })

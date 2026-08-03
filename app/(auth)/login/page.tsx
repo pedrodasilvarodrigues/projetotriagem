@@ -12,6 +12,7 @@ import { safeInternalRedirect } from "@/lib/auth/safe-redirect";
 const errorMessages: Record<string, string> = {
   "sessao-expirada": "Sua sessão expirou por segurança. Por favor, entre novamente para continuar sua jornada.",
   "nao-foi-possivel-iniciar-google": "Ops! Não conseguimos conectar sua conta Google no momento. Que tal usar e-mail e senha?",
+  "google-cancelado": "O acesso com Google foi cancelado. Você pode tentar novamente quando quiser.",
   "credenciais-invalidas": "E-mail ou senha incorretos. Que tal tentar de novo ou recuperar sua senha?",
   "email-nao-confirmado": "Falta pouco! Confirme seu e-mail através do link que enviamos para você.",
   "conta-nao-cadastrada": "Ainda não encontramos essa conta por aqui. Que tal criar seu cadastro como Profissional ou Empresa?",

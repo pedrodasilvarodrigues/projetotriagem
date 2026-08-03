@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getCurrentRole, requireRole } from "@/lib/auth/access";
+import { requireRole } from "@/lib/auth/access";
 import { appendSearchParam, safeInternalRedirect } from "@/lib/auth/safe-redirect";
 import { createAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
 import { createServerClient } from "@/lib/supabase/server";
@@ -37,7 +37,7 @@ export async function createServicePostAction(input: {
   description: string;
   imagePaths: string[];
 }): Promise<ServicePostActionResult> {
-  await requireRole("professional");
+  await requireRole("admin");
   const supabase = await createServerClient();
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) return { ok: false, error: "Sua sessão expirou. Entre novamente." };
@@ -76,7 +76,7 @@ export async function updateServicePostAction(input: {
   description: string;
   imagePaths?: string[];
 }): Promise<ServicePostActionResult> {
-  await requireRole("professional");
+  await requireRole("admin");
   const supabase = await createServerClient();
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) return { ok: false, error: "Sua sessão expirou. Entre novamente." };
@@ -118,7 +118,7 @@ export async function updateServicePostAction(input: {
 }
 
 export async function deleteServicePostAction(postId: string): Promise<ServicePostActionResult> {
-  await requireRole("professional");
+  await requireRole("admin");
   const supabase = await createServerClient();
   const { data: post, error: readError } = await supabase
     .from("service_posts")
@@ -142,7 +142,7 @@ export async function deleteServicePostAction(postId: string): Promise<ServicePo
 }
 
 export async function saveProviderProfileAction(formData: FormData) {
-  await requireRole("professional");
+  await requireRole("admin");
   const redirectTo = clean(formData.get("redirectTo"));
   const destination = redirectTo.startsWith("/") && !redirectTo.startsWith("//") ? redirectTo : "/professional/services";
   const supabase = await createServerClient();
@@ -174,7 +174,7 @@ export async function saveProviderProfileAction(formData: FormData) {
 }
 
 export async function uploadPortfolioAction(formData: FormData) {
-  await requireRole("professional");
+  await requireRole("admin");
   const supabase = await createServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const providerId = clean(formData.get("providerId"));
@@ -190,7 +190,7 @@ export async function uploadPortfolioAction(formData: FormData) {
 }
 
 export async function uploadServiceCoverAction(formData: FormData) {
-  await requireRole("professional");
+  await requireRole("admin");
   const supabase = await createServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const file = formData.get("coverImage");
@@ -229,7 +229,7 @@ export async function uploadServiceCoverAction(formData: FormData) {
 }
 
 export async function saveClientProfileAction(formData: FormData) {
-  await requireRole("client");
+  await requireRole("admin");
   const supabase = await createServerClient();
   const { data } = await supabase.auth.getUser();
   if (!data.user) redirect("/login");
@@ -239,6 +239,7 @@ export async function saveClientProfileAction(formData: FormData) {
 }
 
 export async function startConversationAction(formData: FormData) {
+  await requireRole("admin");
   const supabase = await createServerClient();
   const providerId = clean(formData.get("providerId"));
   const returnTo = safeInternalRedirect(formData.get("returnTo"), providerId ? `/services/providers/${providerId}` : "/services");
@@ -267,6 +268,7 @@ export async function startConversationAction(formData: FormData) {
 }
 
 export async function sendMarketplaceMessageAction(formData: FormData) {
+  await requireRole("admin");
   const supabase = await createServerClient();
   const { data } = await supabase.auth.getUser();
   const conversationId = clean(formData.get("conversationId"));
@@ -296,7 +298,7 @@ export async function sendMarketplaceMessageAction(formData: FormData) {
 }
 
 export async function createServiceRequestAction(formData: FormData) {
-  await requireRole("client");
+  await requireRole("admin");
   const supabase = await createServerClient();
   const conversationId = clean(formData.get("conversationId"));
   const { error } = await supabase.rpc("create_service_request", { target_conversation_id: conversationId, target_title: clean(formData.get("title")), target_description: clean(formData.get("description")), target_pricing: clean(formData.get("pricingModel")), target_amount: optionalNumber(formData.get("amount")) });
@@ -305,6 +307,7 @@ export async function createServiceRequestAction(formData: FormData) {
 }
 
 export async function transitionServiceRequestAction(formData: FormData) {
+  await requireRole("admin");
   const supabase = await createServerClient();
   const conversationId = clean(formData.get("conversationId"));
   const { error } = await supabase.rpc("transition_service_request", { target_request_id: clean(formData.get("requestId")), target_status: clean(formData.get("status")), target_note: clean(formData.get("note")) || null });
@@ -313,6 +316,7 @@ export async function transitionServiceRequestAction(formData: FormData) {
 }
 
 export async function confirmServiceCompletionAction(formData: FormData) {
+  await requireRole("admin");
   const supabase = await createServerClient();
   const conversationId = clean(formData.get("conversationId"));
   const { error } = await supabase.rpc("confirm_service_completion", { target_request_id: clean(formData.get("requestId")) });
@@ -321,8 +325,7 @@ export async function confirmServiceCompletionAction(formData: FormData) {
 }
 
 export async function createServiceReviewAction(formData: FormData) {
-  const role = await getCurrentRole();
-  if (role !== "client" && role !== "professional") redirect("/acesso-negado");
+  await requireRole("admin");
   const supabase = await createServerClient();
   const conversationId = clean(formData.get("conversationId"));
   const rating = Number(clean(formData.get("rating")));
@@ -358,7 +361,7 @@ export async function createServiceReviewAction(formData: FormData) {
 }
 
 export async function setServiceOfferingAction(formData: FormData) {
-  await requireRole("professional");
+  await requireRole("admin");
   const enabled = formData.get("enabled") === "on" || formData.get("enabled") === "true";
   const supabase = await createServerClient();
   const { error } = await supabase.rpc("set_service_offering", { target_enabled: enabled });
@@ -369,6 +372,7 @@ export async function setServiceOfferingAction(formData: FormData) {
 }
 
 export async function reportMarketplaceAction(formData: FormData) {
+  await requireRole("admin");
   const supabase = await createServerClient();
   const { data } = await supabase.auth.getUser();
   const conversationId = clean(formData.get("conversationId"));
@@ -455,6 +459,7 @@ export async function resolveMarketplaceReportAction(formData: FormData) {
 }
 
 export async function markMarketplaceNotificationsReadAction() {
+  await requireRole("admin");
   const supabase = await createServerClient();
   const { data } = await supabase.auth.getUser();
   if (!data.user) redirect("/login");

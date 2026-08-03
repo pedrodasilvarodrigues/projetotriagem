@@ -6,10 +6,16 @@ import { safeInternalRedirect } from "@/lib/auth/safe-redirect";
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
+  const oauthError = requestUrl.searchParams.get("error");
   const next = requestUrl.searchParams.get("next");
   const signupRoleParam = requestUrl.searchParams.get("signupRole");
-  const signupRole = signupRoleParam === "professional" || signupRoleParam === "company" || signupRoleParam === "client" ? signupRoleParam : null;
+  const signupRole = signupRoleParam === "professional" || signupRoleParam === "company" ? signupRoleParam : null;
   const safeNext = safeInternalRedirect(next, "") || null;
+
+  if (oauthError) {
+    const errorCode = oauthError === "access_denied" ? "google-cancelado" : "nao-foi-possivel-iniciar-google";
+    return NextResponse.redirect(new URL(`/login?error=${errorCode}`, request.url));
+  }
   let supabase: Awaited<ReturnType<typeof createServerClient>>;
 
   try {

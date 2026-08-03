@@ -357,7 +357,7 @@ export async function signInWithGoogleAction(formData?: FormData) {
     const supabase = await createServerClient();
     const origin = await getAuthRedirectOrigin();
     const accountType = formData instanceof FormData ? String(formData.get("accountType") ?? "") : "";
-    const signupRole = accountType === "professional" || accountType === "company" || accountType === "client" ? accountType : "";
+    const signupRole = accountType === "professional" || accountType === "company" ? accountType : "";
     const callbackUrl = new URL(`${origin}/auth/callback`);
     if (signupRole) callbackUrl.searchParams.set("signupRole", signupRole);
     if (nextPath) callbackUrl.searchParams.set("next", nextPath);

@@ -1,6 +1,6 @@
 export function defaultRouteForRole(role?: string | null) {
   if (role === "admin") return "/admin";
   if (role === "company") return "/company";
-  if (role === "client") return "/client";
+  if (role === "client") return "/acesso-negado?recurso=prestadores-em-desenvolvimento";
   return "/professional";
 }

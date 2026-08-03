@@ -218,3 +218,4 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - O limite de reenvio de recuperacao do Supabase continua existindo na API externa; a interface agora comunica como pedido recente e nao como quebra.
 - A auditoria local encontrou `SUPABASE_SERVICE_ROLE_KEY` invalida para Admin API; o login por email/senha com anon key foi validado contra o Supabase e retorna erros controlados.
 - O deploy em producao ocorre pelo reposititorio GitHub conectado; esta tarefa nao altera configuracoes da Vercel.
+- Correcao de 03/08/2026: o login Google passou a usar uma URL de callback fixa em producao (`https://projetotriagem.vercel.app/auth/callback`). Destino interno e papel escolhido no cadastro sao preservados em cookies HTTP-only temporarios, removidos ao concluir ou falhar o callback, evitando o retorno incorreto para a raiz do servico de autenticacao com `requested path is invalid`.

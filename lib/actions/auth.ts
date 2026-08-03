@@ -1,6 +1,6 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
@@ -11,6 +11,9 @@ import { appendSearchParam, safeInternalRedirect } from "@/lib/auth/safe-redirec
 
 const minimumAge = Number(process.env.MINIMUM_PROFESSIONAL_AGE ?? 14);
 const productionAppUrl = "https://projetotriagem.vercel.app";
+const oauthNextCookie = "portal_oauth_next";
+const oauthRoleCookie = "portal_oauth_role";
+const oauthCookieMaxAge = 10 * 60;
 
 const emailPasswordSchema = z.object({
   email: z.string().trim().toLowerCase().email(),
@@ -99,6 +102,8 @@ function isLocalOrigin(value: string) {
 }
 
 async function getAuthRedirectOrigin() {
+  if (process.env.VERCEL_ENV === "production") return productionAppUrl;
+
   const headerStore = await headers();
   const candidates = [
     normalizeOrigin(process.env.NEXT_PUBLIC_SITE_URL),
@@ -358,14 +363,26 @@ export async function signInWithGoogleAction(formData?: FormData) {
     const origin = await getAuthRedirectOrigin();
     const accountType = formData instanceof FormData ? String(formData.get("accountType") ?? "") : "";
     const signupRole = accountType === "professional" || accountType === "company" ? accountType : "";
-    const callbackUrl = new URL(`${origin}/auth/callback`);
-    if (signupRole) callbackUrl.searchParams.set("signupRole", signupRole);
-    if (nextPath) callbackUrl.searchParams.set("next", nextPath);
+    const callbackUrl = `${origin}/auth/callback`;
+    const cookieStore = await cookies();
+    const cookieOptions = {
+      httpOnly: true,
+      sameSite: "lax" as const,
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: oauthCookieMaxAge
+    };
+
+    if (nextPath) cookieStore.set(oauthNextCookie, nextPath, cookieOptions);
+    else cookieStore.delete(oauthNextCookie);
+
+    if (signupRole) cookieStore.set(oauthRoleCookie, signupRole, cookieOptions);
+    else cookieStore.delete(oauthRoleCookie);
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: callbackUrl.toString(),
+        redirectTo: callbackUrl,
         queryParams: {
           prompt: "select_account",
           access_type: "offline"
@@ -374,10 +391,12 @@ export async function signInWithGoogleAction(formData?: FormData) {
     });
 
     if (error || !data.url) {
-      logAuthError("Falha ao iniciar login Google", error ?? "missing-google-url", { redirectTo: callbackUrl.toString() });
+      cookieStore.delete(oauthNextCookie);
+      cookieStore.delete(oauthRoleCookie);
+      logAuthError("Falha ao iniciar login Google", error ?? "missing-google-url", { redirectTo: callbackUrl });
       target = appendSearchParam(`/login?error=${encodeURIComponent(error?.message ?? "nao-foi-possivel-iniciar-google")}`, "next", nextPath || null);
     } else {
-      logAuth("Redirecionando para Google OAuth", { redirectTo: callbackUrl.toString() });
+      logAuth("Redirecionando para Google OAuth", { redirectTo: callbackUrl });
       target = data.url;
     }
   } catch (error) {

@@ -1,0 +1,17 @@
+project_id = "znmlgfllkwtcyvrpmwbt"
+
+[auth]
+site_url = "https://projetotriagem.vercel.app"
+additional_redirect_urls = ["https://projetotriagem.vercel.app/auth/callback"]
+
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
+
+[auth.email]
+enable_confirmations = true
+max_frequency = "1m0s"
+otp_length = 8
+
+[storage.vector]
+enabled = false

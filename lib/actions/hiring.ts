@@ -9,6 +9,8 @@ import { createServerClient } from "@/lib/supabase/server";
 
 const processIdSchema = z.string().uuid();
 const disputeResolutionSchema = z.enum(["hired", "not_hired"]);
+const candidateVisibilitySchema = z.enum(["active", "archived", "removed"]);
+const candidateViewSchema = z.enum(["active", "archived"]);
 
 function hiringErrorCode(message?: string) {
   if (!message) return "nao-foi-possivel-concluir";
@@ -17,8 +19,39 @@ function hiringErrorCode(message?: string) {
   if (message.includes("professional_response_already_recorded")) return "resposta-ja-registrada";
   if (message.includes("hire_confirmation_expired")) return "prazo-de-confirmacao-encerrado";
   if (message.includes("hire_confirmation_not_in_dispute")) return "disputa-ja-resolvida";
+  if (message.includes("candidate_process_must_be_closed")) return "candidato-ainda-em-andamento";
+  if (message.includes("candidate_already_removed")) return "candidato-ja-removido";
   if (message.includes("access_denied") || message.includes("required")) return "acesso-nao-autorizado";
   return "nao-foi-possivel-concluir";
+}
+
+export async function setCompanyCandidateVisibilityAction(formData: FormData) {
+  await requireActiveCompanyPlan();
+  const processId = processIdSchema.safeParse(formData.get("processId"));
+  const targetVisibility = candidateVisibilitySchema.safeParse(formData.get("targetVisibility"));
+  const currentView = candidateViewSchema.catch("active").parse(formData.get("currentView"));
+  const returnPath = currentView === "archived" ? "/company/candidates?view=archived" : "/company/candidates";
+
+  if (!processId.success || !targetVisibility.success) {
+    redirect(`${returnPath}${returnPath.includes("?") ? "&" : "?"}error=processo-invalido`);
+  }
+
+  const supabase = await createServerClient();
+  const { error } = await supabase.rpc("set_company_candidate_visibility", {
+    target_process_id: processId.data,
+    target_visibility: targetVisibility.data
+  });
+  if (error) {
+    redirect(`${returnPath}${returnPath.includes("?") ? "&" : "?"}error=${hiringErrorCode(error.message)}`);
+  }
+
+  revalidatePath("/company/candidates");
+  const message = targetVisibility.data === "active"
+    ? "candidato-restaurado"
+    : targetVisibility.data === "archived"
+      ? "candidato-arquivado"
+      : "candidato-removido";
+  redirect(`${returnPath}${returnPath.includes("?") ? "&" : "?"}message=${message}`);
 }
 
 export async function companyConfirmHireAction(formData: FormData) {

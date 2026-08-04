@@ -5,6 +5,7 @@ Portal de Triagem Profissional
 Plataforma de recrutamento e triagem profissional que conecta profissionais e empresas por meio de cadastro, banco de talentos, demandas, compatibilidade e encaminhamento qualificado.
 
 # Concluido
+- Página empresarial `/company/plans` criada com comparação comercial clara entre Essencial, Pro e Acesso VIP Total, valores de mensalidade/taxa, benefícios, indicação do plano atual e solicitação segura de mudança pela equipe comercial. O fluxo oficial `plano/status_plano` foi preservado; planos Pro e VIP continuam sujeitos à ativação comercial existente.
 - Onboarding obrigatório de plano para Empresa implementado de ponta a ponta: novas empresas nascem com `plano/status_plano = nenhum`, cadastro por e-mail autentica e segue direto para a escolha, OAuth conclui os dados e segue para a mesma etapa, Essencial ativa imediatamente e Pro/VIP ficam em `pendente_ativacao` até ação do Admin.
 - Acesso empresarial protegido em três camadas: proxy e layout bloqueiam toda a árvore `/company`, ações de servidor reconfirmam o plano e RLS exige `status_plano = ativo` para demandas, contatos, documentos, candidatos, histórico e vitrine Pro. URL direta, refresh e nova aba usam o estado persistido no Supabase.
 - Admin recebeu `/admin/plan-activations`, com fila de Pro/VIP pendentes, ativação auditada por data e usuário administrador e notificação automática via Resend quando configurado. O seletor antigo que alterava somente o plano foi removido.

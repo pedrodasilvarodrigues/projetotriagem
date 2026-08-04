@@ -75,7 +75,7 @@ const navItems: Record<AppRole, NavigationConfig> = {
       { href: "/company/candidates", label: "Análise de Candidatos", icon: UserRoundSearch },
       { href: "/company/history", label: "Histórico", icon: History },
       { href: "/company/notifications", label: "Notificações", icon: Bell },
-      { href: "/company/billing", label: "Faturamento", icon: CreditCard },
+      { href: "/company/plans", label: "Planos", icon: CreditCard },
       { href: "/company/settings", label: "Configurações", icon: Settings }
     ]
   },

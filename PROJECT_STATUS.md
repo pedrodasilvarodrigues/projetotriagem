@@ -5,6 +5,11 @@ Portal de Triagem Profissional
 Plataforma de recrutamento e triagem profissional que conecta profissionais e empresas por meio de cadastro, banco de talentos, demandas, compatibilidade e encaminhamento qualificado.
 
 # Concluido
+- Fluxo de contratação por confirmação cruzada implementado: o Admin aprova o candidato, somente a Empresa pode informar `Contratei este candidato` e o Profissional responde Sim/Não em até 5 dias. Apenas duas confirmações positivas alteram o processo para `Contratado`.
+- Divergências e ausência de resposta entram em `/admin/hiring-disputes`; o Admin visualiza as duas respostas e só decide nesses casos excepcionais, com justificativa e auditoria. A alteração manual direta para estados de contratação foi bloqueada no banco e removida da interface administrativa.
+- Confirmação positiva cria um único registro em `hire_billing_events`, protegido contra duplicidade por processo, para disparar a cobrança por contratação. Resolução administrativa como contratado usa o mesmo mecanismo auditável.
+- Dados de contato deixaram de trafegar na página empresarial de candidatos. A Empresa recebeu o botão `Ver currículo`, atendido por RPC com campos explicitamente permitidos e sem e-mail, telefone, documentos ou endereço completo.
+- Migrations `20260804170000_harden_cross_hire_confirmation.sql` e `20260804170100_restrict_hire_process_visibility.sql` aplicadas ao Supabase remoto com RLS, privilégios mínimos e bloqueio de leitura anônima.
 - Página empresarial `/company/plans` criada com comparação comercial clara entre Essencial, Pro e Acesso VIP Total, valores de mensalidade/taxa, benefícios, indicação do plano atual e solicitação segura de mudança pela equipe comercial. O fluxo oficial `plano/status_plano` foi preservado; planos Pro e VIP continuam sujeitos à ativação comercial existente.
 - Onboarding obrigatório de plano para Empresa implementado de ponta a ponta: novas empresas nascem com `plano/status_plano = nenhum`, cadastro por e-mail autentica e segue direto para a escolha, OAuth conclui os dados e segue para a mesma etapa, Essencial ativa imediatamente e Pro/VIP ficam em `pendente_ativacao` até ação do Admin.
 - Acesso empresarial protegido em três camadas: proxy e layout bloqueiam toda a árvore `/company`, ações de servidor reconfirmam o plano e RLS exige `status_plano = ativo` para demandas, contatos, documentos, candidatos, histórico e vitrine Pro. URL direta, refresh e nova aba usam o estado persistido no Supabase.
@@ -168,6 +173,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Fallback no proxy para redirecionar `/?code=...` para `/auth/callback` quando o Supabase retornar o codigo na raiz do dominio correto.
 
 # Pendente
+- Integrar o consumidor financeiro/Asaas à fila `hire_billing_events`; o evento de cobrança já é criado de forma idempotente, mas a liquidação externa ainda não faz parte do projeto.
 - Definir os valores comerciais oficiais de mensalidade e taxa por contratação de Essencial, Pro e VIP e configurar `NEXT_PUBLIC_*_PRICE/FEE` na Vercel; o repositório atual não contém uma tabela pública com esses números.
 - Configurar `NEXT_PUBLIC_COMMERCIAL_WHATSAPP` na Vercel para habilitar o contato direto pré-preenchido da ativação Pro/VIP.
 - Marketplace: integrar provedor de geocodificacao para ordenar por distancia real; o schema ja possui latitude/longitude e raio para receber essa evolucao.
@@ -189,6 +195,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Evoluir os filtros de vagas para salvar pesquisas e alertas por email quando SMTP estiver pronto.
 
 # Observacoes
+- Validação do fluxo de contratação em 04/08/2026: `npm run lint` passou; testes SQL remotos com rollback confirmaram aprovação obrigatória, confirmação positiva com status `hired` e exatamente 1 evento de cobrança, resposta negativa e prazo expirado com status `hire_dispute` e 0 cobranças, currículo restrito a candidato apresentado, RLS ativa, RPCs indisponíveis para `anon`, fila de e-mail privada e bloqueio de atualização direta para `hired`. O build Webpack local permaneceu sem saída por 10 minutos e foi encerrado por timeout do ambiente.
 - Onboarding de planos validado em 03/08/2026: `npm run lint` passou, PostCSS/Tailwind compilou `globals.css`, servidor Webpack respondeu em `/login` e as rotas protegidas foram bloqueadas sem configuração local. `npm run build -- --webpack` foi executado, mas excedeu 20 minutos sem emitir erro e foi encerrado por timeout do ambiente. Testes SQL transacionais com rollback confirmaram Essencial ativo imediato, Pro pendente, bloqueio de autoativação/vitrine e ativação Pro por Admin com auditoria.
 - Explorar/posts implementados em 24/07/2026 pelas migrations `20260724160032_add_service_posts_explore.sql`, `20260724161133_harden_service_post_paths.sql`, `20260724164705_restrict_service_post_media_to_marketplace_roles.sql` e `20260724170119_allow_removing_service_post_with_missing_media.sql`, aplicadas no Supabase remoto.
 - O bucket privado `service-posts` aceita apenas JPG, PNG e WEBP de até 8 MB; a interface limita cada post a 6 imagens e entrega mídia por URL assinada de uma hora somente a Cliente, Profissional ou Admin.

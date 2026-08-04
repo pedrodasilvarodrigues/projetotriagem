@@ -1,22 +1,25 @@
+import Link from "next/link";
+import { ArrowRight, Check, Clock3, FileText, Scale, ShieldCheck, UserRoundCheck } from "lucide-react";
 import { AppShell } from "@/components/app/shell";
+import { CompanyHireButton } from "@/components/hiring/hire-confirmation-controls";
 import { createServerClient } from "@/lib/supabase/server";
 
 type Candidate = {
   id: string;
   full_name: string;
-  email: string | null;
-  phone: string | null;
-  city: string | null;
-  state: string | null;
-  desired_role: string | null;
-  education_level: string | null;
 };
 
 type Demand = {
   id: string;
   name: string | null;
   title: string;
-  status: string;
+};
+
+type HireConfirmation = {
+  company_confirmed: boolean;
+  professional_confirmed: boolean | null;
+  confirmation_status: string;
+  deadline_at: string | null;
 };
 
 type CandidateProcess = {
@@ -26,89 +29,153 @@ type CandidateProcess = {
   updated_at: string;
   professional: Candidate | Candidate[] | null;
   demand: Demand | Demand[] | null;
+  confirmation: HireConfirmation | HireConfirmation[] | null;
+};
+
+const feedbackMessages: Record<string, string> = {
+  "contratacao-enviada": "Confirmação enviada ao profissional. A contratação será oficial quando ele responder.",
+  "candidato-ainda-nao-aprovado": "A contratação só pode ser informada depois que o Admin aprovar o candidato.",
+  "contratacao-ja-informada": "Esta contratação já foi informada e aguarda a resposta do profissional.",
+  "processo-invalido": "Não foi possível identificar este processo.",
+  "acesso-nao-autorizado": "Este processo não pertence à sua empresa.",
+  "curriculo-indisponivel": "Este currículo ainda não foi liberado para análise.",
+  "nao-foi-possivel-concluir": "Não foi possível registrar a confirmação agora. Tente novamente em instantes."
 };
 
 function one<T>(value: T | T[] | null) {
   return Array.isArray(value) ? value[0] : value;
 }
 
-function processStatusLabel(status: string) {
-  const labels: Record<string, string> = {
-    received: "Recebido",
-    analysis: "Em análise",
-    screening: "Triagem",
-    pre_approved: "Pre-aprovado",
-    training: "Treinamento",
-    interview: "Entrevista",
-    forwarded: "Apresentado",
-    hired: "Contratado",
-    rejected: "Não selecionado"
+function processStatus(status: string) {
+  const labels: Record<string, { label: string; tone: string }> = {
+    forwarded: { label: "Apresentado", tone: "bg-blue-50 text-[#0F2D4E]" },
+    interview: { label: "Em entrevista", tone: "bg-amber-50 text-amber-900" },
+    pre_approved: { label: "Aprovado pelo Admin", tone: "bg-emerald-50 text-emerald-800" },
+    awaiting_professional_confirmation: { label: "Aguardando profissional", tone: "bg-orange-50 text-orange-900" },
+    hire_dispute: { label: "Em análise de divergência", tone: "bg-red-50 text-red-800" },
+    hired: { label: "Contratado", tone: "bg-emerald-100 text-emerald-900" },
+    rejected: { label: "Não selecionado", tone: "bg-slate-100 text-slate-700" }
   };
-  return labels[status] ?? status;
+  return labels[status] ?? { label: "Em análise", tone: "bg-slate-100 text-slate-700" };
 }
 
-export default async function CompanyCandidatesPage() {
+function ConfirmationTrail({ process, confirmation }: { process: CandidateProcess; confirmation: HireConfirmation | undefined }) {
+  const companyDone = Boolean(confirmation?.company_confirmed) || ["awaiting_professional_confirmation", "hire_dispute", "hired"].includes(process.status);
+  const professionalDone = confirmation?.professional_confirmed === true || process.status === "hired";
+  const disputed = confirmation?.professional_confirmed === false || process.status === "hire_dispute";
+
+  return (
+    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2" aria-label="Etapas da confirmação da contratação">
+      <div className={`rounded-xl border px-3 py-2 ${companyDone ? "border-[#F2811D]/40 bg-orange-50" : "border-slate-200 bg-slate-50"}`}>
+        <span className="flex items-center gap-2 text-xs font-bold text-[#0F2D4E]"><Check size={14} /> Empresa</span>
+        <small className="mt-1 block text-[11px] text-slate-600">{companyDone ? "Confirmou" : "Ainda não informou"}</small>
+      </div>
+      <ArrowRight aria-hidden="true" className="text-slate-400" size={16} />
+      <div className={`rounded-xl border px-3 py-2 ${professionalDone ? "border-emerald-200 bg-emerald-50" : disputed ? "border-red-200 bg-red-50" : "border-slate-200 bg-slate-50"}`}>
+        <span className="flex items-center gap-2 text-xs font-bold text-[#0F2D4E]">{disputed ? <Scale size={14} /> : <UserRoundCheck size={14} />} Profissional</span>
+        <small className="mt-1 block text-[11px] text-slate-600">{professionalDone ? "Confirmou" : disputed ? "Resposta divergente" : companyDone ? "Aguardando resposta" : "Etapa seguinte"}</small>
+      </div>
+    </div>
+  );
+}
+
+export default async function CompanyCandidatesPage({
+  searchParams
+}: {
+  searchParams: Promise<{ error?: string; message?: string }>;
+}) {
+  const params = await searchParams;
   const supabase = await createServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const { data: company } = await supabase.from("companies").select("id").eq("owner_id", userData.user?.id).maybeSingle();
   const { data: candidateProcesses } = company?.id
     ? await supabase
         .from("screening_processes")
-        .select("id,status,candidate_origin,updated_at,demand:demands!inner(id,name,title,status,company_id),professional:professionals!inner(id,full_name,email,phone,city,state,desired_role,education_level)")
+        .select("id,status,candidate_origin,updated_at,demand:demands!inner(id,name,title,company_id),professional:professionals!inner(id,full_name),confirmation:hire_confirmations(company_confirmed,professional_confirmed,confirmation_status,deadline_at)")
         .eq("demand.company_id", company.id)
-        .neq("status", "waiting")
+        .in("status", ["forwarded", "interview", "pre_approved", "awaiting_professional_confirmation", "hire_dispute", "hired", "rejected"])
         .order("updated_at", { ascending: false })
     : { data: [] };
 
   const processes = (candidateProcesses ?? []) as unknown as CandidateProcess[];
-  const professionalIds = processes.map((process) => one(process.professional)?.id).filter((id): id is string => Boolean(id));
-  const { data: certifications } = professionalIds.length ? await supabase.from("professional_certifications").select("professional_id,course:courses(category)").in("professional_id", professionalIds) : { data: [] };
-  const certificationAreas = new Map<string, Set<string>>();
-  (certifications ?? []).forEach((item) => {
-    const course = one(item.course as { category: string } | { category: string }[] | null);
-    if (!course?.category) return;
-    const areas = certificationAreas.get(item.professional_id) ?? new Set<string>();
-    areas.add(course.category);
-    certificationAreas.set(item.professional_id, areas);
-  });
 
   return (
     <AppShell eyebrow="Empresa" title="Candidatos apresentados">
-      <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-        <p className="mb-4 text-sm leading-6 text-slate-600">
-          Aqui aparecem somente os profissionais que o administrador apresentou para demandas da sua empresa. Candidatos mantidos na fila reserva não ficam visiveis.
-        </p>
-        <div className="overflow-x-auto">
-          <table className="data-table">
-            <thead>
-              <tr><th>Candidato</th><th>Contato</th><th>Demanda</th><th>Perfil</th><th>Situação</th><th>Atualizado em</th></tr>
-            </thead>
-            <tbody>
-              {processes.map((process) => {
-                const candidate = one(process.professional);
-                const demand = one(process.demand);
-                if (!candidate || !demand) return null;
-                return (
-                  <tr key={process.id}>
-                    <td><strong>{candidate.full_name}</strong><br /><span className="text-xs text-slate-500">{candidate.city ?? "-"}/{candidate.state ?? "-"}</span></td>
-                    <td>{candidate.email ?? "Email não informado"}<br /><span className="text-xs text-slate-500">{candidate.phone ?? "Telefone não informado"}</span></td>
-                    <td><strong>{demand.name ?? demand.title}</strong><br /><span className="text-xs text-slate-500">{demand.title}</span></td>
-                    <td>{candidate.desired_role ?? "Objetivo não informado"}<br /><span className="text-xs text-slate-500">Escolaridade: {candidate.education_level ?? "-"}</span>{[...(certificationAreas.get(candidate.id) ?? [])].map((area) => <span key={area} className="mt-2 block w-fit rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">Certificado em: {area}</span>)}</td>
-                    <td>
-                      <span className="inline-flex rounded bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-800">{processStatusLabel(process.status)}</span>
-                      <span className={`origin-badge mt-2 ${process.candidate_origin === "interesse_empresa" ? "is-interest" : "is-curation"}`}>
-                        {process.candidate_origin === "interesse_empresa" ? "Você demonstrou interesse" : "Apresentado pela curadoria"}
-                      </span>
-                    </td>
-                    <td>{new Date(process.updated_at).toLocaleDateString("pt-BR")}</td>
-                  </tr>
-                );
-              })}
-              {processes.length === 0 ? <tr><td colSpan={6}>Nenhum candidato foi apresentado para sua empresa ainda.</td></tr> : null}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <div className="space-y-5">
+        {params.message ? (
+          <div className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900" role="status">
+            <ShieldCheck aria-hidden="true" className="mt-0.5 shrink-0" size={18} />
+            <p>{feedbackMessages[params.message] ?? "Informação registrada com sucesso."}</p>
+          </div>
+        ) : null}
+        {params.error ? (
+          <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900" role="alert">
+            <Scale aria-hidden="true" className="mt-0.5 shrink-0" size={18} />
+            <p>{feedbackMessages[params.error] ?? feedbackMessages["nao-foi-possivel-concluir"]}</p>
+          </div>
+        ) : null}
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_12px_34px_rgba(15,45,78,.07)] sm:p-6">
+          <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-100 pb-5">
+            <div className="max-w-2xl">
+              <p className="text-xs font-bold uppercase text-[#A94708]">Decisão da empresa</p>
+              <h2 className="mt-1 font-display text-xl font-bold text-[#0F2D4E]">Analise o currículo antes de avançar</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600">Dados de contato permanecem protegidos. Quando o Admin aprovar o candidato, sua empresa poderá informar a contratação e aguardar a confirmação do profissional.</p>
+            </div>
+            <span className="rounded-full bg-[#0F2D4E] px-3 py-1.5 text-xs font-bold text-white">{processes.length} candidato{processes.length === 1 ? "" : "s"}</span>
+          </div>
+
+          <div className="mt-5 grid gap-4 lg:grid-cols-2">
+            {processes.map((process) => {
+              const candidate = one(process.professional);
+              const demand = one(process.demand);
+              const confirmation = one(process.confirmation) ?? undefined;
+              if (!candidate || !demand) return null;
+              const status = processStatus(process.status);
+
+              return (
+                <article key={process.id} className="group flex flex-col rounded-2xl border border-slate-200 bg-[#FAFBFC] p-4 transition duration-200 hover:-translate-y-0.5 hover:border-[#F2811D]/45 hover:shadow-[0_14px_30px_rgba(15,45,78,.09)] sm:p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate font-display text-lg font-bold text-[#0F2D4E]">{candidate.full_name}</p>
+                      <p className="mt-1 text-sm text-slate-600">{demand.name ?? demand.title}</p>
+                    </div>
+                    <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${status.tone}`}>{status.label}</span>
+                  </div>
+
+                  <div className="mt-4">
+                    <ConfirmationTrail process={process} confirmation={confirmation} />
+                  </div>
+
+                  {confirmation?.deadline_at && process.status === "awaiting_professional_confirmation" ? (
+                    <p className="mt-3 flex items-center gap-2 text-xs text-slate-600"><Clock3 aria-hidden="true" size={14} /> Resposta até {new Date(confirmation.deadline_at).toLocaleDateString("pt-BR")}</p>
+                  ) : null}
+
+                  <div className="mt-auto flex flex-wrap items-center gap-2 pt-5">
+                    <Link
+                      href={`/company/candidates/${process.id}/resume`}
+                      className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#0F2D4E]/20 bg-white px-4 py-2.5 text-sm font-bold text-[#0F2D4E] transition hover:border-[#F2811D] hover:bg-orange-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F2811D] focus-visible:ring-offset-2"
+                    >
+                      <FileText aria-hidden="true" size={17} /> Ver currículo
+                    </Link>
+                    {process.status === "pre_approved" && !confirmation?.company_confirmed ? <CompanyHireButton processId={process.id} /> : null}
+                  </div>
+
+                  <span className={`origin-badge mt-4 w-fit ${process.candidate_origin === "interesse_empresa" ? "is-interest" : "is-curation"}`}>
+                    {process.candidate_origin === "interesse_empresa" ? "Você demonstrou interesse" : "Apresentado pela curadoria"}
+                  </span>
+                </article>
+              );
+            })}
+
+            {processes.length === 0 ? (
+              <div className="col-span-full grid min-h-52 place-items-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+                <div><UserRoundCheck className="mx-auto text-[#F2811D]" size={30} /><h2 className="mt-3 font-display text-lg font-bold text-[#0F2D4E]">Nenhum candidato apresentado</h2><p className="mt-1 text-sm text-slate-600">Os profissionais liberados pelo Admin aparecerão aqui.</p></div>
+              </div>
+            ) : null}
+          </div>
+        </section>
+      </div>
     </AppShell>
   );
 }

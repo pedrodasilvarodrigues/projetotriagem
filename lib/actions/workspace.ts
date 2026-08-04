@@ -1404,14 +1404,26 @@ export async function updateProcessStatusAction(formData: FormData) {
   await requireRole("admin");
   const processId = String(formData.get("processId") ?? "");
   const status = String(formData.get("status") ?? "");
-  const companyResult = String(formData.get("companyResult") ?? "").trim();
   const redirectTo = String(formData.get("redirectTo") ?? "/admin/processes");
-  if (!processId || !["received", "analysis", "screening", "pre_approved", "training", "interview", "forwarded", "hired", "rejected", "waiting"].includes(status)) {
+  if (!processId || !["received", "analysis", "screening", "pre_approved", "training", "interview", "forwarded", "rejected", "waiting"].includes(status)) {
     redirect(`${redirectTo}?error=dados-invalidos`);
   }
 
   const supabase = await createServerClient();
-  await supabase.from("screening_processes").update({ status, company_result: companyResult || null }).eq("id", processId);
+  const { data: currentProcess } = await supabase
+    .from("screening_processes")
+    .select("status")
+    .eq("id", processId)
+    .maybeSingle();
+  if (["awaiting_professional_confirmation", "hire_dispute", "hired"].includes(currentProcess?.status ?? "")) {
+    redirect(`${redirectTo}?error=use-o-fluxo-de-confirmacao-da-contratacao`);
+  }
+
+  const { error } = await supabase
+    .from("screening_processes")
+    .update({ status })
+    .eq("id", processId);
+  if (error) redirect(`${redirectTo}?error=nao-foi-possivel-atualizar-o-processo`);
   revalidatePath("/admin/processes");
   revalidatePath("/admin/referrals");
   revalidatePath("/admin/hirings");

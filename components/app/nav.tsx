@@ -7,6 +7,7 @@ import {
   Bell,
   BriefcaseBusiness,
   Building2,
+  CreditCard,
   ChevronDown,
   ChevronUp,
   ClipboardCheck,
@@ -68,6 +69,7 @@ const navItems: Record<AppRole, NavigationConfig> = {
       { href: "/company/demands/new", label: "Criar Demanda", icon: BriefcaseBusiness },
       { href: "/company/demands", label: "Demandas Ativas", icon: ClipboardCheck },
       { href: "/company/candidates", label: "Análise de Candidatos", icon: UserRoundSearch },
+      { href: "/company/plans", label: "Planos", icon: CreditCard },
       { href: "/company/history", label: "Histórico", icon: History },
       { href: "/company/notifications", label: "Notificações", icon: Bell },
       { href: "/company/settings", label: "Configurações", icon: Settings }

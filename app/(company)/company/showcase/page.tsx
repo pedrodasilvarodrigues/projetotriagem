@@ -66,11 +66,11 @@ export default async function CompanyShowcasePage({
   const { data: userData } = await supabase.auth.getUser();
   const { data: company } = await supabase
     .from("companies")
-    .select("id,plano,status,deleted_at")
+    .select("id,plano,status_plano,status,deleted_at")
     .eq("owner_id", userData.user?.id)
     .maybeSingle();
 
-  if (!company || !hasProAccess(company.plano) || company.status !== "approved" || company.deleted_at) {
+  if (!company || !hasProAccess(company.plano) || company.status_plano !== "ativo" || company.status !== "approved" || company.deleted_at) {
     redirect("/company?error=vitrine-exclusiva-plano-pro");
   }
 

@@ -32,7 +32,7 @@ export async function resolveAuthenticatedEntryPath(
 ) {
   const [{ data: roleRecord }, { data: company }, { data: professional }, { data: client }] = await Promise.all([
     supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle(),
-    supabase.from("companies").select("id").eq("owner_id", userId).maybeSingle(),
+    supabase.from("companies").select("id,plano,status_plano").eq("owner_id", userId).maybeSingle(),
     supabase.from("professionals").select("id").eq("user_id", userId).maybeSingle(),
     supabase.from("client_profiles").select("id").eq("user_id", userId).maybeSingle()
   ]);
@@ -44,6 +44,8 @@ export async function resolveAuthenticatedEntryPath(
 
   if (company) {
     if (savedRole !== "company") await supabase.from("user_roles").upsert({ user_id: userId, role: "company" });
+    if (company.status_plano === "pendente_ativacao") return "/company/plan/pending";
+    if (company.status_plano !== "ativo") return "/company/plan";
     return defaultRouteForRole("company");
   }
 

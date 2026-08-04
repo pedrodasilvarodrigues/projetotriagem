@@ -5,6 +5,11 @@ Portal de Triagem Profissional
 Plataforma de recrutamento e triagem profissional que conecta profissionais e empresas por meio de cadastro, banco de talentos, demandas, compatibilidade e encaminhamento qualificado.
 
 # Concluido
+- Onboarding obrigatório de plano para Empresa implementado de ponta a ponta: novas empresas nascem com `plano/status_plano = nenhum`, cadastro por e-mail autentica e segue direto para a escolha, OAuth conclui os dados e segue para a mesma etapa, Essencial ativa imediatamente e Pro/VIP ficam em `pendente_ativacao` até ação do Admin.
+- Acesso empresarial protegido em três camadas: proxy e layout bloqueiam toda a árvore `/company`, ações de servidor reconfirmam o plano e RLS exige `status_plano = ativo` para demandas, contatos, documentos, candidatos, histórico e vitrine Pro. URL direta, refresh e nova aba usam o estado persistido no Supabase.
+- Admin recebeu `/admin/plan-activations`, com fila de Pro/VIP pendentes, ativação auditada por data e usuário administrador e notificação automática via Resend quando configurado. O seletor antigo que alterava somente o plano foi removido.
+- Empresa ativa recebeu `/company/billing` para consultar o plano atual e solicitar alteração pela equipe. A espera Pro/VIP revalida o status automaticamente sem exigir novo login.
+- Migrations `20260803120000_add_company_plan_none_value.sql`, `20260803120100_company_plan_onboarding.sql` e `20260803120200_harden_company_plan_transition.sql` aplicadas no Supabase remoto com preservação das três empresas existentes como ativas.
 - Módulo de prestadores de serviços isolado para desenvolvimento dentro do painel Admin: os acessos públicos, de Cliente e de Profissional foram removidos dos menus, cadastro, perfil, configurações e notificações; as rotas compartilhadas e ações do marketplace agora são bloqueadas fora do papel Admin. Aprovação de prestadores, categorias e denúncias permanecem disponíveis apenas em `/admin`.
 - Login com Google corrigido de ponta a ponta: o gatilho de novos usuários não atribui mais o papel Profissional quando o OAuth não informa um tipo, reconhece apenas papéis explicitamente informados e encaminha contas sem papel ao onboarding; cancelamentos do Google retornam ao login com mensagem clara. A migration `20260803020000_fix_google_oauth_role_onboarding.sql` foi aplicada no Supabase remoto.
 - Vitrine Pro de profissionais implementada de ponta a ponta: gate real por plano `essencial/pro/vip`, currículos ativos exibidos por RPC sem contato, endereço, documentos ou empregadores, filtros e paginação, curtidas ilimitadas ligadas obrigatoriamente a uma demanda e reversíveis enquanto pendentes, fila administrativa de formalização sem veto, origem do candidato no processo e shortlist curado de até 10 profissionais para empresas Pro+. As migrations `20260729160059_add_pro_professional_showcase.sql` e `20260729162651_harden_pro_showcase_helpers.sql` estão aplicadas no Supabase remoto com RLS e helpers privados.
@@ -162,6 +167,8 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Fallback no proxy para redirecionar `/?code=...` para `/auth/callback` quando o Supabase retornar o codigo na raiz do dominio correto.
 
 # Pendente
+- Definir os valores comerciais oficiais de mensalidade e taxa por contratação de Essencial, Pro e VIP e configurar `NEXT_PUBLIC_*_PRICE/FEE` na Vercel; o repositório atual não contém uma tabela pública com esses números.
+- Configurar `NEXT_PUBLIC_COMMERCIAL_WHATSAPP` na Vercel para habilitar o contato direto pré-preenchido da ativação Pro/VIP.
 - Marketplace: integrar provedor de geocodificacao para ordenar por distancia real; o schema ja possui latitude/longitude e raio para receber essa evolucao.
 - Marketplace: ativar notificacoes externas por e-mail conforme volume e regras anti-spam; notificacoes internas e Realtime ja estao implementados.
 - Marketplace: a integracao financeira permanece deliberadamente fora do escopo ate a definicao do modelo de monetizacao.
@@ -181,6 +188,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Evoluir os filtros de vagas para salvar pesquisas e alertas por email quando SMTP estiver pronto.
 
 # Observacoes
+- Onboarding de planos validado em 03/08/2026: `npm run lint` passou, PostCSS/Tailwind compilou `globals.css`, servidor Webpack respondeu em `/login` e as rotas protegidas foram bloqueadas sem configuração local. `npm run build -- --webpack` foi executado, mas excedeu 20 minutos sem emitir erro e foi encerrado por timeout do ambiente. Testes SQL transacionais com rollback confirmaram Essencial ativo imediato, Pro pendente, bloqueio de autoativação/vitrine e ativação Pro por Admin com auditoria.
 - Explorar/posts implementados em 24/07/2026 pelas migrations `20260724160032_add_service_posts_explore.sql`, `20260724161133_harden_service_post_paths.sql`, `20260724164705_restrict_service_post_media_to_marketplace_roles.sql` e `20260724170119_allow_removing_service_post_with_missing_media.sql`, aplicadas no Supabase remoto.
 - O bucket privado `service-posts` aceita apenas JPG, PNG e WEBP de até 8 MB; a interface limita cada post a 6 imagens e entrega mídia por URL assinada de uma hora somente a Cliente, Profissional ou Admin.
 - Testes transacionais com rollback confirmaram: criação pelo proprietário, bloqueio de caminho alheio, exclusão de suspensos do ranking, isolamento completo da conta Empresa e desempate por nota → total de avaliações → post mais recente. Nenhum post artificial permaneceu no banco.

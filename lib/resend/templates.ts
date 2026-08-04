@@ -26,7 +26,14 @@ export const emailTemplates = {
   training_available: (v: Record<string, string>) => ({ subject: "Treinamento disponível", html: base("Treinamento liberado", `<p>A trilha ${v.track} está disponível para acompanhamento.</p>`) }),
   lgpd_data_export: (v: Record<string, string>) => ({ subject: "Exportação de dados", html: base("Seus dados estao prontos", `<p>Acesse sua exportação pelo link seguro: <a href="${v.url}">baixar dados</a>.</p>`) }),
   account_deletion_confirm: (v: Record<string, string>) => ({ subject: "Exclusão de conta confirmada", html: base("Conta removida", `<p>O processo de exclusão/anonimização foi concluído em ${v.date}.</p>`) }),
-  marketplace_message: (v: Record<string, string>) => ({ subject: "Nova mensagem sobre um serviço", html: base("Você recebeu uma nova mensagem", `<p>Olá ${safe(v.name)}.</p><p>${safe(v.preview)}</p><p><a href="${safe(v.url)}">Abrir conversa no Portal Encaixe</a></p>`) })
+  marketplace_message: (v: Record<string, string>) => ({ subject: "Nova mensagem sobre um serviço", html: base("Você recebeu uma nova mensagem", `<p>Olá ${safe(v.name)}.</p><p>${safe(v.preview)}</p><p><a href="${safe(v.url)}">Abrir conversa no Portal Encaixe</a></p>`) }),
+  company_plan_activated: (v: Record<string, string>) => ({
+    subject: `Plano ${safe(v.plan)} ativado no Portal Encaixe`,
+    html: base(
+      "Seu acesso empresarial está liberado",
+      `<p>Olá, ${safe(v.name)}.</p><p>O plano <strong>${safe(v.plan)}</strong> foi ativado. Sua equipe já pode acessar o painel empresarial.</p><p><a href="${safe(v.url)}">Acessar o painel</a></p>`
+    )
+  })
 };
 
 export type EmailTemplateKey = keyof typeof emailTemplates;

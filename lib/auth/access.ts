@@ -18,9 +18,9 @@ export async function getCurrentRole() {
   if (!entryPath) redirect("/onboarding");
   if (entryPath.startsWith("/onboarding")) redirect(entryPath);
 
-  if (entryPath === "/admin") return "admin";
-  if (entryPath === "/company") return "company";
-  if (entryPath === "/client") return "client";
+  if (entryPath.startsWith("/admin")) return "admin";
+  if (entryPath.startsWith("/company")) return "company";
+  if (entryPath.startsWith("/client")) return "client";
   return "professional";
 }
 

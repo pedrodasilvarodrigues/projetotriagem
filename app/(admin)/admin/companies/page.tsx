@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app/shell";
-import { archiveCompanyAction, updateCompanyPlanAction, updateCompanyStatusAction } from "@/lib/actions/workspace";
+import { archiveCompanyAction, updateCompanyStatusAction } from "@/lib/actions/workspace";
 import { companyPlanLabel } from "@/lib/companies/plans";
 import { createServerClient } from "@/lib/supabase/server";
 import { statusLabel } from "@/lib/status-labels";
@@ -10,7 +10,7 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
   const supabase = await createServerClient();
   let query = supabase
     .from("companies")
-    .select("id,trade_name,legal_name,corporate_email,phone,city,state,status,plano,deleted_at,created_at")
+    .select("id,trade_name,legal_name,corporate_email,phone,city,state,status,plano,status_plano,deleted_at,created_at")
     .order("created_at", { ascending: false })
     .limit(120);
 
@@ -58,7 +58,10 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
                     </td>
                     <td>{companyDemands.length}<p className="text-xs text-slate-500">{companyDemands.slice(0, 2).map((item) => item.title).join(", ")}</p></td>
                     <td>{companyPresentations.length}<p className="text-xs text-slate-500">Profissionais apresentados</p></td>
-                    <td><span className={`origin-badge ${company.plano === "essencial" ? "is-pending" : "is-interest"}`}>{companyPlanLabel(company.plano)}</span></td>
+                    <td>
+                      <span className={`origin-badge ${company.status_plano === "ativo" ? "is-processed" : "is-pending"}`}>{companyPlanLabel(company.plano)}</span>
+                      <p className="mt-1 text-xs text-slate-500">{company.status_plano === "ativo" ? "Ativo" : company.status_plano === "pendente_ativacao" ? "Aguardando ativação" : "Ainda não escolhido"}</p>
+                    </td>
                     <td>{company.deleted_at ? "Arquivada" : statusLabel(company.status)}</td>
                     <td>
                       <div className="grid gap-2">
@@ -73,16 +76,6 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
                             <option value="rejected">Reprovada</option>
                           </select>
                           <button className="w-full rounded bg-slate-950 px-3 py-2 text-xs font-semibold text-white">Salvar status</button>
-                        </form>
-                        <form action={updateCompanyPlanAction}>
-                          <input type="hidden" name="companyId" value={company.id} />
-                          <input type="hidden" name="redirectTo" value="/admin/companies" />
-                          <select name="plan" defaultValue={company.plano} className="mb-2 w-full rounded border border-slate-300 px-2 py-2 text-xs">
-                            <option value="essencial">Plano Essencial</option>
-                            <option value="pro">Plano Pro</option>
-                            <option value="vip">Plano VIP</option>
-                          </select>
-                          <button className="w-full rounded bg-[#0F2D4E] px-3 py-2 text-xs font-semibold text-white">Atualizar plano</button>
                         </form>
                         <form action={archiveCompanyAction}>
                           <input type="hidden" name="companyId" value={company.id} />

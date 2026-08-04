@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireRole } from "@/lib/auth/access";
 import { ensureProfessionalPublicProfile } from "@/lib/auth/public-profile-sync";
 import { hasProAccess, PRO_SHORTLIST_LIMIT } from "@/lib/companies/plans";
+import { requireActiveCompanyPlan, requireActivePlanWhenCompany } from "@/lib/companies/plan-access";
 import { cleanInstitutionName, normalizeInstitutionName } from "@/lib/institutions";
 import { ensureInstitutionName } from "@/lib/institutions-server";
 import { createAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
@@ -557,6 +558,7 @@ export async function addProfessionalSkillAction(formData: FormData) {
 }
 
 export async function updateUserSettingsAction(formData: FormData) {
+  await requireActivePlanWhenCompany();
   const parsed = userSettingsSchema.safeParse({
     emailNotifications: formData.get("emailNotifications") === "on",
     opportunityAlerts: formData.get("opportunityAlerts") === "on",
@@ -682,7 +684,7 @@ export async function uploadProfessionalResumeAction(formData: FormData) {
 }
 
 export async function updateCompanyProfileAction(formData: FormData) {
-  await requireRole("company");
+  await requireActiveCompanyPlan();
   const supabase = await createServerClient();
   const { data } = await supabase.auth.getUser();
   if (!data.user) redirect("/login");
@@ -810,7 +812,7 @@ export async function updateCompanyProfileAction(formData: FormData) {
 }
 
 export async function createDemandAction(formData: FormData) {
-  await requireRole("company");
+  await requireActiveCompanyPlan();
   const parsed = demandSchema.safeParse({
     name: formData.get("name"),
     title: formData.get("title"),
@@ -890,7 +892,7 @@ export async function createDemandAction(formData: FormData) {
 }
 
 export async function updateDemandAction(formData: FormData) {
-  await requireRole("company");
+  await requireActiveCompanyPlan();
 
   const demandId = String(formData.get("demandId") ?? "").trim();
   if (!demandId) redirect("/company/demands?error=demanda-invalida");
@@ -959,7 +961,7 @@ export async function updateDemandAction(formData: FormData) {
 }
 
 export async function deleteDemandAction(formData: FormData) {
-  await requireRole("company");
+  await requireActiveCompanyPlan();
 
   const demandId = String(formData.get("demandId") ?? "").trim();
   if (!demandId) redirect("/company/demands?error=demanda-invalida");
@@ -991,7 +993,7 @@ export async function deleteDemandAction(formData: FormData) {
 }
 
 export async function closeDemandAction(formData: FormData) {
-  await requireRole("company");
+  await requireActiveCompanyPlan();
 
   const demandId = String(formData.get("demandId") ?? "").trim();
   const redirectTo = String(formData.get("redirectTo") ?? "/company/demands");
@@ -1028,6 +1030,7 @@ export async function closeDemandAction(formData: FormData) {
 }
 
 export async function markNotificationsReadAction() {
+  await requireActivePlanWhenCompany();
   const supabase = await createServerClient();
   const { data } = await supabase.auth.getUser();
   if (!data.user) redirect("/login");
@@ -1038,6 +1041,7 @@ export async function markNotificationsReadAction() {
 }
 
 export async function requestDataExportAction(formData: FormData) {
+  await requireActivePlanWhenCompany();
   const supabase = await createServerClient();
   const { data } = await supabase.auth.getUser();
   if (!data.user) redirect("/login");
@@ -1181,7 +1185,7 @@ export async function toggleProfessionalLikeAction(input: {
   message: string;
   error: string;
 }> {
-  await requireRole("company");
+  await requireActiveCompanyPlan();
   const parsed = z.object({
     professionalId: z.string().uuid(),
     demandId: z.string().uuid(),
@@ -1200,11 +1204,11 @@ export async function toggleProfessionalLikeAction(input: {
 
   const { data: company } = await supabase
     .from("companies")
-    .select("id,plano,status,deleted_at")
+    .select("id,plano,status_plano,status,deleted_at")
     .eq("owner_id", userData.user.id)
     .maybeSingle();
 
-  if (!company || !hasProAccess(company.plano) || company.status !== "approved" || company.deleted_at) {
+  if (!company || !hasProAccess(company.plano) || company.status_plano !== "ativo" || company.status !== "approved" || company.deleted_at) {
     return { ok: false, likeId: null, status: null, message: "", error: "A vitrine está disponível somente para empresas com Plano Pro ativo." };
   }
 
@@ -1304,11 +1308,11 @@ export async function createProShortlistAction(formData: FormData) {
 
   const { data: demand } = await supabase
     .from("demands")
-    .select("id,status,company:companies!inner(id,plano)")
+    .select("id,status,company:companies!inner(id,plano,status_plano)")
     .eq("id", demandId)
     .maybeSingle();
   const demandCompany = Array.isArray(demand?.company) ? demand.company[0] : demand?.company;
-  if (!demand || !demandCompany || !hasProAccess(demandCompany.plano) || !["active", "screening"].includes(demand.status)) {
+  if (!demand || !demandCompany || !hasProAccess(demandCompany.plano) || demandCompany.status_plano !== "ativo" || !["active", "screening"].includes(demand.status)) {
     redirect(`${redirectTo}?error=shortlist-disponivel-apenas-para-empresa-pro`);
   }
 
@@ -1330,30 +1334,6 @@ export async function createProShortlistAction(formData: FormData) {
   revalidatePath("/company/candidates");
   revalidatePath("/professional/referrals");
   redirect(`${redirectTo}?message=shortlist-pro-apresentado`);
-}
-
-export async function updateCompanyPlanAction(formData: FormData) {
-  await requireRole("admin");
-  const parsed = z.object({
-    companyId: z.string().uuid(),
-    plan: z.enum(["essencial", "pro", "vip"]),
-    redirectTo: z.string().startsWith("/admin/")
-  }).safeParse({
-    companyId: formData.get("companyId"),
-    plan: formData.get("plan"),
-    redirectTo: formData.get("redirectTo") ?? "/admin/companies"
-  });
-  if (!parsed.success) redirect("/admin/companies?error=dados-invalidos");
-
-  const supabase = await createServerClient();
-  const { error } = await supabase.from("companies").update({ plano: parsed.data.plan }).eq("id", parsed.data.companyId);
-  if (error) redirect(`${parsed.data.redirectTo}?error=${encodeURIComponent(error.message)}`);
-
-  revalidatePath("/admin/companies");
-  revalidatePath(`/admin/companies/${parsed.data.companyId}`);
-  revalidatePath("/company");
-  revalidatePath("/company/showcase");
-  redirect(`${parsed.data.redirectTo}?message=plano-atualizado`);
 }
 
 export async function createAdminDemandAction(formData: FormData) {

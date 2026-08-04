@@ -323,7 +323,9 @@ async function saveCompanySignup(client: ReturnType<typeof createAdminClient>, u
         neighborhood: data.neighborhood,
         city: data.city,
         state: data.state.toUpperCase(),
-        status: "pending"
+        status: "pending",
+        plano: "nenhum",
+        status_plano: "nenhum"
       },
       { onConflict: "cnpj" }
     )
@@ -549,8 +551,10 @@ export async function registerCompanyWithEmailAction(formData: FormData) {
   }
 
   await saveCompanySignup(admin, createdUser.user.id, data);
-
-  redirect("/login?message=cadastro-criado");
+  const supabase = await createServerClient();
+  const { error: signInError } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
+  if (signInError) redirect("/login?message=cadastro-criado&next=/company/plan");
+  redirect("/company/plan");
 }
 
 export async function registerClientWithEmailAction(formData: FormData) {

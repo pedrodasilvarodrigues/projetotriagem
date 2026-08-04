@@ -116,6 +116,31 @@ export async function proxy(request: NextRequest) {
     if (path.startsWith("/company") && role !== "company") return NextResponse.redirect(new URL("/acesso-negado", request.url));
     if (path.startsWith("/professional") && role !== "professional") return NextResponse.redirect(new URL("/acesso-negado", request.url));
     if (path.startsWith("/client") && role !== "client") return NextResponse.redirect(new URL("/acesso-negado", request.url));
+
+    if (path.startsWith("/company") && role === "company") {
+      const { data: company, error: companyError } = await supabase
+        .from("companies")
+        .select("plano,status_plano")
+        .eq("owner_id", data.user.id)
+        .is("deleted_at", null)
+        .maybeSingle();
+
+      if (companyError) {
+        console.error("[auth] Proxy falhou ao verificar o plano empresarial", { path, userId: data.user.id, error: companyError.message });
+        return NextResponse.redirect(new URL("/login?error=nao-foi-possivel-verificar-o-plano", request.url));
+      }
+
+      if (!company) return NextResponse.redirect(new URL("/onboarding/company", request.url));
+
+      const isPlanRoute = path === "/company/plan" || path.startsWith("/company/plan/");
+      if (company.status_plano === "ativo") {
+        if (isPlanRoute) return NextResponse.redirect(new URL("/company", request.url));
+      } else if (company.status_plano === "pendente_ativacao") {
+        if (path !== "/company/plan/pending") return NextResponse.redirect(new URL("/company/plan/pending", request.url));
+      } else if (path !== "/company/plan") {
+        return NextResponse.redirect(new URL("/company/plan", request.url));
+      }
+    }
   }
 
   return response;

@@ -297,7 +297,9 @@ export async function saveCompanyAction(formData: FormData) {
     neighborhood: data.neighborhood,
     city: data.city,
     state: data.state.toUpperCase(),
-    status: "pending"
+    status: "pending",
+    plano: "nenhum",
+    status_plano: "nenhum"
   }, { onConflict: "cnpj" }).select("id").single();
 
   if (error || !company?.id) redirect(`/onboarding/company?error=${encodeURIComponent(error?.message ?? "empresa-nao-criada")}`);
@@ -310,5 +312,5 @@ export async function saveCompanyAction(formData: FormData) {
     role_title: data.contactRole
   });
   await recordConsent(user.id);
-  redirect("/company");
+  redirect("/company/plan");
 }

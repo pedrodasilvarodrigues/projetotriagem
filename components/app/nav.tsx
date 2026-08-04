@@ -10,6 +10,7 @@ import {
   ChevronDown,
   ChevronUp,
   ClipboardCheck,
+  CreditCard,
   FileText,
   GraduationCap,
   History,
@@ -47,6 +48,7 @@ const navItems: Record<AppRole, NavigationConfig> = {
       { href: "/admin", label: "Painel", icon: LayoutGrid },
       { href: "/admin/professionals", label: "Profissionais", icon: UserRoundSearch },
       { href: "/admin/companies", label: "Empresas", icon: Building2 },
+      { href: "/admin/plan-activations", label: "Ativar planos", icon: CreditCard },
       { href: "/admin/demands", label: "Demandas", icon: BriefcaseBusiness },
       { href: "/admin/company-likes", label: "Interesses Pro", icon: HeartHandshake },
       { href: "/admin/processes", label: "Processos", icon: ClipboardCheck },
@@ -73,6 +75,7 @@ const navItems: Record<AppRole, NavigationConfig> = {
       { href: "/company/candidates", label: "Análise de Candidatos", icon: UserRoundSearch },
       { href: "/company/history", label: "Histórico", icon: History },
       { href: "/company/notifications", label: "Notificações", icon: Bell },
+      { href: "/company/billing", label: "Faturamento", icon: CreditCard },
       { href: "/company/settings", label: "Configurações", icon: Settings }
     ]
   },

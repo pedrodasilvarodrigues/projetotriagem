@@ -6,6 +6,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 
 # Concluido
 - Web Push implementado: service worker, consentimento por dispositivo, subscriptions protegidas por RLS, fila transacional alimentada por notificações internas/marketplace e entrega protegida pelo Cron da Vercel. O fluxo inclui teste real e orientação para iPhone fora de PWA; nenhuma chave privada é versionada.
+- Migration `20260804200000_add_web_push_notifications.sql` aplicada e validada no Supabase remoto: `push_subscriptions` e `push_notification_outbox` existem com RLS ativa, e os triggers de notificações internas e do marketplace estão registrados.
 - Cadastro profissional por e-mail e onboarding por Google agora solicitam foto com pré-visualização, validação de formato/tamanho e persistência no bucket privado `avatars`. A Empresa vê a foto somente de profissionais apresentados, nos cards e no currículo protegido, por RPC e política de Storage específicas.
 - Personalizador de download do currículo passou a ser renderizado em portal no `body`, mantendo o seletor de modelo sobre o viewport atual mesmo quando o botão é acionado no fim da página, com bloqueio temporário da rolagem de fundo.
 - Integridade de encerramento reforçada: candidato `Contratado` só pode ser arquivado; candidato `Reprovado` pode ser arquivado ou excluído da lista. Demandas com qualquer profissional contratado só podem ser arquivadas, enquanto demandas sem contratação podem ser excluídas.
@@ -181,7 +182,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Fallback no proxy para redirecionar `/?code=...` para `/auth/callback` quando o Supabase retornar o codigo na raiz do dominio correto.
 
 # Pendente
-- Web Push: configurar na Vercel `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `SUPABASE_SERVICE_ROLE_KEY` e `CRON_SECRET` antes da primeira publicação. A migration `20260804200000_add_web_push_notifications.sql` está pronta para aplicar no Supabase.
+- Web Push: configurar na Vercel `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `SUPABASE_SERVICE_ROLE_KEY` e `CRON_SECRET` antes da primeira publicação.
 - Integrar o consumidor financeiro/Asaas à fila `hire_billing_events`; o evento de cobrança já é criado de forma idempotente, mas a liquidação externa ainda não faz parte do projeto.
 - Definir os valores comerciais oficiais de mensalidade e taxa por contratação de Essencial, Pro e VIP e configurar `NEXT_PUBLIC_*_PRICE/FEE` na Vercel; o repositório atual não contém uma tabela pública com esses números.
 - Configurar `NEXT_PUBLIC_COMMERCIAL_WHATSAPP` na Vercel para habilitar o contato direto pré-preenchido da ativação Pro/VIP.

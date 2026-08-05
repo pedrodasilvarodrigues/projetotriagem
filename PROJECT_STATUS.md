@@ -187,6 +187,7 @@ Plataforma de recrutamento e triagem profissional que conecta profissionais e em
 - Fallback no proxy para redirecionar `/?code=...` para `/auth/callback` quando o Supabase retornar o codigo na raiz do dominio correto.
 
 # Pendente
+- Web Push: o Cron da Vercel está configurado para uma execução diária, compatível com o plano atual. Entrega automática em intervalos de minutos exige Vercel Pro ou migração do disparador para um agendador externo/Supabase Cron.
 - Web Push: configurar na Vercel `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `SUPABASE_SERVICE_ROLE_KEY` e `CRON_SECRET` antes da primeira publicação.
 - Integrar o consumidor financeiro/Asaas à fila `hire_billing_events`; o evento de cobrança já é criado de forma idempotente, mas a liquidação externa ainda não faz parte do projeto.
 - Definir os valores comerciais oficiais de mensalidade e taxa por contratação de Essencial, Pro e VIP e configurar `NEXT_PUBLIC_*_PRICE/FEE` na Vercel; o repositório atual não contém uma tabela pública com esses números.

@@ -25,7 +25,7 @@ const successMessages: Record<string, string> = {
 const errorMessages: Record<string, string> = {
   "solicitacao-invalida": "Não foi possível identificar o prestador ou a ação solicitada.",
   "motivo-obrigatorio": "Informe o motivo antes de reprovar ou suspender o prestador.",
-  "aprovacao-nao-confirmada": "O banco não confirmou a alteração. Atualize a página e tente novamente.",
+  "aprovacao-nao-confirmada": "O sistema não confirmou a alteração. Atualize a página e tente novamente.",
   "admin_required": "Sua sessão não possui permissão administrativa para esta ação.",
   "provider_not_found": "O cadastro do prestador não foi encontrado.",
   "moderation_reason_required": "Informe o motivo antes de reprovar ou suspender o prestador."

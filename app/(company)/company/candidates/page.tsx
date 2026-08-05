@@ -34,6 +34,11 @@ type CandidateProcess = {
   confirmation: HireConfirmation | HireConfirmation[] | null;
 };
 
+type CandidateAvatar = {
+  process_id: string;
+  avatar_path: string;
+};
+
 const feedbackMessages: Record<string, string> = {
   "contratacao-enviada": "Confirmação enviada ao profissional. A contratação será oficial quando ele responder.",
   "candidato-ainda-nao-aprovado": "A contratação só pode ser informada depois que o Admin aprovar o candidato.",
@@ -46,6 +51,7 @@ const feedbackMessages: Record<string, string> = {
   "candidato-removido": "Candidato excluído da sua lista. O histórico administrativo foi preservado.",
   "candidato-ainda-em-andamento": "Somente candidatos contratados ou reprovados podem ser arquivados ou excluídos.",
   "candidato-ja-removido": "Este candidato já foi excluído da lista.",
+  "candidato-contratado-so-pode-ser-arquivado": "Candidatos contratados fazem parte do histórico da contratação e só podem ser arquivados.",
   "nao-foi-possivel-concluir": "Não foi possível registrar a confirmação agora. Tente novamente em instantes."
 };
 
@@ -107,6 +113,14 @@ export default async function CompanyCandidatesPage({
     : { data: [] };
 
   const allProcesses = (candidateProcesses ?? []) as unknown as CandidateProcess[];
+  const { data: candidateAvatars } = company?.id ? await supabase.rpc("list_company_candidate_avatars") : { data: [] };
+  const signedAvatarEntries = await Promise.all(
+    ((candidateAvatars ?? []) as CandidateAvatar[]).map(async (item) => {
+      const { data } = await supabase.storage.from("avatars").createSignedUrl(item.avatar_path, 60 * 60);
+      return [item.process_id, data?.signedUrl ?? null] as const;
+    })
+  );
+  const avatarUrls = new Map(signedAvatarEntries.filter((entry): entry is readonly [string, string] => Boolean(entry[1])));
   const activeProcesses = allProcesses.filter((process) => process.company_visibility === "active");
   const archivedProcesses = allProcesses.filter((process) => process.company_visibility === "archived");
   const processes = currentView === "archived" ? archivedProcesses : activeProcesses;
@@ -165,13 +179,19 @@ export default async function CompanyCandidatesPage({
               const confirmation = one(process.confirmation) ?? undefined;
               if (!candidate || !demand) return null;
               const status = processStatus(process.status);
+              const avatarUrl = avatarUrls.get(process.id);
 
               return (
                 <article key={process.id} className="group flex flex-col rounded-2xl border border-slate-200 bg-[#FAFBFC] p-4 transition duration-200 hover:-translate-y-0.5 hover:border-[#F2811D]/45 hover:shadow-[0_14px_30px_rgba(15,45,78,.09)] sm:p-5">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate font-display text-lg font-bold text-[#0F2D4E]">{candidate.full_name}</p>
-                      <p className="mt-1 text-sm text-slate-600">{demand.name ?? demand.title}</p>
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-full border-2 border-white bg-[#DDE7F0] text-lg font-bold text-[#0F2D4E] shadow-[0_0_0_1px_rgba(15,45,78,.16),0_8px_20px_rgba(15,45,78,.12)]">
+                        {avatarUrl ? <img src={avatarUrl} alt={`Foto de ${candidate.full_name}`} className="size-full object-cover" /> : candidate.full_name.slice(0, 1).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate font-display text-lg font-bold text-[#0F2D4E]">{candidate.full_name}</p>
+                        <p className="mt-1 text-sm text-slate-600">{demand.name ?? demand.title}</p>
+                      </div>
                     </div>
                     <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${status.tone}`}>{status.label}</span>
                   </div>
@@ -196,7 +216,7 @@ export default async function CompanyCandidatesPage({
 
                   {process.status === "hired" || process.status === "rejected" ? (
                     <div className="mt-4 border-t border-slate-200 pt-4">
-                      <CandidateVisibilityControls processId={process.id} currentView={currentView} />
+                      <CandidateVisibilityControls processId={process.id} currentView={currentView} processStatus={process.status as "hired" | "rejected"} />
                     </div>
                   ) : null}
 

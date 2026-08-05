@@ -9,14 +9,14 @@ type CityOption = { city: string; state: string };
 
 const profileErrorMessages: Record<string, string> = {
   "nome-invalido": "Informe o nome completo.",
-  "email-invalido": "Confira o email informado.",
+  "email-invalido": "Confira o e-mail informado.",
   "cpf-invalido": "Confira o CPF informado.",
   "cpf-ja-cadastrado": "Este CPF já pertence a outro cadastro.",
   "data-invalida": "Informe uma data valida no formato dd/mm/aaaa e idade mínima de 14 anos.",
   "nacionalidade-invalida": "Informe a nacionalidade.",
   "cargo-invalido": "Informe o cargo desejado.",
   "telefone-invalido": "Informe um telefone com DDD.",
-  "cep-invalido": "Informe um CEP com 8 digitos.",
+  "cep-invalido": "Informe um CEP com 8 dígitos.",
   "endereco-invalido": "Confira os dados do endereço.",
   "localizacao-invalida": "Informe cidade e estado.",
   "erro-ao-salvar-perfil": "Não foi possível salvar os dados gerais. Tente novamente.",
@@ -94,7 +94,7 @@ export default async function ProfessionalProfilePage({ searchParams }: { search
           </section>
           <div className="grid gap-4 md:grid-cols-2">
             <label className="text-sm font-semibold">Nome completo<input name="fullName" required defaultValue={profileData.fullName} className="field-input mt-2" /></label>
-            <label className="text-sm font-semibold">Email<input name="email" type="email" defaultValue={profileData.email} className="field-input mt-2" /></label>
+            <label className="text-sm font-semibold">E-mail<input name="email" type="email" defaultValue={profileData.email} className="field-input mt-2" /></label>
             <label className="text-sm font-semibold">Nacionalidade<input name="nationality" defaultValue={profileData.nationality} className="field-input mt-2" /></label>
             <label className="text-sm font-semibold">Cargo desejado<input name="desiredRole" required defaultValue={profileData.desiredRole} className="field-input mt-2" /></label>
             <label className="text-sm font-semibold">Disponibilidade em dias<input name="availableInDays" type="number" min="0" defaultValue={profileData.availableInDays} className="field-input mt-2" /></label>

@@ -255,7 +255,7 @@ function ProfessionalResumeDocument({ input }: { input: ProfessionalResumePdfInp
         <Page size="A4" style={[exportStyles.page, exportStyles.pageInner]}>
           <View style={exportStyles.header}>
             <ContactBlock input={input} />
-            <Text style={exportStyles.meta}>{availability} | Grau de instrucao: {input.educationLevel}{input.showSalaryExpectation ? " | Pretensão salarial: a combinar" : ""}</Text>
+            <Text style={exportStyles.meta}>{availability} | Grau de instrução: {input.educationLevel}{input.showSalaryExpectation ? " | Pretensão salarial: a combinar" : ""}</Text>
           </View>
           <ResumeSections input={input} accentColor={accentColor} timeline />
         </Page>
@@ -268,7 +268,7 @@ function ProfessionalResumeDocument({ input }: { input: ProfessionalResumePdfInp
       <Page size="A4" style={exportStyles.page}>
         <View style={[exportStyles.editorialBand, { backgroundColor: accentColor }]}>
           <ContactBlock input={input} />
-          <Text style={exportStyles.meta}>{availability} | Grau de instrucao: {input.educationLevel}{input.showSalaryExpectation ? " | Pretensão salarial: a combinar" : ""}</Text>
+          <Text style={exportStyles.meta}>{availability} | Grau de instrução: {input.educationLevel}{input.showSalaryExpectation ? " | Pretensão salarial: a combinar" : ""}</Text>
         </View>
         <View style={{ padding: "0 36 36" }}>
           <ResumeSections input={input} accentColor={accentColor} />

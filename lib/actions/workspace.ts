@@ -973,16 +973,16 @@ export async function deleteDemandAction(formData: FormData) {
   const { data: company } = await supabase.from("companies").select("id").eq("owner_id", userData.user.id).maybeSingle();
   if (!company?.id) redirect("/company/profile?error=complete-empresa");
 
-  const { error } = await supabase
-    .from("demands")
-    .update({
-      status: "cancelled",
-      deleted_at: new Date().toISOString()
-    })
-    .eq("id", demandId)
-    .eq("company_id", company.id);
+  const { error } = await supabase.rpc("company_remove_demand", { target_demand_id: demandId });
 
-  if (error) redirect(`/company/demands?error=${encodeURIComponent(error.message)}`);
+  if (error) {
+    const code = error.message.includes("demand_with_hire_must_be_archived")
+      ? "demanda-com-contratacao-deve-ser-arquivada"
+      : error.message.includes("demand_access_denied")
+        ? "demanda-nao-encontrada"
+        : "nao-foi-possivel-excluir-a-demanda";
+    redirect(`/company/demands?error=${code}`);
+  }
 
   revalidatePath("/company");
   revalidatePath("/company/demands");

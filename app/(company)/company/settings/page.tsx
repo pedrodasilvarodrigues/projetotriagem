@@ -38,7 +38,7 @@ export default async function CompanySettingsPage({ searchParams }: { searchPara
             </div>
             <div className="mt-4 space-y-3 text-sm">
               <p><strong className="block text-slate-950">Empresa</strong>{company?.trade_name ?? "Não informado"}</p>
-              <p><strong className="block text-slate-950">Email corporativo</strong>{company?.corporate_email ?? userData.user?.email ?? "Não informado"}</p>
+              <p><strong className="block text-slate-950">E-mail corporativo</strong>{company?.corporate_email ?? userData.user?.email ?? "Não informado"}</p>
               <p><strong className="block text-slate-950">Telefone</strong>{company?.phone ?? "Não informado"}</p>
             </div>
             <Link href="/company/profile" className="mt-5 inline-flex rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">Editar perfil</Link>
@@ -79,7 +79,7 @@ export default async function CompanySettingsPage({ searchParams }: { searchPara
             <SettingsPreferences
               prefs={prefs}
               labels={{
-                notificationsDescription: "Emails da plataforma e alertas sobre demandas e candidatos.",
+                notificationsDescription: "E-mails da plataforma e alertas sobre demandas e candidatos.",
                 alertsTitle: "Alertas operacionais",
                 alertsDescription: "Receber avisos de movimentacao em demandas, triagens e candidatos.",
                 privacyTitle: "Visibilidade empresarial",

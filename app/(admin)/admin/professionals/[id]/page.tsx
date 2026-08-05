@@ -47,7 +47,7 @@ export default async function AdminProfessionalDetailPage({ params }: { params: 
               <p className="text-xs font-bold uppercase text-slate-500">Cadastro completo</p>
               <h2 className="mt-1 text-2xl font-semibold">{professional.full_name}</h2>
               <p className="mt-2 text-sm text-slate-600">{professional.desired_role} · {professional.city}/{professional.state}</p>
-              <p className="mt-2 text-sm text-slate-600">{professional.email ?? "Email não informado"} · {professional.phone ?? "Telefone não informado"}</p>
+              <p className="mt-2 text-sm text-slate-600">{professional.email ?? "E-mail não informado"} · {professional.phone ?? "Telefone não informado"}</p>
               <p className="mt-4 text-sm leading-6 text-slate-700">{professional.summary ?? "Resumo profissional ainda não informado."}</p>
             </div>
             <div className="grid gap-2 rounded-lg bg-slate-50 p-4">
@@ -84,7 +84,7 @@ export default async function AdminProfessionalDetailPage({ params }: { params: 
           </section>
 
           <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold">Histórico de processos e apresentacoes</h2>
+            <h2 className="text-lg font-semibold">Histórico de processos e apresentações</h2>
             <div className="mt-4 grid gap-3">
               {(presentations ?? []).map((item) => <p key={item.id} className="rounded border border-slate-200 p-3 text-sm">Apresentado para <strong>{one(item.company)?.trade_name}</strong> em {new Date(item.presented_at).toLocaleString("pt-BR")} · {statusLabel(item.status)}</p>)}
               {(processes ?? []).map((process) => {

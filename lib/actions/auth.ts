@@ -8,6 +8,7 @@ import { sendTransactionalEmail } from "@/lib/resend/send-email";
 import { createServerClient, hasSupabasePublicEnv } from "@/lib/supabase/server";
 import { ageFromBirthDate, isValidBrazilianPhone, isValidCnpj, isValidCpf, onlyDigits } from "@/lib/validations/br";
 import { appendSearchParam, safeInternalRedirect } from "@/lib/auth/safe-redirect";
+import { isValidProfilePhoto, profilePhotoPath } from "@/lib/uploads/profile-photo";
 
 const minimumAge = Number(process.env.MINIMUM_PROFESSIONAL_AGE ?? 14);
 const productionAppUrl = "https://projetotriagem.vercel.app";
@@ -237,7 +238,7 @@ async function confirmAuthEmailByAddress(email: string) {
   }
 }
 
-async function saveProfessionalSignup(client: ReturnType<typeof createAdminClient>, userId: string, data: ProfessionalRegistration) {
+async function saveProfessionalSignup(client: ReturnType<typeof createAdminClient>, userId: string, data: ProfessionalRegistration, avatarPath: string) {
   const normalizedCpf = onlyDigits(data.cpf);
   const normalizedPhone = onlyDigits(data.phone);
   const { ipAddress, userAgent } = await getRequestMeta();
@@ -250,6 +251,7 @@ async function saveProfessionalSignup(client: ReturnType<typeof createAdminClien
     full_name: data.fullName,
     email: data.email,
     phone: normalizedPhone,
+    avatar_path: avatarPath,
     status: "pending"
   });
 
@@ -482,6 +484,10 @@ export async function registerProfessionalWithEmailAction(formData: FormData) {
   if (!parsed.success) redirect("/register?error=dados-invalidos");
   if (!canUseAdminClient()) redirect("/register?error=configuracao-supabase-incompleta");
 
+  const avatar = formData.get("avatar");
+  if (!(avatar instanceof File) || avatar.size === 0) redirect("/register?error=foto-obrigatoria");
+  if (!isValidProfilePhoto(avatar)) redirect("/register?error=foto-invalida");
+
   const data = parsed.data;
   const admin = createAdminClient();
   const { data: duplicatedCpf } = await admin.from("professionals").select("id,user_id").eq("cpf", onlyDigits(data.cpf)).maybeSingle();
@@ -501,7 +507,17 @@ export async function registerProfessionalWithEmailAction(formData: FormData) {
     redirect(`/register?error=${signupErrorCode(error)}`);
   }
 
-  await saveProfessionalSignup(admin, createdUser.user.id, data);
+  const avatarPath = profilePhotoPath(createdUser.user.id, avatar);
+  const { error: avatarError } = await admin.storage.from("avatars").upload(avatarPath, avatar, {
+    upsert: true,
+    contentType: avatar.type
+  });
+  if (avatarError) {
+    await admin.auth.admin.deleteUser(createdUser.user.id);
+    redirect("/register?error=foto-invalida");
+  }
+
+  await saveProfessionalSignup(admin, createdUser.user.id, data, avatarPath);
 
   redirect("/login?message=cadastro-criado");
 }

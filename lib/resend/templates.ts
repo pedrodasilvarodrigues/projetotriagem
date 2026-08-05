@@ -5,7 +5,7 @@ const base = (title: string, body: string) => `
     <main style="max-width:640px;margin:0 auto;padding:32px 20px">
       <h1 style="font-size:24px;line-height:1.2">${title}</h1>
       <section style="background:#fff;border:1px solid #e4e4e7;border-radius:12px;padding:24px">${body}</section>
-      <p style="font-size:12px;color:#71717a;margin-top:24px">Portal de Triagem Profissional. Email transacional automatico.</p>
+      <p style="font-size:12px;color:#71717a;margin-top:24px">Portal de Triagem Profissional. E-mail transacional automático.</p>
     </main>
   </body>
 </html>`;
@@ -13,12 +13,12 @@ const base = (title: string, body: string) => `
 const safe = (value = "") => value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char] ?? char);
 
 export const emailTemplates = {
-  welcome_professional: (v: Record<string, string>) => ({ subject: "Bem-vindo ao Portal de Triagem", html: base("Bem-vindo, profissional", `<p>Ola ${v.name}. Seu perfil foi criado e será analisado pela equipe.</p>`) }),
+  welcome_professional: (v: Record<string, string>) => ({ subject: "Bem-vindo ao Portal de Triagem", html: base("Bem-vindo, profissional", `<p>Olá, ${v.name}. Seu perfil foi criado e será analisado pela equipe.</p>`) }),
   welcome_company: (v: Record<string, string>) => ({ subject: "Empresa cadastrada no Portal", html: base("Cadastro empresarial recebido", `<p>Olá ${v.name}. Sua empresa já pode registrar demandas internas após aprovação.</p>`) }),
-  email_verification: (v: Record<string, string>) => ({ subject: "Verifique seu email", html: base("Verificacao de email", `<p>Use o link seguro para confirmar seu acesso: <a href="${v.url}">confirmar email</a>.</p>`) }),
+  email_verification: (v: Record<string, string>) => ({ subject: "Verifique seu e-mail", html: base("Verificação de e-mail", `<p>Use o link seguro para confirmar seu acesso: <a href="${v.url}">confirmar e-mail</a>.</p>`) }),
   password_reset: (v: Record<string, string>) => ({ subject: "Redefinicao de senha", html: base("Redefina sua senha", `<p>Acesse o link seguro para criar uma nova senha: <a href="${v.url}">redefinir senha</a>.</p>`) }),
-  profile_approved: (v: Record<string, string>) => ({ subject: "Perfil aprovado", html: base("Perfil aprovado", `<p>Ola ${v.name}. Seu cadastro foi aprovado pela equipe de triagem.</p>`) }),
-  profile_rejected: (v: Record<string, string>) => ({ subject: "Perfil reprovado", html: base("Perfil reprovado", `<p>Ola ${v.name}. Motivo informado: ${v.reason}.</p>`) }),
+  profile_approved: (v: Record<string, string>) => ({ subject: "Perfil aprovado", html: base("Perfil aprovado", `<p>Olá, ${v.name}. Seu cadastro foi aprovado pela equipe de triagem.</p>`) }),
+  profile_rejected: (v: Record<string, string>) => ({ subject: "Perfil reprovado", html: base("Perfil reprovado", `<p>Olá, ${v.name}. Motivo informado: ${v.reason}.</p>`) }),
   process_status_update: (v: Record<string, string>) => ({ subject: "Atualização no processo", html: base("Situação atualizada", `<p>Seu processo agora está em: <strong>${v.status}</strong>.</p>`) }),
   candidate_forwarded: (v: Record<string, string>) => ({ subject: "Candidato encaminhado", html: base("Novo candidato encaminhado", `<p>${v.candidate} foi encaminhado para a demanda ${v.demand}.</p>`) }),
   support_ticket_opened: (v: Record<string, string>) => ({ subject: "Chamado aberto", html: base("Recebemos seu chamado", `<p>Protocolo: <strong>${v.protocol}</strong>.</p>`) }),

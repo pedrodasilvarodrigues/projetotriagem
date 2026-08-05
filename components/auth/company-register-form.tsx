@@ -48,7 +48,7 @@ const errorMessages: Record<string, string> = {
   "email-ja-cadastrado": "Esse e-mail já possui cadastro. Volte para o acesso ou use outro e-mail.",
   "cnpj-ja-cadastrado": "Esse CNPJ já possui cadastro no portal.",
   "senha-invalida": "A senha precisa ter pelo menos 6 caracteres.",
-  "configuracao-supabase-incompleta": "Configuração do Supabase pendente. Adicione as variáveis de ambiente seguras na Vercel.",
+  "configuracao-supabase-incompleta": "O cadastro está temporariamente indisponível. Tente novamente em instantes.",
   "nao-foi-possivel-criar-conta": "Não foi possível criar a conta agora. Tente novamente em instantes."
 };
 
@@ -134,7 +134,7 @@ export function CompanyRegisterForm({ error }: { error?: string }) {
       <fieldset className="grid gap-4 md:grid-cols-2">
         <legend className="mb-1 text-sm font-bold text-blue-700 font-display md:col-span-2">Dados de acesso</legend>
         <label className="block text-sm font-bold text-slate-800">
-          Email de acesso
+          E-mail de acesso
           <input name="email" required type="email" autoComplete="email" className={inputClass} placeholder="empresa@site.com" />
         </label>
         <label className="block text-sm font-bold text-slate-800">
@@ -154,7 +154,7 @@ export function CompanyRegisterForm({ error }: { error?: string }) {
         <label className="block text-sm font-bold text-slate-800">Razão Social<input name="legalName" required value={legalName} onChange={(event) => setLegalName(event.target.value)} className={inputClass} placeholder="Nome Oficial da Empresa" /></label>
         <label className="block text-sm font-bold text-slate-800">Nome Fantasia<input name="tradeName" required value={tradeName} onChange={(event) => setTradeName(event.target.value)} className={inputClass} placeholder="Nome Comercial" /></label>
         <label className="block text-sm font-bold text-slate-800">Telefone<input name="phone" required value={phone} onChange={(event) => setPhone(maskPhone(event.target.value))} className={inputClass} placeholder="(00) 00000-0000" /></label>
-        <label className="block text-sm font-bold text-slate-800">Email Corporativo (opcional)<input name="corporateEmail" type="email" value={corporateEmail} onChange={(event) => setCorporateEmail(event.target.value)} placeholder="Opcional" className={inputClass} /></label>
+        <label className="block text-sm font-bold text-slate-800">E-mail corporativo (opcional)<input name="corporateEmail" type="email" value={corporateEmail} onChange={(event) => setCorporateEmail(event.target.value)} placeholder="Opcional" className={inputClass} /></label>
         <label className="block text-sm font-bold text-slate-800">CEP<input name="cep" required value={cep} onBlur={(event) => lookupCep(event.target.value)} onChange={(event) => setCep(maskCep(event.target.value))} className={inputClass} placeholder="00000-000" /></label>
         <label className="block text-sm font-bold text-slate-800 lg:col-span-2">Endereço<input name="street" required value={street} onChange={(event) => setStreet(event.target.value)} className={inputClass} placeholder="Rua / Avenida..." /></label>
         <label className="block text-sm font-bold text-slate-800">Número<input name="addressNumber" required value={number} onChange={(event) => setNumber(event.target.value)} className={inputClass} placeholder="Nº" /></label>

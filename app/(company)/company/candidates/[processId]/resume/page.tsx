@@ -37,6 +37,9 @@ export default async function CompanyCandidateResumePage({ params }: { params: P
   const { data, error } = await supabase.rpc("get_company_candidate_resume", { target_process_id: processId });
   if (error || !data) redirect("/company/candidates?error=curriculo-indisponivel");
   const resume = data as unknown as ResumeData;
+  const { data: candidateAvatars } = await supabase.rpc("list_company_candidate_avatars");
+  const avatarPath = ((candidateAvatars ?? []) as Array<{ process_id: string; avatar_path: string }>).find((item) => item.process_id === processId)?.avatar_path;
+  const { data: avatarData } = avatarPath ? await supabase.storage.from("avatars").createSignedUrl(avatarPath, 60 * 60) : { data: null };
   const technicalSkills = resume.skills.filter((skill) => skill.skill_type === "technical");
   const behavioralSkills = resume.skills.filter((skill) => skill.skill_type !== "technical");
 
@@ -49,14 +52,19 @@ export default async function CompanyCandidateResumePage({ params }: { params: P
 
         <section className="relative overflow-hidden rounded-2xl bg-[#0F2D4E] p-6 text-white shadow-[0_18px_46px_rgba(15,45,78,.2)] sm:p-8">
           <div className="absolute inset-y-0 right-0 w-2 bg-[#F2811D]" />
-          <div className="relative max-w-3xl">
-            <p className="flex items-center gap-2 text-xs font-bold uppercase text-[#FFB36D]"><ShieldCheck aria-hidden="true" size={15} /> Currículo protegido</p>
-            <h2 className="mt-3 font-display text-3xl font-bold">{resume.professional.full_name}</h2>
-            <p className="mt-2 text-base font-semibold text-slate-100">{resume.professional.desired_role ?? "Objetivo profissional não informado"}</p>
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-200">{resume.professional.summary ?? "O profissional ainda não adicionou um resumo ao currículo."}</p>
-            <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-slate-100">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5"><MapPin size={14} /> {resume.professional.city ?? "Cidade não informada"}/{resume.professional.state ?? "--"}</span>
-              <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5">Candidatura para: {resume.demand.name ?? resume.demand.title}</span>
+          <div className="relative flex max-w-4xl flex-col gap-5 sm:flex-row sm:items-start">
+            <div className="grid size-28 shrink-0 place-items-center overflow-hidden rounded-full border-4 border-white/90 bg-[#DDE7F0] text-3xl font-bold text-[#0F2D4E] shadow-[0_0_0_2px_rgba(242,129,29,.75),0_18px_36px_rgba(0,0,0,.22)]">
+              {avatarData?.signedUrl ? <img src={avatarData.signedUrl} alt={`Foto de ${resume.professional.full_name}`} className="size-full object-cover" /> : resume.professional.full_name.slice(0, 1).toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="flex items-center gap-2 text-xs font-bold uppercase text-[#FFB36D]"><ShieldCheck aria-hidden="true" size={15} /> Currículo protegido</p>
+              <h2 className="mt-3 font-display text-3xl font-bold">{resume.professional.full_name}</h2>
+              <p className="mt-2 text-base font-semibold text-slate-100">{resume.professional.desired_role ?? "Objetivo profissional não informado"}</p>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-200">{resume.professional.summary ?? "O profissional ainda não adicionou um resumo ao currículo."}</p>
+              <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-slate-100">
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5"><MapPin size={14} /> {resume.professional.city ?? "Cidade não informada"}/{resume.professional.state ?? "--"}</span>
+                <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5">Candidatura para: {resume.demand.name ?? resume.demand.title}</span>
+              </div>
             </div>
           </div>
         </section>

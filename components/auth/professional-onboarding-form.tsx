@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { BirthDateInput } from "@/components/auth/birth-date-input";
 import { ConsentFields } from "@/components/auth/onboarding-layout";
+import { ProfilePhotoField } from "@/components/auth/profile-photo-field";
 import { saveProfessionalBasicsAction } from "@/lib/actions/onboarding";
 
 type ViaCepResponse = {
@@ -38,6 +39,13 @@ export function ProfessionalOnboardingForm({ email, error }: { email: string; er
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [cepStatus, setCepStatus] = useState("");
+  const errorMessages: Record<string, string> = {
+    "dados-invalidos": "Revise os dados pessoais informados.",
+    "cpf-ja-cadastrado": "Esse CPF já possui cadastro no portal.",
+    "foto-obrigatoria": "Escolha uma foto profissional para continuar.",
+    "foto-invalida": "Use uma foto JPG, PNG ou WEBP de até 2 MB.",
+    "foto-nao-salva": "Não foi possível salvar a foto agora. Tente novamente."
+  };
 
   async function lookupCep(value: string) {
     const rawCep = digits(value);
@@ -62,14 +70,15 @@ export function ProfessionalOnboardingForm({ email, error }: { email: string; er
 
   return (
     <form action={saveProfessionalBasicsAction} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-      {error ? <div className="mb-5 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">Verifique os dados informados. Código: {error}</div> : null}
+      {error ? <div className="mb-5 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">{errorMessages[error] ?? "Verifique os dados informados e tente novamente."}</div> : null}
       <h2 className="text-lg font-semibold">Dados pessoais</h2>
+      <div className="mt-5"><ProfilePhotoField /></div>
       <div className="mt-5 grid gap-4 md:grid-cols-2">
-        <label className="block text-sm font-medium text-slate-800">Nome Completo<input name="fullName" required pattern="^[A-Za-zÀ-ÿ\\s]+$" className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
+        <label className="block text-sm font-medium text-slate-800">Nome completo<input name="fullName" required pattern="^[A-Za-zÀ-ÿ\\s]+$" className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
         <label className="block text-sm font-medium text-slate-800">CPF<input name="cpf" required inputMode="numeric" value={cpf} onChange={(event) => setCpf(maskCpf(event.target.value))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
         <label className="block text-sm font-medium text-slate-800">Telefone<input name="phone" required inputMode="numeric" value={phone} onChange={(event) => setPhone(maskPhone(event.target.value))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
-        <label className="block text-sm font-medium text-slate-800">Email<input name="email" required type="email" defaultValue={email} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
-        <label className="block text-sm font-medium text-slate-800">Data de Nascimento<BirthDateInput className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
+        <label className="block text-sm font-medium text-slate-800">E-mail<input name="email" required type="email" defaultValue={email} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
+        <label className="block text-sm font-medium text-slate-800">Data de nascimento<BirthDateInput className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
         <label className="block text-sm font-medium text-slate-800">CEP<input name="cep" required inputMode="numeric" value={cep} onBlur={(event) => lookupCep(event.target.value)} onChange={(event) => setCep(maskCep(event.target.value))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
         <label className="block text-sm font-medium text-slate-800 md:col-span-2">Endereço<input name="street" required value={street} onChange={(event) => setStreet(event.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
         <label className="block text-sm font-medium text-slate-800">Número<input name="addressNumber" required className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>

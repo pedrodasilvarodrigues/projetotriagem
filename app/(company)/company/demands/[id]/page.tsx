@@ -1,6 +1,7 @@
 import { AppShell } from "@/components/app/shell";
 import { CompanyDemandForm } from "@/components/company/company-demand-form";
-import { closeDemandAction, deleteDemandAction, updateDemandAction } from "@/lib/actions/workspace";
+import { DemandLifecycleControls } from "@/components/company/demand-lifecycle-controls";
+import { updateDemandAction } from "@/lib/actions/workspace";
 import { createServerClient } from "@/lib/supabase/server";
 
 type DemandPageParams = {
@@ -26,11 +27,15 @@ export default async function CompanyDemandEditPage({
         .eq("company_id", company.id)
         .maybeSingle()
     : { data: null };
+  const { count: hiredProfessionals } = demand?.id
+    ? await supabase.from("screening_processes").select("id", { count: "exact", head: true }).eq("demand_id", demand.id).eq("status", "hired")
+    : { count: 0 };
+  const hasHiredProfessional = (hiredProfessionals ?? 0) > 0;
 
   if (!demand) {
     return (
       <AppShell eyebrow="Empresa" title="Editar Demanda">
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700">Demanda não encontrada para está empresa.</p>
+        <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700">Demanda não encontrada para esta empresa.</p>
       </AppShell>
     );
   }
@@ -44,7 +49,7 @@ export default async function CompanyDemandEditPage({
           action={updateDemandAction}
           companyCity={company?.city}
           companyState={company?.state}
-          submitLabel="Salvar alteracoes"
+          submitLabel="Salvar alterações"
           demand={{
             id: demand.id,
             name: demand.name,
@@ -63,30 +68,19 @@ export default async function CompanyDemandEditPage({
           }}
         />
 
-        {!['closed', 'cancelled'].includes(demand.status) ? (
-          <form action={closeDemandAction} className="rounded-lg border border-slate-300 bg-white p-5 shadow-sm">
-            <input type="hidden" name="demandId" value={demand.id} />
-            <input type="hidden" name="redirectTo" value={`/company/demands/${demand.id}`} />
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h2 className="text-lg font-semibold text-slate-900">Encerrar demanda</h2>
-                <p className="mt-1 text-sm text-slate-600">Use está opção quando a vaga já tiver sido preenchida. A demanda deixa de receber novos candidatos.</p>
-              </div>
-              <button className="rounded-md bg-slate-800 px-4 py-2 text-sm font-semibold text-white" type="submit">Encerrar demanda</button>
-            </div>
-          </form>
-        ) : null}
-
-        <form action={deleteDemandAction} className="rounded-lg border border-red-200 bg-red-50 p-5 shadow-sm">
-          <input type="hidden" name="demandId" value={demand.id} />
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_10px_30px_rgba(15,45,78,.06)]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-red-900">Excluir demanda</h2>
-              <p className="mt-1 text-sm text-red-800">A demanda será marcada como cancelada e deixara de aparecer como ativa.</p>
+              <h2 className="text-lg font-semibold text-[#0F2D4E]">Organizar demanda</h2>
+              <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">
+                {hasHiredProfessional
+                  ? "Como esta demanda possui uma contratação, ela faz parte do histórico da Empresa e só pode ser arquivada."
+                  : "Você pode arquivar a demanda para preservar o histórico ou excluí-la enquanto nenhuma contratação estiver vinculada a ela."}
+              </p>
             </div>
-            <button className="rounded-md bg-red-700 px-4 py-2 text-sm font-semibold text-white" type="submit">Excluir demanda</button>
+            <DemandLifecycleControls demandId={demand.id} status={demand.status} hasHiredProfessional={hasHiredProfessional} redirectTo={`/company/demands/${demand.id}`} />
           </div>
-        </form>
+        </section>
       </div>
     </AppShell>
   );

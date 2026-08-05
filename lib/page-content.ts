@@ -170,7 +170,7 @@ export const pages = {
   adminNotifications: content({
     eyebrow: "Administrador",
     title: "Notificações",
-    description: "Modelos, disparos internos em tempo real, registros de email e eventos transacionais do sistema.",
+    description: "Modelos, disparos internos em tempo real, registros de e-mail e eventos transacionais do sistema.",
     formTitle: "Criar aviso",
     formFields: ["Título", "Público", "Mensagem", "Canal"],
     rows: [
@@ -184,7 +184,7 @@ export const pages = {
     title: "Configurações",
     description: "Preferências globais, LGPD, DPO, termos, política de privacidade, acessibilidade e segurança.",
     formTitle: "Atualizar configuração",
-    formFields: ["Nome da plataforma", "Email DPO", "Versão dos termos", "Alto contraste"],
+    formFields: ["Nome da plataforma", "E-mail do DPO", "Versão dos termos", "Alto contraste"],
     rows: [
       { name: "Política de privacidade", status: "Versionada", owner: "DPO", updated: "Hoje" },
       { name: "Termos de uso", status: "Versionado", owner: "Jurídico", updated: "Ontem" },
@@ -208,7 +208,7 @@ export const pages = {
     title: "Perfil empresarial",
     description: "Dados da empresa, responsáveis, configurações operacionais e preferências de contato para acompanhamento das demandas privadas.",
     formTitle: "Atualizar empresa",
-    formFields: ["Razão social", "Responsável", "Email corporativo", "Telefone"],
+    formFields: ["Razão social", "Responsável", "E-mail corporativo", "Telefone"],
     rows: [
       { name: "Dados cadastrais", status: "Completo", owner: "Empresa", updated: "Hoje" },
       { name: "Responsáveis", status: "Validado", owner: "Empresa", updated: "Hoje" },
@@ -379,9 +379,9 @@ export const pages = {
   professionalNotifications: content({
     eyebrow: "Profissional",
     title: "Notificações",
-    description: "Avisos internos, situação do processo, suporte, emails transacionais e marcação de leitura.",
+    description: "Avisos internos, situação do processo, suporte, e-mails transacionais e marcação de leitura.",
     formTitle: "Preferências",
-    formFields: ["Email", "Notificação interna", "Processos", "Suporte"],
+    formFields: ["E-mail", "Notificação interna", "Processos", "Suporte"],
     rows: [
       { name: "Situação atualizada", status: "Não lida", owner: "Sistema", updated: "Hoje" },
       { name: "Perfil aprovado", status: "Lida", owner: "Sistema", updated: "Ontem" },
@@ -394,7 +394,7 @@ export const pages = {
     title: "Desenvolvimento",
     description: "Cursos sugeridos, competências faltantes e melhorias recomendadas com base nas oportunidades compatíveis.",
     formTitle: "Plano de melhoria",
-    formFields: ["Competencia", "Curso sugerido", "Prioridade", "Prazo"],
+    formFields: ["Competência", "Curso sugerido", "Prioridade", "Prazo"],
     rows: [
       { name: "Excel intermediário", status: "Sugerido", owner: "Alta prioridade", updated: "Hoje" },
       { name: "NR-10", status: "Certificação faltante", owner: "Média prioridade", updated: "Ontem" },

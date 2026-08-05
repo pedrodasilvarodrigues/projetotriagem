@@ -14,7 +14,7 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold">Sim, possuo currículo</h2>
-          <p className="mt-2 text-sm text-slate-600">Formatos aceitos: PDF ou DOCX. Limite maximo: 5 MB.</p>
+          <p className="mt-2 text-sm text-slate-600">Formatos aceitos: PDF ou DOCX. Limite máximo: 5 MB.</p>
           <form action={uploadResumeAction} className="mt-5 space-y-4">
             <label className="block rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-600">
               Selecione o arquivo do currículo

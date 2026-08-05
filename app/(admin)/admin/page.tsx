@@ -65,13 +65,13 @@ export default async function AdminHomePage() {
       href: "/admin/processes"
     },
     {
-      title: "Apresentacoes realizadas",
+      title: "Apresentações realizadas",
       value: presentations.count,
       detail: "Profissionais encaminhados para empresas",
       href: "/admin/demands#apresentar"
     },
     {
-      title: "Contratacoes registradas",
+      title: "Contratações registradas",
       value: hirings.count,
       detail: "Processos finalizados como contratado",
       href: "/admin/processes"

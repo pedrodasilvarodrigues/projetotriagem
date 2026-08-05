@@ -4,16 +4,16 @@ import { requestPasswordResetAction } from "@/lib/actions/auth";
 import { PortalEncaixeLogo } from "@/components/app/logo";
 
 const messageMap: Record<string, string> = {
-  "email-enviado": "Enviamos as instruções para o email informado.",
-  "email-solicitado-supabase": "Solicitamos o envio pelo Supabase. Se o email não chegar, configure um SMTP/Resend para entrega confiável.",
-  "email-recente": "Já existe uma solicitação recente para esse email. Confira sua caixa de entrada e tente novamente em cerca de 1 minuto se precisar de outro link."
+  "email-enviado": "Enviamos as instruções para o e-mail informado.",
+  "email-solicitado-supabase": "Solicitamos o envio da mensagem. Se o e-mail não chegar, confira sua caixa de entrada novamente em alguns minutos.",
+  "email-recente": "Já existe uma solicitação recente para esse e-mail. Confira sua caixa de entrada e tente novamente em cerca de 1 minuto se precisar de outro link."
 };
 
 const errorMap: Record<string, string> = {
-  "email-invalido": "Informe um email válido.",
+  "email-invalido": "Informe um e-mail válido.",
   "aguarde-um-minuto": "Aguarde cerca de 1 minuto antes de solicitar outro email. Essa proteção evita abusos.",
-  "configuracao-supabase-incompleta": "Configuração do Supabase pendente. Verifique as variáveis de ambiente.",
-  "erro-autenticacao": "Não foi possível enviar o email agora. Tente novamente em instantes."
+  "configuracao-supabase-incompleta": "A recuperação de senha está temporariamente indisponível.",
+  "erro-autenticacao": "Não foi possível enviar o e-mail agora. Tente novamente em instantes."
 };
 
 export default async function ForgotPasswordPage({ searchParams }: { searchParams: Promise<{ error?: string; message?: string }> }) {
@@ -41,7 +41,7 @@ export default async function ForgotPasswordPage({ searchParams }: { searchParam
 
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_22px_70px_rgba(15,23,42,0.06)]">
             <h1 className="text-3xl font-extrabold tracking-tight text-blue-750 font-display">Recuperar senha</h1>
-            <p className="mt-2 text-sm leading-6 text-slate-500 font-medium font-sans">Informe seu email para receber o link de redefinição de senha.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-500 font-medium font-sans">Informe seu e-mail para receber o link de redefinição de senha.</p>
 
             {error ? (
               <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 font-medium" role="alert">
@@ -57,7 +57,7 @@ export default async function ForgotPasswordPage({ searchParams }: { searchParam
 
             <form action={requestPasswordResetAction} className="mt-6 space-y-4">
               <label className="block text-sm font-bold text-slate-800">
-                Email
+                E-mail
                 <span className="mt-2 flex items-center gap-3 rounded-xl border border-slate-300 bg-slate-50 px-3 py-3 shadow-inner transition focus-within:border-orange-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-100">
                   <Mail aria-hidden="true" className="text-slate-400" size={17} />
                   <input name="email" required type="email" autoComplete="email" className="min-w-0 flex-1 bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400 font-medium" placeholder="seu@email.com" />

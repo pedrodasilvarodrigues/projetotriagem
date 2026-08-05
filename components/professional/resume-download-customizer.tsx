@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { Check, Download, X } from "lucide-react";
 
 type ResumeDownloadCustomizerProps = {
@@ -10,7 +11,7 @@ type ResumeDownloadCustomizerProps = {
 };
 
 const templates = [
-  { id: "classico", title: "Classico", tone: "bg-[#d8d9d0]", layout: "grid-cols-[44px_1fr]" },
+  { id: "classico", title: "Clássico", tone: "bg-[#d8d9d0]", layout: "grid-cols-[44px_1fr]" },
   { id: "editorial", title: "Editorial", tone: "bg-white", layout: "grid-cols-1" },
   { id: "linha", title: "Linha do tempo", tone: "bg-[#d8d9d0]", layout: "grid-cols-[42px_1fr]" }
 ];
@@ -69,6 +70,15 @@ export function ResumeDownloadCustomizer({ exportUrl, hasDocument, showSalaryExp
   const selectedColor = useMemo(() => colors.find((item) => item.id === color) ?? colors[0], [color]);
   const selectedTemplate = templates.find((item) => item.id === template) ?? templates[0];
 
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
   function handleDownload() {
     const url = new URL(exportUrl, window.location.origin);
     url.searchParams.set("template", selectedTemplate.id);
@@ -88,14 +98,14 @@ export function ResumeDownloadCustomizer({ exportUrl, hasDocument, showSalaryExp
         Baixar currículo
       </button>
 
-      {open ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/55 px-3 py-4 backdrop-blur-sm sm:items-center">
-          <section className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-t-[28px] bg-white p-6 text-slate-950 shadow-2xl sm:rounded-[28px] sm:p-7">
+      {open && typeof document !== "undefined" ? createPortal(
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/55 px-3 py-4 backdrop-blur-sm sm:items-center">
+          <section role="dialog" aria-modal="true" aria-labelledby="resume-customizer-title" className="max-h-[calc(100dvh-2rem)] w-full max-w-3xl overflow-y-auto rounded-t-[28px] bg-white p-6 text-slate-950 shadow-2xl sm:max-h-[92vh] sm:rounded-[28px] sm:p-7">
             <div className="mx-auto mb-5 h-1.5 w-40 rounded-full bg-slate-200" />
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-bold uppercase text-[#174a86]">Currículo</p>
-                <h2 className="mt-1 text-2xl font-bold tracking-normal">Personalize seu CV</h2>
+                <h2 id="resume-customizer-title" className="mt-1 text-2xl font-bold tracking-normal">Personalize seu CV</h2>
               </div>
               <button type="button" onClick={() => setOpen(false)} className="rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-950" aria-label="Fechar personalização">
                 <X aria-hidden="true" size={26} />
@@ -165,7 +175,8 @@ export function ResumeDownloadCustomizer({ exportUrl, hasDocument, showSalaryExp
               </button>
             </div>
           </section>
-        </div>
+        </div>,
+        document.body
       ) : null}
     </>
   );

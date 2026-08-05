@@ -109,7 +109,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
 
             <div className="my-6 flex items-center gap-3 text-xs font-bold uppercase text-slate-350">
               <span className="h-px flex-1 bg-slate-200" />
-              Cadastro com Email e Senha
+              Cadastro com e-mail e senha
               <span className="h-px flex-1 bg-slate-200" />
             </div>
 

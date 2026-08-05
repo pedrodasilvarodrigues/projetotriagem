@@ -45,8 +45,8 @@ const languages = [
 const localizedLabels = {
   "pt-BR": {
     notificationsTitle: "Notificações",
-    notificationsDescription: "Emails da plataforma e alertas de vagas.",
-    emailPlatformTitle: "Emails da plataforma",
+    notificationsDescription: "E-mails da plataforma e alertas de vagas.",
+    emailPlatformTitle: "E-mails da plataforma",
     emailPlatformDescription: "Receber avisos importantes sobre processos, triagens e mensagens.",
     alertsTitle: "Alertas de vagas",
     alertsDescription: "Receber oportunidades de acordo com cidades, perfil e currículo.",

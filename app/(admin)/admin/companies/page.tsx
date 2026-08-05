@@ -31,7 +31,7 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
         <section id="buscar" className="scroll-mt-24 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
           <h2 className="text-lg font-semibold">Buscar empresas</h2>
           <form className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_auto]" action="/admin/companies">
-            <input name="q" defaultValue={params.q ?? ""} className="field-input" placeholder="Nome, razão social ou email" />
+            <input name="q" defaultValue={params.q ?? ""} className="field-input" placeholder="Nome, razão social ou e-mail" />
             <select name="status" defaultValue={params.status ?? ""} className="field-input">
               <option value="">Todas as situações</option>
               <option value="pending">Pendente</option>
@@ -54,7 +54,7 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
                     <td>
                       <strong>{company.trade_name}</strong>
                       <p className="text-xs text-slate-500">{company.legal_name}</p>
-                      <p className="text-xs text-slate-500">{company.city}/{company.state} · {company.corporate_email ?? "Email não informado"}</p>
+                      <p className="text-xs text-slate-500">{company.city}/{company.state} · {company.corporate_email ?? "E-mail não informado"}</p>
                     </td>
                     <td>{companyDemands.length}<p className="text-xs text-slate-500">{companyDemands.slice(0, 2).map((item) => item.title).join(", ")}</p></td>
                     <td>{companyPresentations.length}<p className="text-xs text-slate-500">Profissionais apresentados</p></td>

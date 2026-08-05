@@ -31,7 +31,7 @@ export default async function AdminProfessionalsPage({ searchParams }: { searchP
         <section id="buscar" className="scroll-mt-24 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
           <h2 className="text-lg font-semibold">Buscar e filtrar profissionais</h2>
           <form className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_180px_auto]" action="/admin/professionals">
-            <input name="q" defaultValue={params.q ?? ""} className="field-input" placeholder="Nome, email ou cargo" />
+            <input name="q" defaultValue={params.q ?? ""} className="field-input" placeholder="Nome, e-mail ou cargo" />
             <input name="city" defaultValue={params.city ?? ""} className="field-input" placeholder="Cidade" />
             <select name="status" defaultValue={params.status ?? ""} className="field-input">
               <option value="">Todas as situações</option>
@@ -56,7 +56,7 @@ export default async function AdminProfessionalsPage({ searchParams }: { searchP
                 <tr key={professional.id}>
                   <td>
                     <strong>{professional.full_name}</strong>
-                    <p className="text-xs text-slate-500">{professional.email ?? "Email não informado"} · {professional.phone ?? "Telefone não informado"}</p>
+                    <p className="text-xs text-slate-500">{professional.email ?? "E-mail não informado"} · {professional.phone ?? "Telefone não informado"}</p>
                   </td>
                   <td>{professional.desired_role}<p className="text-xs text-slate-500">{professional.city}/{professional.state}</p></td>
                   <td>{professional.deleted_at ? "Arquivado" : statusLabel(professional.status)}</td>
@@ -89,7 +89,7 @@ export default async function AdminProfessionalsPage({ searchParams }: { searchP
         </section>
 
         <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <h2 className="text-lg font-semibold">Histórico recente de apresentacoes</h2>
+          <h2 className="text-lg font-semibold">Histórico recente de apresentações</h2>
           <div className="mt-3 grid gap-2">
             {(presentations ?? []).slice(0, 8).map((presentation: any) => (
               <p key={presentation.id} className="rounded border border-slate-200 bg-slate-50 p-3 text-sm">

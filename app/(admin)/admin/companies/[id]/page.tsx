@@ -30,7 +30,7 @@ export default async function AdminCompanyDetailPage({ params }: { params: Promi
               <p className="text-xs font-bold uppercase text-slate-500">Cadastro empresarial</p>
               <h2 className="mt-1 text-2xl font-semibold">{company.trade_name}</h2>
               <p className="mt-2 text-sm text-slate-600">{company.legal_name}</p>
-              <p className="mt-2 text-sm text-slate-600">{company.city}/{company.state} · {company.corporate_email ?? "Email não informado"} · {company.phone ?? "Telefone não informado"}</p>
+              <p className="mt-2 text-sm text-slate-600">{company.city}/{company.state} · {company.corporate_email ?? "E-mail não informado"} · {company.phone ?? "Telefone não informado"}</p>
               <p className="mt-3"><span className={`origin-badge ${company.status_plano === "ativo" ? "is-processed" : "is-pending"}`}>Plano {companyPlanLabel(company.plano)} · {company.status_plano === "ativo" ? "ativo" : company.status_plano === "pendente_ativacao" ? "aguardando ativação" : "não escolhido"}</span></p>
               <p className="mt-4 text-sm leading-6 text-slate-700">{company.description ?? "Descrição empresarial ainda não informada."}</p>
             </div>

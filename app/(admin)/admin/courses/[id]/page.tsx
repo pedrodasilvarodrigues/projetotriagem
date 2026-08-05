@@ -118,7 +118,7 @@ export default async function AdminCourseDetailPage({ params, searchParams }: { 
                     <span className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                       <span>
                         <strong className="text-[#0F2D4E]">{professional?.full_name ?? "Profissional"}</strong>
-                        <span className="block text-xs text-slate-500">{professional?.email ?? "Email não informado"} · tentativa {attempt.attempt_number} · {new Date(attempt.completed_at).toLocaleString("pt-BR")}</span>
+                        <span className="block text-xs text-slate-500">{professional?.email ?? "E-mail não informado"} · tentativa {attempt.attempt_number} · {new Date(attempt.completed_at).toLocaleString("pt-BR")}</span>
                       </span>
                       <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold ${attempt.approved ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
                         {attempt.approved ? <CheckCircle2 aria-hidden="true" size={14} /> : <XCircle aria-hidden="true" size={14} />}

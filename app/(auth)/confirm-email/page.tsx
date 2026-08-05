@@ -4,14 +4,14 @@ import { resendSignupConfirmationAction } from "@/lib/actions/auth";
 import { PortalEncaixeLogo } from "@/components/app/logo";
 
 const messageMap: Record<string, string> = {
-  "email-enviado": "Se esse email estiver cadastrado e ainda não confirmado, enviaremos um novo link de confirmação."
+  "email-enviado": "Se esse e-mail estiver cadastrado e ainda não confirmado, enviaremos um novo link de confirmação."
 };
 
 const errorMap: Record<string, string> = {
-  "email-invalido": "Informe um email válido.",
-  "aguarde-um-minuto": "Aguarde cerca de 1 minuto antes de solicitar outro email. Essa proteção evita envios repetidos.",
+  "email-invalido": "Informe um e-mail válido.",
+  "aguarde-um-minuto": "Aguarde cerca de 1 minuto antes de solicitar outro e-mail. Essa proteção evita envios repetidos.",
   "email-ja-confirmado": "Esse e-mail já foi confirmado. Volte para a página de acesso e entre normalmente.",
-  "configuracao-supabase-incompleta": "Configuração do Supabase pendente. Verifique as variáveis de ambiente.",
+  "configuracao-supabase-incompleta": "O serviço de confirmação está temporariamente indisponível.",
   "erro-autenticacao": "Não foi possível reenviar a confirmação agora. Tente novamente em instantes."
 };
 
@@ -65,7 +65,7 @@ export default async function ConfirmEmailPage({ searchParams }: { searchParams:
 
             <form action={resendSignupConfirmationAction} className="mt-6 space-y-4">
               <label className="block text-sm font-bold text-slate-800">
-                Email
+                E-mail
                 <span className="mt-2 flex items-center gap-3 rounded-xl border border-slate-300 bg-slate-50 px-3 py-3 shadow-inner transition focus-within:border-orange-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-100">
                   <Mail aria-hidden="true" className="text-slate-400" size={17} />
                   <input name="email" required type="email" autoComplete="email" className="min-w-0 flex-1 bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400 font-medium" placeholder="seu@email.com" />

@@ -189,7 +189,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
               <form action={signInWithEmailAction} className="mt-6 space-y-4">
                 <input type="hidden" name="next" value={nextPath} />
                 <label className="block text-sm font-bold text-slate-800">
-                  Email
+                  E-mail
                   <span className="mt-2 flex items-center gap-3 rounded-xl border border-slate-300 bg-slate-50 px-3 py-3 shadow-inner transition focus-within:border-orange-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-100">
                     <Mail aria-hidden="true" className="text-slate-400" size={18} />
                     <input name="email" required type="email" autoComplete="email" placeholder="seu@email.com" className="min-w-0 flex-1 bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400 font-medium" />

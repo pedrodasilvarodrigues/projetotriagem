@@ -21,6 +21,7 @@ function hiringErrorCode(message?: string) {
   if (message.includes("hire_confirmation_not_in_dispute")) return "disputa-ja-resolvida";
   if (message.includes("candidate_process_must_be_closed")) return "candidato-ainda-em-andamento";
   if (message.includes("candidate_already_removed")) return "candidato-ja-removido";
+  if (message.includes("hired_candidate_must_be_archived")) return "candidato-contratado-so-pode-ser-arquivado";
   if (message.includes("access_denied") || message.includes("required")) return "acesso-nao-autorizado";
   return "nao-foi-possivel-concluir";
 }

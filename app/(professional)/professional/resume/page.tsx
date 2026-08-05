@@ -37,8 +37,8 @@ const personalErrorMessages: Record<string, string> = {
   "data-invalida": "Informe uma data valida no formato dd/mm/aaaa.",
   "idade-minima": "O cadastro profissional exige idade mínima de 14 anos.",
   "telefone-invalido": "Informe um telefone com DDD.",
-  "email-invalido": "Confira o email informado.",
-  "cep-invalido": "Informe um CEP com 8 digitos.",
+  "email-invalido": "Confira o e-mail informado.",
+  "cep-invalido": "Informe um CEP com 8 dígitos.",
   "city-invalido": "Informe a cidade.",
   "state-invalido": "Informe o estado com duas letras.",
   "estado-invalido": "Informe o estado com duas letras.",
@@ -203,7 +203,7 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
               <label className="text-sm font-semibold">Nome<input name="firstName" required defaultValue={nameParts.firstName} className="field-input mt-2" /></label>
               <label className="text-sm font-semibold">Sobrenome<input name="lastName" required defaultValue={nameParts.lastName} className="field-input mt-2" /></label>
               <label className="text-sm font-semibold">Nacionalidade<input name="nationality" required defaultValue={professional?.nationality ?? "Brasileira"} className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">Email<input name="email" required type="email" defaultValue={professional?.email ?? userData.user?.email ?? ""} className="field-input mt-2" /></label>
+              <label className="text-sm font-semibold">E-mail<input name="email" required type="email" defaultValue={professional?.email ?? userData.user?.email ?? ""} className="field-input mt-2" /></label>
               <PersonalDataFields
                 identityRequired
                 initial={{
@@ -232,7 +232,7 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
               <label className="flex items-start gap-3 border border-slate-200 bg-slate-50 p-3 text-sm font-medium"><input name="profileVisible" type="checkbox" defaultChecked={prefs.profile_visible} className="mt-1 size-4" /><span><strong className="block">Currículo visível</strong><span className="text-slate-600">Permitir que recrutadores internos vejam seu perfil.</span></span></label>
               <label className="flex items-start gap-3 border border-slate-200 bg-slate-50 p-3 text-sm font-medium"><input name="allowRecruiterContact" type="checkbox" defaultChecked={prefs.allow_recruiter_contact} className="mt-1 size-4" /><span><strong className="block">Permitir contato</strong><span className="text-slate-600">Receber contato quando houver compatibilidade.</span></span></label>
               <label className="flex items-start gap-3 border border-slate-200 bg-slate-50 p-3 text-sm font-medium"><input name="opportunityAlerts" type="checkbox" defaultChecked={prefs.opportunity_alerts} className="mt-1 size-4" /><span><strong className="block">Alertas de vagas</strong><span className="text-slate-600">Usar seu currículo para recomendar vagas.</span></span></label>
-              <label className="flex items-start gap-3 border border-slate-200 bg-slate-50 p-3 text-sm font-medium"><input name="emailNotifications" type="checkbox" defaultChecked={prefs.email_notifications} className="mt-1 size-4" /><span><strong className="block">Notificações por email</strong><span className="text-slate-600">Receber avisos importantes do processo.</span></span></label>
+              <label className="flex items-start gap-3 border border-slate-200 bg-slate-50 p-3 text-sm font-medium"><input name="emailNotifications" type="checkbox" defaultChecked={prefs.email_notifications} className="mt-1 size-4" /><span><strong className="block">Notificações por e-mail</strong><span className="text-slate-600">Receber avisos importantes do processo.</span></span></label>
               <label className="flex items-start gap-3 border border-slate-200 bg-slate-50 p-3 text-sm font-medium md:col-span-2"><input name="showSalaryExpectation" type="checkbox" defaultChecked={prefs.show_salary_expectation} className="mt-1 size-4" /><span><strong className="block">Exibir pretensão salarial</strong><span className="text-slate-600">Mostrar essa informação quando estiver cadastrada.</span></span></label>
               <div className="md:col-span-2"><button className="rounded-md bg-blue-700 px-5 py-3 text-sm font-semibold text-white" type="submit">Salvar confidencialidade</button></div>
             </form>
@@ -245,7 +245,7 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
             </div>
             <form action={updateResumeProfileAction} className="mt-5 grid gap-4 md:grid-cols-2">
               <label className="text-sm font-semibold">Cargo desejado<input name="desiredRole" required defaultValue={professional?.desired_role ?? ""} className="field-input mt-2" /></label>
-              <label className="text-sm font-semibold">Grau de instrucao atual
+              <label className="text-sm font-semibold">Grau de instrução atual
                 <select name="educationLevel" defaultValue={professional?.education_level ?? "medio"} className="field-input mt-2">
                   {educationOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                 </select>
@@ -262,7 +262,7 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
               <GraduationCap aria-hidden="true" size={18} className="text-blue-700" />
               <h2 className="text-lg font-semibold">Histórico acadêmico</h2>
             </div>
-            <p className="mt-2 text-sm leading-6 text-slate-600">Adicione instituições, cursos tecnicos, graduacoes e pos-graduacoes. O grau de instrucao atual fica separado no objetivo profissional.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">Adicione instituições, cursos técnicos, graduações e pós-graduações. O grau de instrução atual fica separado no objetivo profissional.</p>
             <div className="mt-5 grid gap-3 md:grid-cols-2">
               {((educations ?? []) as EducationRow[]).map((education) => (
                 <article key={education.id} className="border border-slate-200 bg-slate-50 p-4">

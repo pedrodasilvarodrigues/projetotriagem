@@ -322,7 +322,7 @@ export default async function AdminDemandsPage({ searchParams }: { searchParams:
                                 <p className="text-xs font-bold uppercase tracking-wide text-slate-500">#{index + 1} mais compatível</p>
                                 <h3 className="font-semibold text-slate-950">{professional.full_name}</h3>
                                 <p className="text-xs text-slate-500">{professional.desired_role ?? "Cargo não informado"} · {professional.city ?? "-"}/{professional.state ?? "-"}</p>
-                                <p className="text-xs text-slate-500">{professional.email ?? "Email não informado"} · {professional.phone ?? "Telefone não informado"}</p>
+                                <p className="text-xs text-slate-500">{professional.email ?? "E-mail não informado"} · {professional.phone ?? "Telefone não informado"}</p>
                                 {currentStatus ? <p className="mt-2 text-xs font-semibold text-blue-700">Já está {currentStatus} nesta demanda.</p> : null}
                                 {relevantCertifications.length > 0 ? (
                                   <details className="mt-3 rounded-xl border border-green-200 bg-green-50 p-3">
@@ -386,7 +386,7 @@ export default async function AdminDemandsPage({ searchParams }: { searchParams:
                       </div>
                     ) : (
                       <p className="rounded border border-slate-200 bg-white p-3 text-sm text-slate-600">
-                        Nenhum profissional compatível calculado para está demanda ainda. Quando o motor de compatibilidade gerar pontuacoes, eles aparecerao aqui em ordem.
+                        Nenhum profissional compatível foi calculado para esta demanda. Quando o motor de compatibilidade gerar pontuações, eles aparecerão aqui em ordem.
                       </p>
                     )}
                   </div>

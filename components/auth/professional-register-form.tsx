@@ -5,6 +5,7 @@ import { Eye, EyeOff, MapPin } from "lucide-react";
 import { LoadingGear } from "@/components/app/loading-gear";
 import { BirthDateInput } from "@/components/auth/birth-date-input";
 import { ConsentFields } from "@/components/auth/onboarding-layout";
+import { ProfilePhotoField } from "@/components/auth/profile-photo-field";
 import { registerProfessionalWithEmailAction } from "@/lib/actions/auth";
 
 type ViaCepResponse = {
@@ -35,8 +36,10 @@ const errorMessages: Record<string, string> = {
   "dados-invalidos": "Revise os campos obrigatórios e confira CPF, telefone, CEP e data de nascimento.",
   "email-ja-cadastrado": "Esse e-mail já possui cadastro. Volte para o acesso ou use outro e-mail.",
   "cpf-ja-cadastrado": "Esse CPF já possui cadastro no portal.",
+  "foto-obrigatoria": "Escolha uma foto profissional para concluir o cadastro.",
+  "foto-invalida": "Use uma foto JPG, PNG ou WEBP de até 2 MB.",
   "senha-invalida": "A senha precisa ter pelo menos 6 caracteres.",
-  "configuracao-supabase-incompleta": "Configuração do Supabase pendente. Adicione as variáveis de ambiente seguras na Vercel.",
+  "configuracao-supabase-incompleta": "O cadastro está temporariamente indisponível. Tente novamente em instantes.",
   "nao-foi-possivel-criar-conta": "Não foi possível criar a conta agora. Tente novamente em instantes."
 };
 
@@ -83,10 +86,12 @@ export function ProfessionalRegisterForm({ error }: { error?: string }) {
         </div>
       ) : null}
 
+      <ProfilePhotoField />
+
       <fieldset className="grid gap-4 md:grid-cols-2">
         <legend className="mb-1 text-sm font-bold text-blue-700 font-display md:col-span-2">Dados de acesso</legend>
         <label className="block text-sm font-bold text-slate-800">
-          Email
+          E-mail
           <input name="email" required type="email" autoComplete="email" className={inputClass} placeholder="seu@email.com" />
         </label>
         <label className="block text-sm font-bold text-slate-800">
@@ -103,7 +108,7 @@ export function ProfessionalRegisterForm({ error }: { error?: string }) {
       <fieldset className="grid gap-4 md:grid-cols-2">
         <legend className="mb-1 text-sm font-bold text-blue-700 font-display md:col-span-2">Dados profissionais</legend>
         <label className="block text-sm font-bold text-slate-800">
-          Nome Completo
+          Nome completo
           <input name="fullName" required autoComplete="name" className={inputClass} placeholder="Nome completo" />
         </label>
         <label className="block text-sm font-bold text-slate-800">
@@ -115,7 +120,7 @@ export function ProfessionalRegisterForm({ error }: { error?: string }) {
           <input name="phone" required inputMode="numeric" autoComplete="tel" value={phone} onChange={(event) => setPhone(maskPhone(event.target.value))} className={inputClass} placeholder="(00) 00000-0000" />
         </label>
         <label className="block text-sm font-bold text-slate-800">
-          Data de Nascimento
+          Data de nascimento
           <BirthDateInput className={inputClass} />
         </label>
       </fieldset>

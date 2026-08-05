@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
     accentColor,
     showSalaryExpectation,
     fullName: professional.full_name ?? "Profissional",
-    email: professional.email ?? userData.user.email ?? "Email não informado",
+    email: professional.email ?? userData.user.email ?? "E-mail não informado",
     phone: professional.phone ?? "",
     city: professional.city ?? "Cidade",
     state: professional.state ?? "UF",

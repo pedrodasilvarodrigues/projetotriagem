@@ -108,12 +108,12 @@ export function CandidateVisibilityControls({
 }: {
   processId: string;
   currentView: "active" | "archived";
-  processStatus: "hired" | "rejected";
+  processStatus: string;
 }) {
   return (
     <div className="flex flex-wrap gap-2">
       <VisibilityForm processId={processId} target={currentView === "archived" ? "active" : "archived"} currentView={currentView} />
-      {processStatus === "rejected" ? <VisibilityForm processId={processId} target="removed" currentView={currentView} /> : null}
+      {processStatus !== "hired" ? <VisibilityForm processId={processId} target="removed" currentView={currentView} /> : null}
     </div>
   );
 }

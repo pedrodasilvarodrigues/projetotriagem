@@ -214,11 +214,9 @@ export default async function CompanyCandidatesPage({
                     {process.status === "pre_approved" && !confirmation?.company_confirmed ? <CompanyHireButton processId={process.id} /> : null}
                   </div>
 
-                  {process.status === "hired" || process.status === "rejected" ? (
-                    <div className="mt-4 border-t border-slate-200 pt-4">
-                      <CandidateVisibilityControls processId={process.id} currentView={currentView} processStatus={process.status as "hired" | "rejected"} />
-                    </div>
-                  ) : null}
+                  <div className="mt-4 border-t border-slate-200 pt-4">
+                    <CandidateVisibilityControls processId={process.id} currentView={currentView} processStatus={process.status} />
+                  </div>
 
                   <span className={`origin-badge mt-4 w-fit ${process.candidate_origin === "interesse_empresa" ? "is-interest" : "is-curation"}`}>
                     {process.candidate_origin === "interesse_empresa" ? "Você demonstrou interesse" : "Apresentado pela curadoria"}

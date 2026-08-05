@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Eye, EyeOff, MapPin } from "lucide-react";
 import { LoadingGear } from "@/components/app/loading-gear";
 import { BirthDateInput } from "@/components/auth/birth-date-input";
 import { ConsentFields } from "@/components/auth/onboarding-layout";
 import { ProfilePhotoField } from "@/components/auth/profile-photo-field";
+import { ResumeOnboardingChoice, type ResumeChoice } from "@/components/auth/resume-onboarding-choice";
 import { registerProfessionalWithEmailAction } from "@/lib/actions/auth";
 
 type ViaCepResponse = {
@@ -33,6 +34,11 @@ function maskCep(value: string) {
 }
 
 const errorMessages: Record<string, string> = {
+  "curriculo-obrigatorio": "Escolha entre anexar seu currículo ou informar que ainda não possui um.",
+  "arquivo-obrigatorio": "Selecione o arquivo PDF do seu currículo.",
+  "arquivo-maior-que-5mb": "O currículo deve ter no máximo 5 MB.",
+  "formato-invalido": "Envie o currículo no formato PDF.",
+  "curriculo-nao-salvo": "Não foi possível salvar o currículo agora. Tente novamente.",
   "dados-invalidos": "Revise os campos obrigatórios e confira CPF, telefone, CEP e data de nascimento.",
   "email-ja-cadastrado": "Esse e-mail já possui cadastro. Volte para o acesso ou use outro e-mail.",
   "cpf-ja-cadastrado": "Esse CPF já possui cadastro no portal.",
@@ -54,6 +60,18 @@ export function ProfessionalRegisterForm({ error }: { error?: string }) {
   const [cepStatus, setCepStatus] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [resumeStep, setResumeStep] = useState(false);
+  const [resumeChoice, setResumeChoice] = useState<ResumeChoice>("");
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    if (!resumeStep) {
+      event.preventDefault();
+      setResumeStep(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    setSubmitting(true);
+  }
 
   async function lookupCep(value: string) {
     const rawCep = digits(value);
@@ -79,13 +97,14 @@ export function ProfessionalRegisterForm({ error }: { error?: string }) {
   const inputClass = "mt-2 w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-3 text-sm text-slate-950 outline-none transition focus:border-orange-500 focus:bg-white focus:ring-4 focus:ring-orange-100 placeholder:text-slate-400 font-medium shadow-inner";
 
   return (
-    <form action={registerProfessionalWithEmailAction} onSubmit={() => setSubmitting(true)} className="space-y-5">
+    <form action={registerProfessionalWithEmailAction} onSubmit={handleSubmit} className="space-y-5">
       {error ? (
         <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 font-medium" role="alert">
           {errorMessages[error] ?? `Verifique os dados informados. Código: ${error}`}
         </div>
       ) : null}
 
+      <div hidden={resumeStep} className="space-y-5">
       <ProfilePhotoField />
 
       <fieldset className="grid gap-4 md:grid-cols-2">
@@ -159,10 +178,20 @@ export function ProfessionalRegisterForm({ error }: { error?: string }) {
       {cepStatus ? <p className="text-xs font-semibold text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-200" aria-live="polite">{cepStatus}</p> : null}
 
       <ConsentFields />
+      </div>
+
+      {resumeStep ? (
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-inner">
+          <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-orange-600">Última etapa do cadastro</p>
+          <ResumeOnboardingChoice value={resumeChoice} onChange={setResumeChoice} />
+        </div>
+      ) : null}
+
+      {resumeStep ? <button className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-700" type="button" onClick={() => setResumeStep(false)}>Voltar aos dados</button> : null}
 
       <button disabled={submitting} className="btn-primary w-full py-3.5 shadow-lg shadow-orange-500/10 flex items-center justify-center gap-2 cursor-pointer" type="submit">
         {submitting ? <LoadingGear compact label="Criando cadastro" /> : null}
-        Criar cadastro
+        {resumeStep ? "Concluir cadastro" : "Continuar"}
       </button>
     </form>
   );

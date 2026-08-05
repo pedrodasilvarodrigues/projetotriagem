@@ -4,6 +4,7 @@ import { useState } from "react";
 import { BirthDateInput } from "@/components/auth/birth-date-input";
 import { ConsentFields } from "@/components/auth/onboarding-layout";
 import { ProfilePhotoField } from "@/components/auth/profile-photo-field";
+import { ResumeOnboardingChoice, type ResumeChoice } from "@/components/auth/resume-onboarding-choice";
 import { saveProfessionalBasicsAction } from "@/lib/actions/onboarding";
 
 type ViaCepResponse = {
@@ -39,7 +40,13 @@ export function ProfessionalOnboardingForm({ email, error }: { email: string; er
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [cepStatus, setCepStatus] = useState("");
+  const [resumeChoice, setResumeChoice] = useState<ResumeChoice>("");
   const errorMessages: Record<string, string> = {
+    "curriculo-obrigatorio": "Escolha entre anexar seu currículo ou informar que ainda não possui um.",
+    "arquivo-obrigatorio": "Selecione o arquivo PDF do seu currículo.",
+    "arquivo-maior-que-5mb": "O currículo deve ter no máximo 5 MB.",
+    "formato-invalido": "Envie o currículo no formato PDF.",
+    "curriculo-nao-salvo": "Não foi possível salvar o currículo agora. Tente novamente.",
     "dados-invalidos": "Revise os dados pessoais informados.",
     "cpf-ja-cadastrado": "Esse CPF já possui cadastro no portal.",
     "foto-obrigatoria": "Escolha uma foto profissional para continuar.",
@@ -88,6 +95,9 @@ export function ProfessionalOnboardingForm({ email, error }: { email: string; er
       </div>
       {cepStatus ? <p className="mt-3 text-sm text-slate-600" aria-live="polite">{cepStatus}</p> : null}
       <div className="mt-5"><ConsentFields /></div>
+      <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+        <ResumeOnboardingChoice value={resumeChoice} onChange={setResumeChoice} />
+      </div>
       <button className="mt-6 rounded-md bg-blue-700 px-5 py-3 text-sm font-semibold text-white" type="submit">Continuar</button>
     </form>
   );

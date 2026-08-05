@@ -7,6 +7,7 @@ import { ResumeDownloadCustomizer } from "@/components/professional/resume-downl
 import { PersonalDataFields } from "@/components/professional/personal-data-fields";
 import { RemoveResumeItemButton } from "@/components/professional/remove-resume-item-button";
 import { ResumeSectionNav } from "@/components/professional/resume-section-nav";
+import { ResumeCompletionPrompt } from "@/components/professional/resume-completion-prompt";
 import {
   addProfessionalCourseAction,
   addProfessionalEducationAction,
@@ -94,7 +95,7 @@ function one<T>(value: T | T[] | null) {
   return Array.isArray(value) ? value[0] : value;
 }
 
-export default async function ProfessionalResumePage({ searchParams }: { searchParams: Promise<{ error?: string; message?: string }> }) {
+export default async function ProfessionalResumePage({ searchParams }: { searchParams: Promise<{ error?: string; message?: string; resumePrompt?: string }> }) {
   const params = await searchParams;
   const supabase = await createServerClient();
   const { data: userData } = await supabase.auth.getUser();
@@ -144,6 +145,7 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
 
   return (
     <AppShell eyebrow="Profissional" title="Currículo">
+      {params.resumePrompt === "1" ? <ResumeCompletionPrompt /> : null}
       <div className="space-y-5">
         <ResumeSectionNav sections={sections} />
 

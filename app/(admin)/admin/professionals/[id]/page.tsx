@@ -19,7 +19,8 @@ export default async function AdminProfessionalDetailPage({ params }: { params: 
     { data: languages },
     { data: skills },
     { data: processes },
-    { data: presentations }
+    { data: presentations },
+    { data: resume }
   ] = await Promise.all([
     supabase.from("professionals").select("*").eq("id", id).maybeSingle(),
     supabase.from("professional_educations").select("level,institution,course_name,completed_at").eq("professional_id", id).order("created_at", { ascending: false }),
@@ -28,8 +29,16 @@ export default async function AdminProfessionalDetailPage({ params }: { params: 
     supabase.from("professional_languages").select("language_name,proficiency").eq("professional_id", id).order("created_at", { ascending: false }),
     supabase.from("professional_skills").select("name,skill_type,proficiency").eq("professional_id", id).order("created_at", { ascending: false }),
     supabase.from("screening_processes").select("id,status,created_at,company_result,demand:demands(title,company:companies(trade_name))").eq("professional_id", id).order("created_at", { ascending: false }),
-    supabase.from("professional_presentations").select("id,status,notes,presented_at,company:companies(trade_name)").eq("professional_id", id).order("presented_at", { ascending: false })
+    supabase.from("professional_presentations").select("id,status,notes,presented_at,company:companies(trade_name)").eq("professional_id", id).order("presented_at", { ascending: false }),
+    supabase.from("resumes").select("active_version_id").eq("professional_id", id).maybeSingle()
   ]);
+
+  const { data: activeVersion } = resume?.active_version_id
+    ? await supabase.from("resume_versions").select("storage_path,generated_at").eq("id", resume.active_version_id).maybeSingle()
+    : { data: null };
+  const { data: signedResume } = activeVersion?.storage_path
+    ? await supabase.storage.from("curriculums").createSignedUrl(activeVersion.storage_path, 60 * 60)
+    : { data: null };
 
   return (
     <AppShell eyebrow="Administrador" title="Perfil do profissional">
@@ -75,6 +84,15 @@ export default async function AdminProfessionalDetailPage({ params }: { params: 
 
           <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">Currículo estruturado</h2>
+            {signedResume?.signedUrl ? (
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4">
+                <div>
+                  <p className="font-semibold text-slate-950">Currículo original anexado</p>
+                  <p className="text-sm text-slate-600">Documento oficial enviado pelo profissional.</p>
+                </div>
+                <a className="rounded bg-blue-950 px-4 py-2 text-sm font-semibold text-white" href={signedResume.signedUrl} target="_blank" rel="noreferrer">Abrir PDF</a>
+              </div>
+            ) : null}
             <div className="mt-4 grid gap-4 lg:grid-cols-2">
               <div><h3 className="font-semibold">Formação</h3>{(educations ?? []).map((item) => <p key={`${item.institution}-${item.course_name}`} className="mt-2 text-sm text-slate-600">{item.course_name} · {item.institution}</p>)}</div>
               <div><h3 className="font-semibold">Experiências</h3>{(experiences ?? []).map((item) => <p key={`${item.company_name}-${item.role_title}`} className="mt-2 text-sm text-slate-600">{item.role_title} · {item.company_name}</p>)}</div>

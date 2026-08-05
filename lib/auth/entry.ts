@@ -51,6 +51,14 @@ export async function resolveAuthenticatedEntryPath(
 
   if (professional) {
     if (savedRole !== "professional") await supabase.from("user_roles").upsert({ user_id: userId, role: "professional" });
+    const { data: resumeOnboarding } = await supabase
+      .from("professional_resume_onboarding")
+      .select("choice,prompt_status")
+      .eq("professional_id", professional.id)
+      .maybeSingle();
+    if (resumeOnboarding?.choice === "none" && resumeOnboarding.prompt_status === "pending") {
+      return "/professional/resume?resumePrompt=1";
+    }
     return defaultRouteForRole("professional");
   }
 

@@ -9,6 +9,7 @@ import { createServerClient, hasSupabasePublicEnv } from "@/lib/supabase/server"
 import { ageFromBirthDate, isValidBrazilianPhone, isValidCnpj, isValidCpf, onlyDigits } from "@/lib/validations/br";
 import { appendSearchParam, safeInternalRedirect } from "@/lib/auth/safe-redirect";
 import { isValidProfilePhoto, profilePhotoPath } from "@/lib/uploads/profile-photo";
+import { saveResumeOnboardingChoice, saveUploadedResume, validateResumePdf } from "@/lib/resume/resume-upload";
 
 const minimumAge = Number(process.env.MINIMUM_PROFESSIONAL_AGE ?? 14);
 const productionAppUrl = "https://projetotriagem.vercel.app";
@@ -49,6 +50,7 @@ const professionalRegistrationSchema = emailPasswordSchema
     neighborhood: z.string().min(2),
     city: z.string().min(2),
     state: z.string().min(2).max(2),
+    resumeChoice: z.enum(["uploaded", "none"]),
     terms: z.literal("on"),
     privacy: z.literal("on")
   });
@@ -257,7 +259,7 @@ async function saveProfessionalSignup(client: ReturnType<typeof createAdminClien
 
   await client.from("user_roles").upsert({ user_id: userId, role: "professional" });
 
-  const { error: professionalError } = await client.from("professionals").upsert(
+  const { data: professional, error: professionalError } = await client.from("professionals").upsert(
     {
       user_id: userId,
       full_name: data.fullName,
@@ -276,9 +278,9 @@ async function saveProfessionalSignup(client: ReturnType<typeof createAdminClien
       status: "pending"
     },
     { onConflict: "user_id" }
-  );
+  ).select("id").single();
 
-  if (professionalError) redirect(`/register?error=${encodeURIComponent(professionalError.message)}`);
+  if (professionalError || !professional?.id) redirect(`/register?error=${encodeURIComponent(professionalError?.message ?? "profissional-nao-criado")}`);
 
   await client.from("consent_records").insert({
     user_id: userId,
@@ -287,6 +289,8 @@ async function saveProfessionalSignup(client: ReturnType<typeof createAdminClien
     ip_address: ipAddress,
     user_agent: userAgent
   });
+
+  return professional.id as string;
 }
 
 async function saveCompanySignup(client: ReturnType<typeof createAdminClient>, userId: string, data: CompanyRegistration) {
@@ -477,6 +481,7 @@ export async function registerProfessionalWithEmailAction(formData: FormData) {
     neighborhood: formData.get("neighborhood"),
     city: formData.get("city"),
     state: formData.get("state"),
+    resumeChoice: formData.get("resumeChoice"),
     terms: formData.get("terms"),
     privacy: formData.get("privacy")
   });
@@ -487,6 +492,11 @@ export async function registerProfessionalWithEmailAction(formData: FormData) {
   const avatar = formData.get("avatar");
   if (!(avatar instanceof File) || avatar.size === 0) redirect("/register?error=foto-obrigatoria");
   if (!isValidProfilePhoto(avatar)) redirect("/register?error=foto-invalida");
+  const resume = formData.get("resume");
+  if (parsed.data.resumeChoice === "uploaded") {
+    const resumeError = validateResumePdf(resume);
+    if (resumeError) redirect(`/register?error=${resumeError}`);
+  }
 
   const data = parsed.data;
   const admin = createAdminClient();
@@ -517,7 +527,31 @@ export async function registerProfessionalWithEmailAction(formData: FormData) {
     redirect("/register?error=foto-invalida");
   }
 
-  await saveProfessionalSignup(admin, createdUser.user.id, data, avatarPath);
+  const professionalId = await saveProfessionalSignup(admin, createdUser.user.id, data, avatarPath);
+
+  let uploadedResumePath: string | null = null;
+  try {
+    if (data.resumeChoice === "uploaded" && resume instanceof File) {
+      const imported = await saveUploadedResume({ client: admin, userId: createdUser.user.id, professionalId, file: resume, source: "registration" });
+      uploadedResumePath = imported.path;
+      await saveResumeOnboardingChoice({
+        client: admin,
+        professionalId,
+        choice: "uploaded",
+        importStatus: imported.importStatus,
+        importSummary: imported.importSummary,
+        importError: imported.importError
+      });
+    } else {
+      await saveResumeOnboardingChoice({ client: admin, professionalId, choice: "none" });
+    }
+  } catch (resumeError) {
+    logAuthError("Falha ao salvar currículo no cadastro", resumeError, { userId: createdUser.user.id });
+    if (uploadedResumePath) await admin.storage.from("curriculums").remove([uploadedResumePath]);
+    await admin.storage.from("avatars").remove([avatarPath]);
+    await admin.auth.admin.deleteUser(createdUser.user.id);
+    redirect("/register?error=curriculo-nao-salvo");
+  }
 
   redirect("/login?message=cadastro-criado");
 }

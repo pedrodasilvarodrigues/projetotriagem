@@ -8,6 +8,7 @@ import { generateResumePdf } from "@/lib/pdf/resume";
 import { createServerClient } from "@/lib/supabase/server";
 import { ageFromBirthDate, isValidBrazilianPhone, isValidCnpj, isValidCpf, onlyDigits } from "@/lib/validations/br";
 import { isValidProfilePhoto, profilePhotoPath } from "@/lib/uploads/profile-photo";
+import { saveResumeOnboardingChoice, saveUploadedResume, validateResumePdf } from "@/lib/resume/resume-upload";
 
 const minimumAge = Number(process.env.MINIMUM_PROFESSIONAL_AGE ?? 14);
 
@@ -28,6 +29,7 @@ const professionalSchema = z.object({
   neighborhood: z.string().min(2),
   city: z.string().min(2),
   state: z.string().min(2).max(2),
+  resumeChoice: z.enum(["uploaded", "none"]),
   terms: z.literal("on"),
   privacy: z.literal("on")
 });
@@ -99,6 +101,7 @@ export async function saveProfessionalBasicsAction(formData: FormData) {
     neighborhood: formData.get("neighborhood"),
     city: formData.get("city"),
     state: formData.get("state"),
+    resumeChoice: formData.get("resumeChoice"),
     terms: formData.get("terms"),
     privacy: formData.get("privacy")
   });
@@ -108,6 +111,11 @@ export async function saveProfessionalBasicsAction(formData: FormData) {
   const avatar = formData.get("avatar");
   if (!(avatar instanceof File) || avatar.size === 0) redirect("/onboarding/professional?error=foto-obrigatoria");
   if (!isValidProfilePhoto(avatar)) redirect("/onboarding/professional?error=foto-invalida");
+  const resume = formData.get("resume");
+  if (parsed.data.resumeChoice === "uploaded") {
+    const resumeError = validateResumePdf(resume);
+    if (resumeError) redirect(`/onboarding/professional?error=${resumeError}`);
+  }
 
   const data = parsed.data;
   const normalizedCpf = onlyDigits(data.cpf);
@@ -130,7 +138,7 @@ export async function saveProfessionalBasicsAction(formData: FormData) {
     redirect("/onboarding/professional?error=foto-nao-salva");
   }
   await supabase.from("user_roles").upsert({ user_id: user.id, role: "professional" });
-  const { error } = await supabase.from("professionals").upsert({
+  const { data: professional, error } = await supabase.from("professionals").upsert({
     user_id: user.id,
     full_name: data.fullName,
     email: data.email,
@@ -146,10 +154,25 @@ export async function saveProfessionalBasicsAction(formData: FormData) {
     city: data.city,
     state: data.state.toUpperCase(),
     status: "pending"
-  }, { onConflict: "user_id" });
-  if (error) redirect(`/onboarding/professional?error=${encodeURIComponent(error.message)}`);
+  }, { onConflict: "user_id" }).select("id").single();
+  if (error || !professional?.id) redirect(`/onboarding/professional?error=${encodeURIComponent(error?.message ?? "profissional-nao-criado")}`);
   await recordConsent(user.id);
-  redirect("/professional");
+
+  let uploadedResume = false;
+  try {
+    if (data.resumeChoice === "uploaded" && resume instanceof File) {
+      const imported = await saveUploadedResume({ client: supabase, userId: user.id, professionalId: professional.id, file: resume, source: "onboarding" });
+      await saveResumeOnboardingChoice({ client: supabase, professionalId: professional.id, choice: "uploaded", importStatus: imported.importStatus, importSummary: imported.importSummary, importError: imported.importError });
+      uploadedResume = true;
+    } else {
+      await saveResumeOnboardingChoice({ client: supabase, professionalId: professional.id, choice: "none" });
+    }
+  } catch (resumeError) {
+    console.error("[onboarding] Falha ao salvar currículo", resumeError);
+    redirect("/onboarding/professional?error=curriculo-nao-salvo");
+  }
+  if (uploadedResume) redirect("/professional");
+  redirect("/professional/resume?resumePrompt=1");
 }
 
 export async function uploadResumeAction(formData: FormData) {
@@ -181,6 +204,19 @@ export async function uploadResumeAction(formData: FormData) {
   }
 
   redirect("/professional");
+}
+
+export async function acknowledgeResumePromptAction(answer: "fill" | "later") {
+  const { supabase, user } = await requireUser();
+  if (answer !== "fill" && answer !== "later") return { ok: false };
+  const { data: professional } = await supabase.from("professionals").select("id").eq("user_id", user.id).maybeSingle();
+  if (!professional?.id) return { ok: false };
+  const { error } = await supabase
+    .from("professional_resume_onboarding")
+    .update({ prompt_status: answer, prompt_answered_at: new Date().toISOString() })
+    .eq("professional_id", professional.id)
+    .eq("choice", "none");
+  return { ok: !error };
 }
 
 export async function generateResumeAction(formData: FormData) {

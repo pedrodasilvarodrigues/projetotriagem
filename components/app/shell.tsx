@@ -1,5 +1,6 @@
 import { AppNav } from "@/components/app/nav";
 import { LanguageRuntime } from "@/components/app/language-runtime";
+import { PushNotificationPrompt } from "@/components/app/push-notification-prompt";
 import { requireRole, roleFromEyebrow } from "@/lib/auth/access";
 import { createServerClient } from "@/lib/supabase/server";
 import { type AppLanguage, translateUi } from "@/lib/i18n/ui";
@@ -28,6 +29,7 @@ export async function AppShell({ title, eyebrow, children }: { title: string; ey
       <div className="fixed inset-0 grain-overlay opacity-[0.025] pointer-events-none z-[999]" />
       <LanguageRuntime preferredLanguage={language} />
       <AppNav role={role} preferredLanguage={language} marketplaceEnabled={marketplaceEnabled} companyPlan={company?.plano} />
+      <PushNotificationPrompt />
       <main id="conteudo" className={mainClassName}>
         <header className="mb-4 border-l-4 border-[#F2811D] bg-transparent py-2 pl-3 sm:mb-6 sm:pl-4 animate-fade-in-up">
           <p className="text-xs font-bold uppercase tracking-normal text-[#6B7280]">{translateUi(eyebrow, language)}</p>

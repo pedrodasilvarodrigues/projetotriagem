@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { CinematicIntro } from "@/components/app/cinematic-intro";
 import { RouteTransition } from "@/components/app/route-transition";
 import { UserPreferencesProvider } from "@/components/app/user-preferences-provider";
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <RouteTransition>{children}</RouteTransition>
         </UserPreferencesProvider>
       </body>
+      <GoogleAnalytics gaId="G-BVE5QRQ75G" />
     </html>
   );
 }

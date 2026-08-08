@@ -5,7 +5,7 @@ const base = (title: string, body: string) => `
     <main style="max-width:640px;margin:0 auto;padding:32px 20px">
       <h1 style="font-size:24px;line-height:1.2">${title}</h1>
       <section style="background:#fff;border:1px solid #e4e4e7;border-radius:12px;padding:24px">${body}</section>
-      <p style="font-size:12px;color:#71717a;margin-top:24px">Portal de Triagem Profissional. E-mail transacional automático.</p>
+      <p style="font-size:12px;color:#71717a;margin-top:24px">Portal Encaixe. E-mail transacional automático.</p>
     </main>
   </body>
 </html>`;

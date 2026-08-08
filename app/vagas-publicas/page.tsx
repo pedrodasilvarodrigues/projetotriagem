@@ -1,7 +1,14 @@
 import Link from "next/link";
 import { ArrowRight, BriefcaseBusiness, Building2, CheckCircle2, Clock, FileText, MapPin, Search, SlidersHorizontal, Sparkles, UserRoundCheck } from "lucide-react";
 import { PublicPageShell } from "@/components/app/public-page-shell";
+import { createPublicMetadata } from "@/lib/seo";
 import { createAdminClient } from "@/lib/supabase/admin";
+
+export const metadata = createPublicMetadata({
+  title: "Vagas públicas",
+  description: "Consulte vagas e oportunidades profissionais publicadas no Portal Encaixe e prepare seu currículo para participar das triagens.",
+  path: "/vagas-publicas"
+});
 
 type DemandRow = {
   id: string;

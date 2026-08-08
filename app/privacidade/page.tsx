@@ -1,4 +1,11 @@
 import { PublicPageShell } from "@/components/app/public-page-shell";
+import { createPublicMetadata } from "@/lib/seo";
+
+export const metadata = createPublicMetadata({
+  title: "Política de Privacidade",
+  description: "Saiba como o Portal Encaixe coleta, utiliza, compartilha e protege dados pessoais e profissionais.",
+  path: "/privacidade"
+});
 
 export default function PrivacyPage() {
   return (

@@ -3,11 +3,29 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import { CinematicIntro } from "@/components/app/cinematic-intro";
 import { RouteTransition } from "@/components/app/route-transition";
 import { UserPreferencesProvider } from "@/components/app/user-preferences-provider";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Portal de Triagem Profissional",
-  description: "Triagem privada, compatibilidade profissional e encaminhamento administrado."
+  metadataBase: new URL(SITE_URL),
+  applicationName: SITE_NAME,
+  title: {
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`
+  },
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    siteName: SITE_NAME,
+    locale: "pt_BR",
+    type: "website"
+  },
+  twitter: {
+    card: "summary",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION
+  }
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

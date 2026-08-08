@@ -1,4 +1,4 @@
-# Portal de Triagem Profissional
+# Portal Encaixe
 
 Sistema Next.js com Supabase e Resend para triagem privada de profissionais, demandas internas de empresas e encaminhamento administrado.
 

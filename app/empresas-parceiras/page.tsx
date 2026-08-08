@@ -1,5 +1,12 @@
 import { PublicPageShell } from "@/components/app/public-page-shell";
+import { createPublicMetadata } from "@/lib/seo";
 import { createAdminClient } from "@/lib/supabase/admin";
+
+export const metadata = createPublicMetadata({
+  title: "Empresas parceiras",
+  description: "Conheça empresas cadastradas e aprovadas no Portal Encaixe para publicar demandas e receber profissionais encaminhados.",
+  path: "/empresas-parceiras"
+});
 
 async function getCompanies() {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) return [];

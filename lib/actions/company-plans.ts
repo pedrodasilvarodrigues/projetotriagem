@@ -57,7 +57,7 @@ export async function activateCompanyPlanAction(formData: FormData) {
         variables: {
           name: activated.company_name,
           plan: String(activated.plano).toUpperCase(),
-          url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://projetotriagem.vercel.app"}/company`
+          url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.portalencaixe.com.br"}/company`
         }
       });
       notification = result.error ? "email-falhou" : "email-enviado";

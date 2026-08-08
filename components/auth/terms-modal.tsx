@@ -44,7 +44,7 @@ export function TermsModal({ label = "Ver Termos" }: { label?: string }) {
             </div>
             <div className="max-h-[62vh] overflow-y-auto px-5 py-4 text-sm leading-7 text-slate-700">
               <h3 className="font-semibold text-slate-950">Termos de Uso</h3>
-              <p>O Portal de Triagem Profissional oferece ambiente privado para cadastro, triagem e encaminhamento administrado de profissionais e empresas. O usuário deve fornecer informações verdadeiras, manter seus dados atualizados e utilizar a plataforma somente para fins profissionais legítimos.</p>
+              <p>O Portal Encaixe oferece ambiente privado para cadastro, triagem e encaminhamento administrado de profissionais e empresas. O usuário deve fornecer informações verdadeiras, manter seus dados atualizados e utilizar a plataforma somente para fins profissionais legítimos.</p>
               <p>A plataforma não garante contratação, publicação de vaga ou seleção automática. A triagem e o encaminhamento seguem critérios operacionais, requisitos informados pelas empresas e validação administrativa.</p>
 
               <h3 className="mt-5 font-semibold text-slate-950">Política de Privacidade</h3>

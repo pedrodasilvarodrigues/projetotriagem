@@ -83,7 +83,7 @@ export default async function AdminHomePage() {
       <div className="space-y-6">
         <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           <p className="max-w-3xl text-sm leading-6 text-slate-600">
-            Visão rapida da operação do Portal de Triagem Profissional. A ideia aqui e mostrar o essencial: quantos profissionais, empresas, demandas e processos existem, sem transformar a área administrativa em um painel pesado.
+            Visão rapida da operação do Portal Encaixe. A ideia aqui e mostrar o essencial: quantos profissionais, empresas, demandas e processos existem, sem transformar a área administrativa em um painel pesado.
           </p>
         </section>
 

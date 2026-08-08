@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { ArrowRight, Bell, BriefcaseBusiness, CheckCircle2, ClipboardCheck, FileSearch, Send, UserRoundCheck, type LucideIcon } from "lucide-react";
 import { PublicPageShell } from "@/components/app/public-page-shell";
+import { createPublicMetadata } from "@/lib/seo";
+
+export const metadata = createPublicMetadata({
+  title: "Como funciona",
+  description: "Entenda como cadastro, currículo, demandas, compatibilidade, triagem e encaminhamentos funcionam no Portal Encaixe.",
+  path: "/como-funciona"
+});
 
 type FlowCard = {
   title: string;

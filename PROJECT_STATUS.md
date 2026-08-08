@@ -1,10 +1,11 @@
 # Projeto
-Portal de Triagem Profissional
+Portal Encaixe
 
 # Objetivo
 Plataforma de recrutamento e triagem profissional que conecta profissionais e empresas por meio de cadastro, banco de talentos, demandas, compatibilidade e encaminhamento qualificado.
 
 # Concluido
+- Canonicalização e SEO público revisados: `metadataBase`, títulos, descrições, Open Graph, Twitter e canonical individual usam `https://www.portalencaixe.com.br`; `robots.txt` aponta para o sitemap oficial, o sitemap contém somente rotas públicas e o hostname legado `projetotriagem.vercel.app` redireciona por 308 preservando caminho e query string.
 - Google Analytics 4 integrado globalmente pelo componente oficial `GoogleAnalytics` do pacote `@next/third-parties`, com o ID de medição `G-BVE5QRQ75G` carregado uma única vez no layout raiz do App Router.
 - Sitemap público implementado em `app/sitemap.ts` com o domínio oficial `https://www.portalencaixe.com.br`, contendo somente rotas institucionais e públicas existentes; autenticação, painéis, administração, APIs e rotas privadas ficaram fora da indexação.
 - Onboarding de currículo implementado: o cadastro profissional por e-mail e o onboarding via Google exigem a escolha entre `Anexar currículo` e `Não tenho currículo` antes de concluir o fluxo.

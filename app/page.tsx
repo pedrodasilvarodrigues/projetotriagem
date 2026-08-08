@@ -1,5 +1,13 @@
 import { PublicHome, type PublicCompany, type PublicStats } from "@/components/app/public-home";
+import { createPublicMetadata, SITE_NAME } from "@/lib/seo";
 import { createAdminClient } from "@/lib/supabase/admin";
+
+export const metadata = createPublicMetadata({
+  title: SITE_NAME,
+  description: "Conecte seu currículo a oportunidades e encontre profissionais com triagem, compatibilidade e acompanhamento em um só portal.",
+  path: "/",
+  absoluteTitle: true
+});
 
 const fallbackStats: PublicStats = {
   professionals: 1500,

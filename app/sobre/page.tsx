@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { ArrowRight, BriefcaseBusiness, CheckCircle2, ClipboardCheck, FileText, SearchCheck, ShieldCheck, UserRoundCheck, type LucideIcon } from "lucide-react";
 import { PublicPageShell } from "@/components/app/public-page-shell";
+import { createPublicMetadata } from "@/lib/seo";
+
+export const metadata = createPublicMetadata({
+  title: "Sobre nós",
+  description: "Conheça o Portal Encaixe e como organizamos currículos, triagem e encaminhamentos para aproximar profissionais e empresas.",
+  path: "/sobre"
+});
 
 type InfoCard = {
   title: string;

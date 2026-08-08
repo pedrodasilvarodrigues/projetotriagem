@@ -1,4 +1,11 @@
 import { PublicPageShell } from "@/components/app/public-page-shell";
+import { createPublicMetadata } from "@/lib/seo";
+
+export const metadata = createPublicMetadata({
+  title: "LGPD e proteção de dados",
+  description: "Conheça os direitos dos titulares e os compromissos do Portal Encaixe com privacidade, segurança e proteção de dados.",
+  path: "/lgpd"
+});
 
 export default function LgpdPage() {
   return (

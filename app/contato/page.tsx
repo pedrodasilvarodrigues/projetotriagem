@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { ArrowRight, BriefcaseBusiness, Clock, HelpCircle, Mail, MessageCircle, UserRoundCheck, type LucideIcon } from "lucide-react";
 import { PublicPageShell } from "@/components/app/public-page-shell";
+import { createPublicMetadata } from "@/lib/seo";
+
+export const metadata = createPublicMetadata({
+  title: "Contato",
+  description: "Entre em contato com o Portal Encaixe para tirar dúvidas sobre cadastro, currículos, empresas, vagas e acompanhamento de processos.",
+  path: "/contato"
+});
 
 type ContactCard = {
   title: string;

@@ -287,7 +287,7 @@ export async function sendMarketplaceMessageAction(formData: FormData) {
         const recipientId = data.user.id === conversation.requester_user_id ? providerUserId : conversation.requester_user_id;
         if (recipientId) {
           const { data: recipient } = await admin.from("profiles").select("email,full_name").eq("id", recipientId).maybeSingle();
-          if (recipient?.email) await sendTransactionalEmail({ to: recipient.email, template: "marketplace_message", variables: { name: recipient.full_name || "usuário", preview: body.slice(0, 160), url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://projetotriagem.vercel.app"}/marketplace/conversations/${conversationId}` } });
+          if (recipient?.email) await sendTransactionalEmail({ to: recipient.email, template: "marketplace_message", variables: { name: recipient.full_name || "usuário", preview: body.slice(0, 160), url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.portalencaixe.com.br"}/marketplace/conversations/${conversationId}` } });
         }
       }
     } catch (emailError) {

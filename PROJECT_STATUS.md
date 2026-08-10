@@ -5,6 +5,7 @@ Portal Encaixe
 Plataforma de recrutamento e triagem profissional que conecta profissionais e empresas por meio de cadastro, banco de talentos, demandas, compatibilidade e encaminhamento qualificado.
 
 # Concluido
+- Integração Resend da aplicação consolidada no servidor: `RESEND_API_KEY` é a única variável obrigatória, o remetente fixo é `Portal Encaixe <noreply@portalencaixe.com.br>`, erros do provedor são normalizados e os fluxos de recuperação de senha, ativação de plano e mensagem do marketplace reutilizam o mesmo serviço sem expor credenciais ao navegador. O reset usa idempotência e não aciona outro provedor quando o estado da entrega é incerto; os e-mails nativos e o fallback seguro do Supabase Auth foram preservados.
 - Canonicalização e SEO público revisados: `metadataBase`, títulos, descrições, Open Graph, Twitter e canonical individual usam `https://www.portalencaixe.com.br`; `robots.txt` aponta para o sitemap oficial, o sitemap contém somente rotas públicas e o hostname legado `projetotriagem.vercel.app` redireciona por 308 preservando caminho e query string.
 - Google Analytics 4 integrado globalmente pelo componente oficial `GoogleAnalytics` do pacote `@next/third-parties`, com o ID de medição `G-BVE5QRQ75G` carregado uma única vez no layout raiz do App Router.
 - Sitemap público implementado em `app/sitemap.ts` com o domínio oficial `https://www.portalencaixe.com.br`, contendo somente rotas institucionais e públicas existentes; autenticação, painéis, administração, APIs e rotas privadas ficaram fora da indexação.

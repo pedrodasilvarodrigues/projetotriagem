@@ -6,6 +6,7 @@ import { requireRole } from "@/lib/auth/access";
 import { appendSearchParam, safeInternalRedirect } from "@/lib/auth/safe-redirect";
 import { createAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
 import { createServerClient } from "@/lib/supabase/server";
+import { isResendConfigured } from "@/lib/resend/config";
 import { sendTransactionalEmail } from "@/lib/resend/send-email";
 import {
   SERVICE_POST_MAX_IMAGES,
@@ -276,7 +277,7 @@ export async function sendMarketplaceMessageAction(formData: FormData) {
   if (!data.user || !conversationId || !body) return;
   const { error } = await supabase.from("marketplace_messages").insert({ conversation_id: conversationId, sender_id: data.user.id, body });
   if (error) redirect(`/marketplace/conversations/${conversationId}?error=${safeErrorCode(error)}`);
-  if (hasSupabaseAdminEnv() && process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL) {
+  if (hasSupabaseAdminEnv() && isResendConfigured()) {
     try {
       const admin = createAdminClient();
       const { data: conversation } = await admin.from("marketplace_conversations").select("requester_user_id,provider_id").eq("id", conversationId).single();

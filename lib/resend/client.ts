@@ -1,5 +1,14 @@
+import "server-only";
+
 import { Resend } from "resend";
+import { getResendApiKey } from "@/lib/resend/config";
+
+let resendClient: Resend | null = null;
 
 export function createResendClient() {
-  return new Resend(process.env.RESEND_API_KEY);
+  if (!resendClient) {
+    resendClient = new Resend(getResendApiKey());
+  }
+
+  return resendClient;
 }

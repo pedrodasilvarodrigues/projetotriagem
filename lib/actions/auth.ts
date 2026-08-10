@@ -4,7 +4,8 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
-import { sendTransactionalEmail } from "@/lib/resend/send-email";
+import { isResendConfigured } from "@/lib/resend/config";
+import { sendTransactionalEmail, TransactionalEmailError } from "@/lib/resend/send-email";
 import { createServerClient, hasSupabasePublicEnv } from "@/lib/supabase/server";
 import { ageFromBirthDate, isValidBrazilianPhone, isValidCnpj, isValidCpf, onlyDigits } from "@/lib/validations/br";
 import { appendSearchParam, safeInternalRedirect } from "@/lib/auth/safe-redirect";
@@ -133,7 +134,7 @@ function canUseAdminClient() {
 }
 
 function canSendBrandedAuthEmail() {
-  return Boolean(process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL && canUseAdminClient());
+  return isResendConfigured() && canUseAdminClient();
 }
 
 function authErrorCode(error?: { message?: string | null; status?: number | null; code?: string | null } | null) {
@@ -676,8 +677,11 @@ export async function requestPasswordResetAction(formData: FormData) {
   const supabase = await createServerClient();
   const origin = await getAuthRedirectOrigin();
   const recipient = parsed.data.email;
+  const resendAvailable = canSendBrandedAuthEmail();
+  let resendDelivered = false;
+  let resendRequestStarted = false;
 
-  if (canSendBrandedAuthEmail()) {
+  if (resendAvailable) {
     try {
       const admin = createAdminClient();
       const { data, error } = await admin.auth.admin.generateLink({
@@ -695,25 +699,16 @@ export async function requestPasswordResetAction(formData: FormData) {
         resetUrl.searchParams.set("type", "recovery");
         resetUrl.searchParams.set("next", "/update-password");
 
-        const { error: emailError } = await sendTransactionalEmail({
+        resendRequestStarted = true;
+        await sendTransactionalEmail({
           to: recipient,
           template: "password_reset",
-          variables: { url: resetUrl.toString() }
+          variables: { url: resetUrl.toString() },
+          idempotencyKey: `password-reset-${tokenHash}`
         });
 
-        if (!emailError) {
-          await recordAuthEmailAttempt({ recipient, templateKey: "password_reset", providerId: "resend", status: "sent" });
-          redirect("/forgot-password?message=email-enviado");
-        }
-
-        await recordAuthEmailAttempt({
-          recipient,
-          templateKey: "password_reset",
-          providerId: "resend",
-          status: "failed",
-          errorMessage: emailError.message
-        });
-        logAuthError("Falha ao enviar recuperação via Resend", emailError, { recipient });
+        await recordAuthEmailAttempt({ recipient, templateKey: "password_reset", providerId: "resend", status: "sent" });
+        resendDelivered = true;
       } else {
         await recordAuthEmailAttempt({
           recipient,
@@ -733,8 +728,13 @@ export async function requestPasswordResetAction(formData: FormData) {
         errorMessage: error instanceof Error ? error.message : String(error)
       });
       logAuthError("Excecao no envio de recuperação via Resend", error, { recipient });
+      if (resendRequestStarted && !(error instanceof TransactionalEmailError)) {
+        redirect("/forgot-password?error=erro-autenticacao");
+      }
     }
   }
+
+  if (resendDelivered) redirect("/forgot-password?message=email-enviado");
 
   const { error } = await supabase.auth.resetPasswordForEmail(recipient, {
     redirectTo: `${origin}/auth/callback?next=/update-password`
@@ -758,9 +758,9 @@ export async function requestPasswordResetAction(formData: FormData) {
     templateKey: "password_reset",
     providerId: "supabase-auth",
     status: "requested",
-    errorMessage: canSendBrandedAuthEmail() ? "Alternativa usada após falha do Resend." : "Envio solicitado pelo provedor padrão do Supabase. Configure SMTP/Resend para entrega confiável."
+    errorMessage: resendAvailable ? "Alternativa usada após falha do Resend." : "Envio solicitado pelo provedor padrão do Supabase. Configure SMTP/Resend para entrega confiável."
   });
-  redirect(canSendBrandedAuthEmail() ? "/forgot-password?message=email-enviado" : "/forgot-password?message=email-solicitado-supabase");
+  redirect(resendAvailable ? "/forgot-password?message=email-enviado" : "/forgot-password?message=email-solicitado-supabase");
 }
 
 export async function resendSignupConfirmationAction(formData: FormData) {

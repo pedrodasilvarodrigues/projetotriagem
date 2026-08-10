@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth/access";
 import { getCurrentCompanyPlanAccess } from "@/lib/companies/plan-access";
+import { isResendConfigured } from "@/lib/resend/config";
 import { sendTransactionalEmail } from "@/lib/resend/send-email";
 import { createServerClient } from "@/lib/supabase/server";
 
@@ -49,9 +50,9 @@ export async function activateCompanyPlanAction(formData: FormData) {
     .maybeSingle();
   const recipient = activated.company_email || contact?.email;
 
-  if (recipient && process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL) {
+  if (recipient && isResendConfigured()) {
     try {
-      const result = await sendTransactionalEmail({
+      await sendTransactionalEmail({
         to: recipient,
         template: "company_plan_activated",
         variables: {
@@ -60,7 +61,7 @@ export async function activateCompanyPlanAction(formData: FormData) {
           url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.portalencaixe.com.br"}/company`
         }
       });
-      notification = result.error ? "email-falhou" : "email-enviado";
+      notification = "email-enviado";
     } catch (emailError) {
       console.error("[plans] Plano ativado, mas o aviso por e-mail falhou", { companyId: parsed.data, error: emailError });
       notification = "email-falhou";

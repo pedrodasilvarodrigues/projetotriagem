@@ -36,12 +36,15 @@ export function PublicHeader({ showActions = true }: { showActions?: boolean }) 
 
   return (
     <header className={`fixed inset-x-0 top-0 z-50 border-b transition-all duration-300 ${scrolled ? "border-slate-200/80 bg-white/90 shadow-sm backdrop-blur-md" : "border-transparent bg-white/45 backdrop-blur-sm"}`}>
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
+      <div className="relative mx-auto flex h-20 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
         <Link href="/" className="flex min-w-0 items-center gap-3" aria-label="Portal Encaixe">
           <PortalEncaixeLogo />
         </Link>
 
-        <nav aria-label="Navegação institucional" className="hidden items-center gap-6 text-sm font-bold text-slate-600 lg:flex">
+        <nav
+          aria-label="Navegação institucional"
+          className={`hidden items-center gap-6 text-sm font-bold text-slate-600 lg:flex ${showActions ? "" : "absolute left-1/2 -translate-x-1/2"}`}
+        >
           {navItems.map((item) => {
             const active = pathname === item.href;
             return (

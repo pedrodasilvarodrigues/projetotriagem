@@ -24,13 +24,15 @@ type TransactionalEmailInput = {
 export async function sendTransactionalEmail(input: TransactionalEmailInput) {
   const resend = createResendClient();
   const template = emailTemplates[input.template](input.variables);
+  const plainText = "text" in template && typeof template.text === "string" ? template.text : undefined;
 
   const { data, error } = await resend.emails.send(
     {
       from: getResendFromEmail(),
       to: input.to,
       subject: template.subject,
-      html: template.html
+      html: template.html,
+      ...(plainText ? { text: plainText } : {})
     },
     input.idempotencyKey ? { idempotencyKey: input.idempotencyKey } : undefined
   );

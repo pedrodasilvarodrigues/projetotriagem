@@ -15,7 +15,7 @@ const navItems = [
   { href: "/contato", label: "Contato" }
 ];
 
-export function PublicHeader() {
+export function PublicHeader({ showActions = true }: { showActions?: boolean }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -58,14 +58,16 @@ export function PublicHeader() {
           })}
         </nav>
 
-        <div className="hidden items-center gap-3 sm:flex">
-          <Link href="/login" className="btn-secondary rounded-xl bg-white px-4 py-2 text-xs shadow-sm sm:text-sm">
-            Entrar
-          </Link>
-          <Link href="/register" className="btn-primary animate-pulse-glow rounded-xl px-4 py-2 text-xs shadow-md sm:text-sm">
-            Cadastrar currículo
-          </Link>
-        </div>
+        {showActions ? (
+          <div className="hidden items-center gap-3 sm:flex">
+            <Link href="/login" className="btn-secondary rounded-xl bg-white px-4 py-2 text-xs shadow-sm sm:text-sm">
+              Entrar
+            </Link>
+            <Link href="/register" className="btn-primary animate-pulse-glow rounded-xl px-4 py-2 text-xs shadow-md sm:text-sm">
+              Cadastrar currículo
+            </Link>
+          </div>
+        ) : null}
 
         <button
           type="button"
@@ -96,14 +98,16 @@ export function PublicHeader() {
               );
             })}
           </nav>
-          <div className="mt-3 grid gap-2 sm:hidden">
-            <Link href="/register" className="btn-primary rounded-2xl px-4 py-3 text-center text-sm">
-              Cadastrar currículo
-            </Link>
-            <Link href="/login" className="btn-secondary rounded-2xl px-4 py-3 text-center text-sm">
-              Entrar
-            </Link>
-          </div>
+          {showActions ? (
+            <div className="mt-3 grid gap-2 sm:hidden">
+              <Link href="/register" className="btn-primary rounded-2xl px-4 py-3 text-center text-sm">
+                Cadastrar currículo
+              </Link>
+              <Link href="/login" className="btn-secondary rounded-2xl px-4 py-3 text-center text-sm">
+                Entrar
+              </Link>
+            </div>
+          ) : null}
         </div>
       </div>
     </header>

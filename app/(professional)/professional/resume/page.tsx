@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BriefcaseBusiness, CheckCircle2, FileText, GraduationCap, Languages, Plus, ShieldCheck, Sparkles, Target, Upload } from "lucide-react";
+import { ArrowUpRight, BriefcaseBusiness, CheckCircle2, FileText, GraduationCap, Languages, Plus, ShieldCheck, Sparkles, Star, Target, Upload } from "lucide-react";
 import { AppShell } from "@/components/app/shell";
 import { DateTextInput } from "@/components/forms/date-text-input";
 import { InstitutionAutocomplete } from "@/components/forms/institution-autocomplete";
@@ -8,6 +8,7 @@ import { PersonalDataFields } from "@/components/professional/personal-data-fiel
 import { RemoveResumeItemButton } from "@/components/professional/remove-resume-item-button";
 import { ResumeSectionNav } from "@/components/professional/resume-section-nav";
 import { ResumeCompletionPrompt } from "@/components/professional/resume-completion-prompt";
+import { PORTAL_FEEDBACK_URL } from "@/lib/feedback";
 import {
   addProfessionalCourseAction,
   addProfessionalEducationAction,
@@ -198,6 +199,26 @@ export default async function ProfessionalResumePage({ searchParams }: { searchP
               ) : null}
             </div>
           </section>
+
+          {activeVersion ? (
+            <section className="overflow-hidden rounded-2xl border border-[#F2811D]/25 bg-gradient-to-r from-[#0F2D4E] to-[#1B4E78] p-5 text-white shadow-lg shadow-[#0F2D4E]/10 sm:p-6">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 gap-4">
+                  <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-[#F2811D] text-white shadow-lg shadow-orange-950/20">
+                    <Star aria-hidden="true" size={23} />
+                  </span>
+                  <div>
+                    <h2 className="font-display text-xl font-extrabold">Currículo finalizado. Como foi sua experiência?</h2>
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-200">Sua avaliação ajuda a equipe a entender o que funcionou bem e o que pode melhorar no cadastro do currículo.</p>
+                  </div>
+                </div>
+                <a href={PORTAL_FEEDBACK_URL} target="_blank" rel="noopener noreferrer" className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#F2811D] px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-orange-950/20 transition hover:-translate-y-0.5 hover:bg-[#F5A24D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:translate-y-0">
+                  Ir avaliar
+                  <ArrowUpRight aria-hidden="true" size={17} />
+                </a>
+              </div>
+            </section>
+          ) : null}
 
           <section id="dados-pessoais" className="scroll-mt-72 border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold uppercase">Dados pessoais</h2>

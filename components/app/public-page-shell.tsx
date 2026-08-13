@@ -8,6 +8,7 @@ export function PublicPageShell({
   eyebrow = "Portal Encaixe",
   primaryAction = { href: "/register", label: "Cadastrar currículo" },
   secondaryAction = { href: "/vagas-publicas", label: "Ver vagas públicas" },
+  hideHeaderActions = false,
   asideTitle = "Por que cadastrar?",
   asideItems = [
     "Seu perfil entra no banco de talentos.",
@@ -20,7 +21,8 @@ export function PublicPageShell({
   description: string;
   eyebrow?: string;
   primaryAction?: { href: string; label: string };
-  secondaryAction?: { href: string; label: string };
+  secondaryAction?: { href: string; label: string } | null;
+  hideHeaderActions?: boolean;
   asideTitle?: string;
   asideItems?: string[];
   children: React.ReactNode;
@@ -28,7 +30,7 @@ export function PublicPageShell({
   return (
     <main id="conteudo" className="relative min-h-screen overflow-x-hidden bg-[#FAFBFC] text-slate-950">
       <div className="fixed inset-0 grain-overlay opacity-[0.018] pointer-events-none z-[999]" />
-      <PublicHeader />
+      <PublicHeader showActions={!hideHeaderActions} />
 
       <section className="relative overflow-hidden bg-gradient-to-b from-white via-[#FAFBFC] to-[#F1F4F8] pt-32 pb-14 md:pt-40 md:pb-20">
         <div className="absolute inset-0 pointer-events-none">
@@ -54,9 +56,11 @@ export function PublicPageShell({
                 {primaryAction.label}
                 <ArrowRight aria-hidden="true" size={17} />
               </Link>
-              <Link href={secondaryAction.href} className="btn-secondary rounded-2xl bg-white px-5 py-3 text-sm">
-                {secondaryAction.label}
-              </Link>
+              {secondaryAction ? (
+                <Link href={secondaryAction.href} className="btn-secondary rounded-2xl bg-white px-5 py-3 text-sm">
+                  {secondaryAction.label}
+                </Link>
+              ) : null}
             </div>
           </div>
 

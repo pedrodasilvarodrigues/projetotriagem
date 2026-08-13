@@ -1,6 +1,6 @@
-import Link from "next/link";
-import { ArrowRight, BriefcaseBusiness, Clock, HelpCircle, Mail, MessageCircle, UserRoundCheck, type LucideIcon } from "lucide-react";
+import { BarChart3, Lightbulb, MessageSquareText, ShieldCheck, Star } from "lucide-react";
 import { PublicPageShell } from "@/components/app/public-page-shell";
+import { PORTAL_FEEDBACK_URL } from "@/lib/feedback";
 import { createPublicMetadata } from "@/lib/seo";
 
 export const metadata = createPublicMetadata({
@@ -9,92 +9,67 @@ export const metadata = createPublicMetadata({
   path: "/contato"
 });
 
-type ContactCard = {
-  title: string;
-  text: string;
-  action?: string;
-  href?: string;
-  icon: LucideIcon;
-};
-
-const channels: Required<Pick<ContactCard, "title" | "text" | "action" | "href" | "icon">>[] = [
+const feedbackTypes = [
   {
-    title: "Sou profissional",
-    text: "Cadastre seu currículo, mantenha seus dados atualizados e acompanhe encaminhamentos pela área profissional.",
-    action: "Cadastrar currículo",
-    href: "/register",
-    icon: UserRoundCheck
+    title: "Avalie sua experiência",
+    text: "Conte como foi usar o Portal Encaixe e dê uma nota para a experiência.",
+    icon: Star
   },
   {
-    title: "Sou empresa",
-    text: "Crie uma conta empresarial para registrar demandas e receber profissionais apresentados pela administração.",
-    action: "Cadastrar empresa",
-    href: "/register",
-    icon: BriefcaseBusiness
+    title: "Envie uma sugestão",
+    text: "Compartilhe uma ideia que possa deixar a plataforma mais clara, completa ou funcional.",
+    icon: Lightbulb
   },
   {
-    title: "Já tenho acesso",
-    text: "Entre no portal para consultar seu perfil, demandas, processos, notificações e histórico de triagem.",
-    action: "Entrar no portal",
-    href: "/login",
-    icon: MessageCircle
+    title: "Relate um problema",
+    text: "Descreva o que aconteceu para que a equipe consiga identificar e priorizar a correção.",
+    icon: MessageSquareText
   }
-];
-
-const checklist: ContactCard[] = [
-  { title: "Complete seu currículo", text: "Dados incompletos reduzem a precisão da triagem.", icon: UserRoundCheck },
-  { title: "Verifique sua área logada", text: "Processos, encaminhamentos e avisos aparecem no portal.", icon: Clock },
-  { title: "Use o cadastro correto", text: "Profissional e empresa possuem fluxos diferentes.", icon: HelpCircle }
 ];
 
 export default function ContactPage() {
   return (
     <PublicPageShell
       eyebrow="Contato"
-      title="Fale com o Portal Encaixe pelo caminho certo."
-      description="Se você quer cadastrar currículo, registrar uma demanda ou acompanhar um processo, o portal centraliza os próximos passos para reduzir ruído e acelerar a triagem."
+      title="Sua experiência ajuda o Portal Encaixe a evoluir."
+      description="Avaliações, sugestões e relatos de problemas são organizados em uma plataforma própria para que a equipe possa analisar cada contribuição com mais atenção."
+      primaryAction={{ href: PORTAL_FEEDBACK_URL, label: "Ir para avaliações e feedback" }}
+      secondaryAction={null}
+      hideHeaderActions
+      asideTitle="Tudo em um só lugar"
+      asideItems={[
+        "Envie avaliações, sugestões ou problemas.",
+        "As contribuições ficam organizadas para análise.",
+        "Você não precisa enviar ou acompanhar e-mails."
+      ]}
     >
       <div className="grid gap-6 lg:grid-cols-3">
-        {channels.map((channel) => (
-          <article key={channel.title} className="group rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#F2811D]/40 hover:shadow-xl">
+        {feedbackTypes.map((item) => (
+          <article key={item.title} className="group rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#F2811D]/40 hover:shadow-xl">
             <span className="flex size-12 items-center justify-center rounded-2xl bg-[#F2811D]/10 text-[#F2811D] transition group-hover:bg-[#F2811D] group-hover:text-white">
-              <channel.icon aria-hidden="true" size={23} />
+              <item.icon aria-hidden="true" size={23} />
             </span>
-            <h2 className="mt-5 font-display text-xl font-extrabold text-[#0F2D4E]">{channel.title}</h2>
-            <p className="mt-3 text-sm leading-7 text-slate-600">{channel.text}</p>
-            <Link href={channel.href} className="mt-5 inline-flex items-center gap-2 text-sm font-extrabold text-[#F2811D] transition hover:text-[#B5520C]">
-              {channel.action}
-              <ArrowRight aria-hidden="true" size={16} />
-            </Link>
+            <h2 className="mt-5 font-display text-xl font-extrabold text-[#0F2D4E]">{item.title}</h2>
+            <p className="mt-3 text-sm leading-7 text-slate-600">{item.text}</p>
           </article>
         ))}
       </div>
 
-      <section className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-        <div className="rounded-[2rem] bg-[#0F2D4E] p-7 text-white">
-          <Mail aria-hidden="true" className="text-[#F2811D]" size={28} />
-          <h2 className="mt-4 font-display text-2xl font-extrabold">Atendimento organizado por prioridade.</h2>
-          <p className="mt-3 text-sm leading-7 text-slate-200">
-            Para suporte de acesso, atualização cadastral ou dúvidas sobre triagem, entre pelo portal quando possível. Isso mantém histórico e evita perda de informações.
-          </p>
-          <div className="mt-6 rounded-2xl border border-white/10 bg-white/8 p-4 text-sm text-slate-200">
-            <strong className="block text-white">Dica rápida</strong>
-            Se ainda não tem conta, o primeiro passo é cadastrar seu currículo. Assim a equipe tem dados suficientes para avaliar compatibilidade.
+      <section className="mt-10 overflow-hidden rounded-[2rem] bg-[#0F2D4E] text-white shadow-2xl shadow-[#0F2D4E]/15">
+        <div className="grid gap-8 p-7 md:p-9 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-center">
+          <div>
+            <span className="flex size-12 items-center justify-center rounded-2xl bg-[#F2811D] text-white shadow-lg shadow-orange-950/20">
+              <ShieldCheck aria-hidden="true" size={24} />
+            </span>
+            <h2 className="mt-5 font-display text-2xl font-extrabold">Feedback separado, análise mais organizada.</h2>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-200">
+              A página externa foi criada exclusivamente para receber opiniões sobre o Portal Encaixe. Assim cada avaliação fica registrada e pode ser analisada sem depender de uma caixa de e-mail.
+            </p>
           </div>
-        </div>
-
-        <div className="rounded-[2rem] border border-slate-200 bg-white p-7">
-          <h2 className="font-display text-2xl font-extrabold text-[#0F2D4E]">Antes de falar com a equipe</h2>
-          <div className="mt-5 space-y-4">
-            {checklist.map((item) => (
-              <div key={item.title} className="flex gap-4 rounded-2xl bg-[#FAFBFC] p-4">
-                <item.icon aria-hidden="true" className="mt-0.5 shrink-0 text-[#F2811D]" size={22} />
-                <div>
-                  <strong className="block text-sm font-extrabold text-[#0F2D4E]">{item.title}</strong>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">{item.text}</p>
-                </div>
-              </div>
-            ))}
+          <div className="rounded-3xl border border-white/10 bg-white/8 p-5">
+            <BarChart3 aria-hidden="true" className="text-[#F2811D]" size={26} />
+            <strong className="mt-4 block font-display text-lg">Sua opinião vira melhoria</strong>
+            <p className="mt-2 text-sm leading-6 text-slate-300">Quanto mais claro for o relato, mais fácil será entender a prioridade e melhorar a experiência.</p>
           </div>
         </div>
       </section>

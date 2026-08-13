@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import { CheckCircle2, LoaderCircle, TriangleAlert } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
-export type ThemePreference = "claro" | "escuro" | "automatico";
+export type ThemePreference = "claro" | "escuro";
 export type FontSizePreference = "pequeno" | "medio" | "grande";
 export type DensityPreference = "compacta" | "confortavel";
 
@@ -25,35 +25,39 @@ type UserPreferencesContextValue = {
 const CACHE_KEY = "portal-encaixe:user-preferences:v1";
 
 export const DEFAULT_USER_PREFERENCES: UserPreferences = {
-  tema: "automatico",
+  tema: "claro",
   tamanho_fonte: "medio",
   densidade: "confortavel"
 };
 
 const UserPreferencesContext = createContext<UserPreferencesContextValue | null>(null);
 
-function isPreferences(value: unknown): value is UserPreferences {
-  if (!value || typeof value !== "object") return false;
+function normalizePreferences(value: unknown): UserPreferences | null {
+  if (!value || typeof value !== "object") return null;
   const candidate = value as Partial<UserPreferences>;
-  return (
-    ["claro", "escuro", "automatico"].includes(candidate.tema ?? "") &&
-    ["pequeno", "medio", "grande"].includes(candidate.tamanho_fonte ?? "") &&
-    ["compacta", "confortavel"].includes(candidate.densidade ?? "")
-  );
+  const legacyTheme = (candidate as { tema?: string }).tema;
+  const theme = legacyTheme === "escuro" ? "escuro" : legacyTheme === "claro" || legacyTheme === "automatico" ? "claro" : null;
+  if (!theme || !["pequeno", "medio", "grande"].includes(candidate.tamanho_fonte ?? "") || !["compacta", "confortavel"].includes(candidate.densidade ?? "")) return null;
+
+  return {
+    tema: theme,
+    tamanho_fonte: candidate.tamanho_fonte as FontSizePreference,
+    densidade: candidate.densidade as DensityPreference
+  };
 }
 
 function readCachedPreferences() {
   try {
     const cached = window.localStorage.getItem(CACHE_KEY);
     const parsed: unknown = cached ? JSON.parse(cached) : null;
-    return isPreferences(parsed) ? parsed : DEFAULT_USER_PREFERENCES;
+    return normalizePreferences(parsed) ?? DEFAULT_USER_PREFERENCES;
   } catch {
     return DEFAULT_USER_PREFERENCES;
   }
 }
 
 function resolveDarkTheme(theme: ThemePreference) {
-  return theme === "escuro" || (theme === "automatico" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  return theme === "escuro";
 }
 
 export function applyUserPreferences(preferences: UserPreferences) {
@@ -65,6 +69,7 @@ export function applyUserPreferences(preferences: UserPreferences) {
   root.dataset.density = preferences.densidade;
   root.classList.toggle("dark", dark);
   root.style.colorScheme = dark ? "dark" : "light";
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", dark ? "#071522" : "#FFFFFF");
 }
 
 export function UserPreferencesProvider({ children }: { children: React.ReactNode }) {
@@ -104,16 +109,19 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
         return;
       }
 
-      if (data && isPreferences(data)) {
-        commitLocalPreferences(data);
+      const storedPreferences = normalizePreferences(data);
+      if (storedPreferences) {
+        commitLocalPreferences(storedPreferences);
+        if ((data as { tema?: string }).tema === "automatico") {
+          await supabase.from("user_preferences").update({ tema: "claro" }).eq("user_id", authData.user.id);
+        }
         return;
       }
 
-      const defaults = DEFAULT_USER_PREFERENCES;
-      commitLocalPreferences(defaults);
+      commitLocalPreferences(cached);
       const { error: insertError } = await supabase.from("user_preferences").insert({
         user_id: authData.user.id,
-        ...defaults
+        ...cached
       });
 
       if (insertError && insertError.code !== "23505") {
@@ -128,14 +136,6 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
     };
   }, [commitLocalPreferences]);
 
-  useEffect(() => {
-    if (preferences.tema !== "automatico") return;
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const syncSystemTheme = () => applyUserPreferences(preferencesRef.current);
-    media.addEventListener("change", syncSystemTheme);
-    return () => media.removeEventListener("change", syncSystemTheme);
-  }, [preferences.tema]);
-
   const updatePreference = useCallback(async <Key extends keyof UserPreferences>(key: Key, value: UserPreferences[Key]) => {
     const previous = preferencesRef.current;
     const next = { ...previous, [key]: value };
@@ -146,8 +146,9 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
       const supabase = createClient();
       const { data: authData } = await supabase.auth.getUser();
       if (!authData.user) {
-        if (preferencesRef.current === next) commitLocalPreferences(previous);
-        setSaveState("error");
+        setSaveState("saved");
+        if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+        savedTimerRef.current = setTimeout(() => setSaveState("idle"), 1800);
         return;
       }
 

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { PortalEncaixeLogo } from "@/components/app/logo";
+import { ThemeToggle } from "@/components/app/theme-toggle";
 
 const navItems = [
   { href: "/", label: "Início" },
@@ -35,7 +36,7 @@ export function PublicHeader({ showActions = true }: { showActions?: boolean }) 
   }, [pathname]);
 
   return (
-    <header className={`fixed inset-x-0 top-0 z-50 border-b transition-all duration-300 ${scrolled ? "border-slate-200/80 bg-white/90 shadow-sm backdrop-blur-md" : "border-transparent bg-white/45 backdrop-blur-sm"}`}>
+    <header className={`fixed inset-x-0 top-0 z-50 border-b transition-all duration-300 ${scrolled ? "border-slate-200/80 bg-white/90 shadow-sm backdrop-blur-md dark:border-[#29445D] dark:bg-[#071522]/95" : "border-transparent bg-white/45 backdrop-blur-sm dark:bg-[#071522]/85"}`}>
       <div className="relative mx-auto flex h-20 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
         <Link href="/" className="flex min-w-0 items-center gap-3" aria-label="Portal Encaixe">
           <PortalEncaixeLogo />
@@ -43,7 +44,7 @@ export function PublicHeader({ showActions = true }: { showActions?: boolean }) 
 
         <nav
           aria-label="Navegação institucional"
-          className={`hidden items-center gap-6 text-sm font-bold text-slate-600 lg:flex ${showActions ? "" : "absolute left-1/2 -translate-x-1/2"}`}
+          className={`hidden items-center gap-6 text-sm font-bold text-slate-600 xl:flex ${showActions ? "" : "absolute left-1/2 -translate-x-1/2"}`}
         >
           {navItems.map((item) => {
             const active = pathname === item.href;
@@ -61,31 +62,34 @@ export function PublicHeader({ showActions = true }: { showActions?: boolean }) 
           })}
         </nav>
 
-        {showActions ? (
-          <div className="hidden items-center gap-3 sm:flex">
-            <Link href="/login" className="btn-secondary rounded-xl bg-white px-4 py-2 text-xs shadow-sm sm:text-sm">
-              Entrar
-            </Link>
-            <Link href="/register" className="btn-primary animate-pulse-glow rounded-xl px-4 py-2 text-xs shadow-md sm:text-sm">
-              Cadastrar currículo
-            </Link>
-          </div>
-        ) : null}
+        <div className="flex shrink-0 items-center gap-2">
+          <ThemeToggle variant="light" />
+          {showActions ? (
+            <div className="hidden items-center gap-3 xl:flex">
+              <Link href="/login" className="btn-secondary rounded-xl bg-white px-4 py-2 text-sm shadow-sm dark:bg-transparent">
+                Entrar
+              </Link>
+              <Link href="/register" className="btn-primary animate-pulse-glow rounded-xl px-4 py-2 text-sm shadow-md">
+                Cadastrar currículo
+              </Link>
+            </div>
+          ) : null}
 
-        <button
-          type="button"
-          onClick={() => setOpen((current) => !current)}
-          className="inline-flex size-11 items-center justify-center rounded-2xl border border-slate-200 bg-white/90 text-[#0F2D4E] shadow-sm transition hover:border-[#F2811D]/50 hover:text-[#F2811D] lg:hidden"
-          aria-expanded={open}
-          aria-controls="public-mobile-menu"
-        >
-          {open ? <X aria-hidden="true" size={20} /> : <Menu aria-hidden="true" size={20} />}
-          <span className="sr-only">{open ? "Fechar menu" : "Abrir menu"}</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setOpen((current) => !current)}
+            className="inline-flex size-11 items-center justify-center rounded-2xl border border-slate-200 bg-white/90 text-[#0F2D4E] shadow-sm transition hover:border-[#F2811D]/50 hover:text-[#F2811D] dark:border-white/15 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 xl:hidden"
+            aria-expanded={open}
+            aria-controls="public-mobile-menu"
+          >
+            {open ? <X aria-hidden="true" size={20} /> : <Menu aria-hidden="true" size={20} />}
+            <span className="sr-only">{open ? "Fechar menu" : "Abrir menu"}</span>
+          </button>
+        </div>
       </div>
 
-      <div id="public-mobile-menu" className={`lg:hidden ${open ? "block" : "hidden"}`}>
-        <div className="mx-4 mb-4 rounded-3xl border border-slate-200 bg-white/95 p-3 shadow-2xl shadow-slate-950/10 backdrop-blur">
+      <div id="public-mobile-menu" className={`xl:hidden ${open ? "block" : "hidden"}`}>
+        <div className="mx-4 mb-4 rounded-3xl border border-slate-200 bg-white/95 p-3 shadow-2xl shadow-slate-950/10 backdrop-blur dark:border-[#29445D] dark:bg-[#0D2438]/95">
           <nav aria-label="Navegação institucional mobile" className="grid gap-1">
             {navItems.map((item) => {
               const active = pathname === item.href;
@@ -94,19 +98,22 @@ export function PublicHeader({ showActions = true }: { showActions?: boolean }) 
                   key={item.href}
                   href={item.href}
                   aria-current={active ? "page" : undefined}
-                  className={`rounded-2xl px-4 py-3 text-sm font-bold transition ${active ? "bg-[#0F2D4E] text-white" : "text-slate-700 hover:bg-[#F1F4F8] hover:text-[#0F2D4E]"}`}
+                  className={`rounded-2xl px-4 py-3 text-sm font-bold transition ${active ? "bg-[#0F2D4E] text-white dark:bg-[#F2811D] dark:text-[#071522]" : "text-slate-700 hover:bg-[#F1F4F8] hover:text-[#0F2D4E] dark:text-slate-200 dark:hover:bg-white/10 dark:hover:text-white"}`}
                 >
                   {item.label}
                 </Link>
               );
             })}
           </nav>
+          <div className="mt-3 border-t border-slate-200 pt-3 dark:border-white/10">
+            <ThemeToggle variant="light" showLabel />
+          </div>
           {showActions ? (
-            <div className="mt-3 grid gap-2 sm:hidden">
+            <div className="mt-3 grid gap-2">
               <Link href="/register" className="btn-primary rounded-2xl px-4 py-3 text-center text-sm">
                 Cadastrar currículo
               </Link>
-              <Link href="/login" className="btn-secondary rounded-2xl px-4 py-3 text-center text-sm">
+              <Link href="/login" className="btn-secondary rounded-2xl px-4 py-3 text-center text-sm dark:bg-transparent">
                 Entrar
               </Link>
             </div>

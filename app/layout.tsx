@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { CinematicIntro } from "@/components/app/cinematic-intro";
 import { RouteTransition } from "@/components/app/route-transition";
@@ -28,13 +28,18 @@ export const metadata: Metadata = {
   }
 };
 
+export const viewport: Viewport = {
+  colorScheme: "light",
+  themeColor: "#FFFFFF"
+};
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var p=JSON.parse(localStorage.getItem("portal-encaixe:user-preferences:v1")||"null")||{tema:"automatico",tamanho_fonte:"medio",densidade:"confortavel"};var d=p.tema==="escuro"||(p.tema==="automatico"&&matchMedia("(prefers-color-scheme: dark)").matches);var r=document.documentElement;r.dataset.theme=p.tema;r.dataset.fontSize=p.tamanho_fonte;r.dataset.density=p.densidade;r.classList.toggle("dark",d);r.style.colorScheme=d?"dark":"light"}catch(e){}})();`
+            __html: `(function(){try{var p=JSON.parse(localStorage.getItem("portal-encaixe:user-preferences:v1")||"null")||{tema:"claro",tamanho_fonte:"medio",densidade:"confortavel"};if(p.tema==="automatico")p.tema="claro";var d=p.tema==="escuro";var r=document.documentElement;r.dataset.theme=p.tema;r.dataset.fontSize=p.tamanho_fonte;r.dataset.density=p.densidade;r.classList.toggle("dark",d);r.style.colorScheme=d?"dark":"light";var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",d?"#071522":"#FFFFFF")}catch(e){}})();`
           }}
         />
       </head>

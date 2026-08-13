@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Contrast, MonitorCog, Moon, Rows3, Sun, Type } from "lucide-react";
+import { Check, Contrast, Moon, Rows3, Sun, Type } from "lucide-react";
 import {
   type DensityPreference,
   type FontSizePreference,
@@ -18,8 +18,7 @@ type Choice<Value extends string> = {
 
 const themeChoices: Choice<ThemePreference>[] = [
   { value: "claro", label: "Claro", description: "Superfícies claras e contraste suave.", icon: Sun },
-  { value: "escuro", label: "Escuro", description: "Paleta noturna calibrada para leitura.", icon: Moon },
-  { value: "automatico", label: "Automático", description: "Acompanha o tema do seu dispositivo.", icon: MonitorCog }
+  { value: "escuro", label: "Escuro", description: "Paleta noturna ativada somente quando você escolher.", icon: Moon }
 ];
 
 const fontChoices: Choice<FontSizePreference>[] = [

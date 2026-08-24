@@ -7,7 +7,6 @@ import { ensureInstitutionName } from "@/lib/institutions-server";
 import { generateResumePdf } from "@/lib/pdf/resume";
 import { createServerClient } from "@/lib/supabase/server";
 import { ageFromBirthDate, isValidBrazilianPhone, isValidCnpj, isValidCpf, onlyDigits } from "@/lib/validations/br";
-import { isValidProfilePhoto, profilePhotoPath } from "@/lib/uploads/profile-photo";
 import { saveResumeOnboardingChoice, saveUploadedResume, validateResumePdf } from "@/lib/resume/resume-upload";
 
 const minimumAge = Number(process.env.MINIMUM_PROFESSIONAL_AGE ?? 14);
@@ -108,9 +107,6 @@ export async function saveProfessionalBasicsAction(formData: FormData) {
 
   if (!parsed.success) redirect("/onboarding/professional?error=dados-invalidos");
 
-  const avatar = formData.get("avatar");
-  if (!(avatar instanceof File) || avatar.size === 0) redirect("/onboarding/professional?error=foto-obrigatoria");
-  if (!isValidProfilePhoto(avatar)) redirect("/onboarding/professional?error=foto-invalida");
   const resume = formData.get("resume");
   if (parsed.data.resumeChoice === "uploaded") {
     const resumeError = validateResumePdf(resume);
@@ -122,20 +118,12 @@ export async function saveProfessionalBasicsAction(formData: FormData) {
   const { data: duplicatedCpf } = await supabase.from("professionals").select("id,user_id").eq("cpf", normalizedCpf).neq("user_id", user.id).maybeSingle();
   if (duplicatedCpf) redirect("/onboarding/professional?error=cpf-ja-cadastrado");
 
-  const avatarPath = profilePhotoPath(user.id, avatar);
-  const { error: avatarError } = await supabase.storage.from("avatars").upload(avatarPath, avatar, {
-    upsert: true,
-    contentType: avatar.type
-  });
-  if (avatarError) redirect("/onboarding/professional?error=foto-nao-salva");
-
   const { error: profileError } = await supabase
     .from("profiles")
-    .update({ full_name: data.fullName, email: data.email, phone: onlyDigits(data.phone), avatar_path: avatarPath, status: "pending" })
+    .update({ full_name: data.fullName, email: data.email, phone: onlyDigits(data.phone), status: "pending" })
     .eq("id", user.id);
   if (profileError) {
-    await supabase.storage.from("avatars").remove([avatarPath]);
-    redirect("/onboarding/professional?error=foto-nao-salva");
+    redirect("/onboarding/professional?error=dados-invalidos");
   }
   await supabase.from("user_roles").upsert({ user_id: user.id, role: "professional" });
   const { data: professional, error } = await supabase.from("professionals").upsert({

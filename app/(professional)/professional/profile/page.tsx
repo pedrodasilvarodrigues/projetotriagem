@@ -19,6 +19,7 @@ const profileErrorMessages: Record<string, string> = {
   "cep-invalido": "Informe um CEP com 8 dígitos.",
   "endereco-invalido": "Confira os dados do endereço.",
   "localizacao-invalida": "Informe cidade e estado.",
+  "foto-invalida": "Envie uma foto JPG, PNG ou WEBP de até 2 MB.",
   "erro-ao-salvar-perfil": "Não foi possível salvar os dados gerais. Tente novamente.",
   "erro-ao-salvar-profissional": "Não foi possível salvar os dados profissionais. Tente novamente.",
   "perfil-nao-criado": "Não foi possível preparar o perfil profissional. Tente novamente.",
@@ -75,7 +76,7 @@ export default async function ProfessionalProfilePage({ searchParams }: { search
         <form action={updateProfessionalProfileAction} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
           {params.error ? <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{profileErrorMessages[params.error] ?? "Verifique os dados informados."}</p> : null}
           {params.message ? <p className="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-700">Perfil atualizado.</p> : null}
-          <section className="mb-6 border-b border-slate-200 pb-5">
+          <section id="foto-perfil" className="mb-6 scroll-mt-28 border-b border-slate-200 pb-5">
             <h2 className="font-semibold">Foto do perfil</h2>
             <div className="mt-4 flex flex-wrap items-center gap-4">
               {avatarUrl?.signedUrl ? (

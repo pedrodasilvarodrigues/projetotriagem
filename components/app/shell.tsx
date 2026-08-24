@@ -1,6 +1,7 @@
 import { AppNav } from "@/components/app/nav";
 import { LanguageRuntime } from "@/components/app/language-runtime";
 import { PushNotificationPrompt } from "@/components/app/push-notification-prompt";
+import { ProfilePhotoPrompt } from "@/components/professional/profile-photo-prompt";
 import { requireRole, roleFromEyebrow } from "@/lib/auth/access";
 import { createServerClient } from "@/lib/supabase/server";
 import { type AppLanguage, translateUi } from "@/lib/i18n/ui";
@@ -11,11 +12,14 @@ export async function AppShell({ title, eyebrow, children }: { title: string; ey
   const role = expectedRole ? await requireRole(expectedRole) : "professional";
   const supabase = await createServerClient();
   const { data: userData } = await supabase.auth.getUser();
-  const [{ data: settings }, marketplaceEnabled, { data: company }] = await Promise.all([
+  const [{ data: settings }, marketplaceEnabled, { data: company }, { data: professionalProfile }] = await Promise.all([
     supabase.from("user_settings").select("preferred_language").eq("user_id", userData.user?.id).maybeSingle(),
     role === "admin" ? isMarketplaceEnabled() : Promise.resolve(false),
     role === "company"
       ? supabase.from("companies").select("plano").eq("owner_id", userData.user?.id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    role === "professional"
+      ? supabase.from("profiles").select("avatar_path").eq("id", userData.user?.id).maybeSingle()
       : Promise.resolve({ data: null })
   ]);
   const language = (settings?.preferred_language ?? "pt-BR") as AppLanguage;
@@ -30,6 +34,7 @@ export async function AppShell({ title, eyebrow, children }: { title: string; ey
       <LanguageRuntime preferredLanguage={language} />
       <AppNav role={role} preferredLanguage={language} marketplaceEnabled={marketplaceEnabled} companyPlan={company?.plano} />
       <PushNotificationPrompt />
+      {role === "professional" && userData.user && !professionalProfile?.avatar_path ? <ProfilePhotoPrompt userId={userData.user.id} /> : null}
       <main id="conteudo" className={mainClassName}>
         <header className="mb-4 border-l-4 border-[#F2811D] bg-transparent py-2 pl-3 sm:mb-6 sm:pl-4 animate-fade-in-up">
           <p className="text-xs font-bold uppercase tracking-normal text-[#6B7280]">{translateUi(eyebrow, language)}</p>

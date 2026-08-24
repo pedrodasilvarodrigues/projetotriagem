@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { BirthDateInput } from "@/components/auth/birth-date-input";
 import { ConsentFields } from "@/components/auth/onboarding-layout";
-import { ProfilePhotoField } from "@/components/auth/profile-photo-field";
 import { ResumeOnboardingChoice, type ResumeChoice } from "@/components/auth/resume-onboarding-choice";
 import { saveProfessionalBasicsAction } from "@/lib/actions/onboarding";
 
@@ -49,9 +48,6 @@ export function ProfessionalOnboardingForm({ email, error }: { email: string; er
     "curriculo-nao-salvo": "Não foi possível salvar o currículo agora. Tente novamente.",
     "dados-invalidos": "Revise os dados pessoais informados.",
     "cpf-ja-cadastrado": "Esse CPF já possui cadastro no portal.",
-    "foto-obrigatoria": "Escolha uma foto profissional para continuar.",
-    "foto-invalida": "Use uma foto JPG, PNG ou WEBP de até 2 MB.",
-    "foto-nao-salva": "Não foi possível salvar a foto agora. Tente novamente."
   };
 
   async function lookupCep(value: string) {
@@ -79,7 +75,6 @@ export function ProfessionalOnboardingForm({ email, error }: { email: string; er
     <form action={saveProfessionalBasicsAction} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
       {error ? <div className="mb-5 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">{errorMessages[error] ?? "Verifique os dados informados e tente novamente."}</div> : null}
       <h2 className="text-lg font-semibold">Dados pessoais</h2>
-      <div className="mt-5"><ProfilePhotoField /></div>
       <div className="mt-5 grid gap-4 md:grid-cols-2">
         <label className="block text-sm font-medium text-slate-800">Nome completo<input name="fullName" required pattern="^[A-Za-zÀ-ÿ\\s]+$" className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>
         <label className="block text-sm font-medium text-slate-800">CPF<input name="cpf" required inputMode="numeric" value={cpf} onChange={(event) => setCpf(maskCpf(event.target.value))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" /></label>

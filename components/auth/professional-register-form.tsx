@@ -5,7 +5,6 @@ import { Eye, EyeOff, MapPin } from "lucide-react";
 import { LoadingGear } from "@/components/app/loading-gear";
 import { BirthDateInput } from "@/components/auth/birth-date-input";
 import { ConsentFields } from "@/components/auth/onboarding-layout";
-import { ProfilePhotoField } from "@/components/auth/profile-photo-field";
 import { ResumeOnboardingChoice, type ResumeChoice } from "@/components/auth/resume-onboarding-choice";
 import { registerProfessionalWithEmailAction } from "@/lib/actions/auth";
 
@@ -42,8 +41,6 @@ const errorMessages: Record<string, string> = {
   "dados-invalidos": "Revise os campos obrigatórios e confira CPF, telefone, CEP e data de nascimento.",
   "email-ja-cadastrado": "Esse e-mail já possui cadastro. Volte para o acesso ou use outro e-mail.",
   "cpf-ja-cadastrado": "Esse CPF já possui cadastro no portal.",
-  "foto-obrigatoria": "Escolha uma foto profissional para concluir o cadastro.",
-  "foto-invalida": "Use uma foto JPG, PNG ou WEBP de até 2 MB.",
   "senha-invalida": "A senha precisa ter pelo menos 6 caracteres.",
   "configuracao-supabase-incompleta": "O cadastro está temporariamente indisponível. Tente novamente em instantes.",
   "nao-foi-possivel-criar-conta": "Não foi possível criar a conta agora. Tente novamente em instantes."
@@ -105,8 +102,6 @@ export function ProfessionalRegisterForm({ error }: { error?: string }) {
       ) : null}
 
       <div hidden={resumeStep} className="space-y-5">
-      <ProfilePhotoField />
-
       <fieldset className="grid gap-4 md:grid-cols-2">
         <legend className="mb-1 text-sm font-bold text-blue-700 font-display md:col-span-2">Dados de acesso</legend>
         <label className="block text-sm font-bold text-slate-800">

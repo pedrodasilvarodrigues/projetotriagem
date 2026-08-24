@@ -9,7 +9,6 @@ import { sendTransactionalEmail, TransactionalEmailError } from "@/lib/resend/se
 import { createServerClient, hasSupabasePublicEnv } from "@/lib/supabase/server";
 import { ageFromBirthDate, isValidBrazilianPhone, isValidCnpj, isValidCpf, onlyDigits } from "@/lib/validations/br";
 import { appendSearchParam, safeInternalRedirect } from "@/lib/auth/safe-redirect";
-import { isValidProfilePhoto, profilePhotoPath } from "@/lib/uploads/profile-photo";
 import { saveResumeOnboardingChoice, saveUploadedResume, validateResumePdf } from "@/lib/resume/resume-upload";
 
 const minimumAge = Number(process.env.MINIMUM_PROFESSIONAL_AGE ?? 14);
@@ -241,7 +240,7 @@ async function confirmAuthEmailByAddress(email: string) {
   }
 }
 
-async function saveProfessionalSignup(client: ReturnType<typeof createAdminClient>, userId: string, data: ProfessionalRegistration, avatarPath: string) {
+async function saveProfessionalSignup(client: ReturnType<typeof createAdminClient>, userId: string, data: ProfessionalRegistration) {
   const normalizedCpf = onlyDigits(data.cpf);
   const normalizedPhone = onlyDigits(data.phone);
   const { ipAddress, userAgent } = await getRequestMeta();
@@ -254,7 +253,6 @@ async function saveProfessionalSignup(client: ReturnType<typeof createAdminClien
     full_name: data.fullName,
     email: data.email,
     phone: normalizedPhone,
-    avatar_path: avatarPath,
     status: "pending"
   });
 
@@ -490,9 +488,6 @@ export async function registerProfessionalWithEmailAction(formData: FormData) {
   if (!parsed.success) redirect("/register?error=dados-invalidos");
   if (!canUseAdminClient()) redirect("/register?error=configuracao-supabase-incompleta");
 
-  const avatar = formData.get("avatar");
-  if (!(avatar instanceof File) || avatar.size === 0) redirect("/register?error=foto-obrigatoria");
-  if (!isValidProfilePhoto(avatar)) redirect("/register?error=foto-invalida");
   const resume = formData.get("resume");
   if (parsed.data.resumeChoice === "uploaded") {
     const resumeError = validateResumePdf(resume);
@@ -518,17 +513,7 @@ export async function registerProfessionalWithEmailAction(formData: FormData) {
     redirect(`/register?error=${signupErrorCode(error)}`);
   }
 
-  const avatarPath = profilePhotoPath(createdUser.user.id, avatar);
-  const { error: avatarError } = await admin.storage.from("avatars").upload(avatarPath, avatar, {
-    upsert: true,
-    contentType: avatar.type
-  });
-  if (avatarError) {
-    await admin.auth.admin.deleteUser(createdUser.user.id);
-    redirect("/register?error=foto-invalida");
-  }
-
-  const professionalId = await saveProfessionalSignup(admin, createdUser.user.id, data, avatarPath);
+  const professionalId = await saveProfessionalSignup(admin, createdUser.user.id, data);
 
   let uploadedResumePath: string | null = null;
   try {
@@ -549,7 +534,6 @@ export async function registerProfessionalWithEmailAction(formData: FormData) {
   } catch (resumeError) {
     logAuthError("Falha ao salvar currículo no cadastro", resumeError, { userId: createdUser.user.id });
     if (uploadedResumePath) await admin.storage.from("curriculums").remove([uploadedResumePath]);
-    await admin.storage.from("avatars").remove([avatarPath]);
     await admin.auth.admin.deleteUser(createdUser.user.id);
     redirect("/register?error=curriculo-nao-salvo");
   }
